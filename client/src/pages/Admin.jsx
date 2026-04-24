@@ -76,7 +76,7 @@ export default function Admin() {
             Overview of employees, attendance, and leaves
           </p>
         </div>
-
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white p-5 rounded-xl shadow-sm border">
             <p className="text-xs text-gray-500">Total Employees</p>

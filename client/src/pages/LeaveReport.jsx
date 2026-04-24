@@ -1,7 +1,7 @@
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useAllLeaves } from "../hooks/useLeaves";
 import { useUsers } from "../hooks/useUsers";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import LeaveDetailsModal from "../components/LeaveDetailsModal";
 import Button from "../components/ui/Button";
 
@@ -14,8 +14,13 @@ export default function LeaveReports() {
   const [month, setMonth] = useState("all");
   const [employee, setEmployee] = useState("all");
 
-  const [selectedLeave, setSelectedLeave] = useState(null); 
+  const [selectedLeave, setSelectedLeave] = useState(null);
 
+  // ✅ PAGINATION
+  const [currentPage, setCurrentPage] = useState(1);
+  const LEAVES_PER_PAGE = 8;
+
+  // FILTER
   const filteredLeaves = useMemo(() => {
     return leaves.filter((leave) => {
       const name = leave.userId?.name?.toLowerCase() || "";
@@ -29,7 +34,7 @@ export default function LeaveReports() {
         email.includes(search.toLowerCase()) ||
         type.includes(search.toLowerCase()) ||
         reason.includes(search.toLowerCase()) ||
-        comment.includes(search.toLowerCase()); 
+        comment.includes(search.toLowerCase());
 
       const statusMatch =
         status === "all" || leave.status === status;
@@ -46,16 +51,29 @@ export default function LeaveReports() {
     });
   }, [leaves, search, status, month, employee]);
 
+  // ✅ RESET PAGE ON FILTER CHANGE
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, status, month, employee]);
+
+  // PAGINATION LOGIC
+  const totalPages = Math.ceil(filteredLeaves.length / LEAVES_PER_PAGE);
+
+  const paginatedLeaves = useMemo(() => {
+    const start = (currentPage - 1) * LEAVES_PER_PAGE;
+    return filteredLeaves.slice(start, start + LEAVES_PER_PAGE);
+  }, [filteredLeaves, currentPage]);
+
   const handleReset = () => {
     setSearch("");
-    setMonth("all")
+    setMonth("all");
     setStatus("all");
     setEmployee("all");
-  }
+  };
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-350 mx-auto space-y-6">
+      <div className="max-w-350 mx-auto space-y-6">
 
         {/* HEADER */}
         <div>
@@ -69,7 +87,6 @@ export default function LeaveReports() {
 
         {/* FILTERS */}
         <div className="bg-white p-4 rounded-xl border shadow-sm grid grid-cols-1 md:grid-cols-5 gap-7">
-
           <input
             type="text"
             placeholder="Search name, email, type, reason..."
@@ -117,7 +134,7 @@ export default function LeaveReports() {
             ))}
           </select>
 
-          <Button onClick={handleReset} variant="danger" className="w-30 ml-10">
+          <Button onClick={handleReset} variant="danger">
             Clear
           </Button>
         </div>
@@ -141,14 +158,14 @@ export default function LeaveReports() {
                     Loading...
                   </td>
                 </tr>
-              ) : filteredLeaves.length === 0 ? (
+              ) : paginatedLeaves.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="p-6 text-gray-500">
                     No data found.
                   </td>
                 </tr>
               ) : (
-                filteredLeaves.map((leave) => (
+                paginatedLeaves.map((leave) => (
                   <tr
                     key={leave._id}
                     onClick={() => setSelectedLeave(leave)}
@@ -188,6 +205,41 @@ export default function LeaveReports() {
               )}
             </tbody>
           </table>
+
+          {/* ✅ PAGINATION CONTROLS */}
+          {totalPages > 1 && (
+            <div className="flex justify-between items-center p-4 border-t">
+              <p className="text-sm text-gray-500">
+                Page {currentPage} of {totalPages}
+              </p>
+
+              <div className="flex gap-2">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === 1
+                      ? "bg-gray-200 text-gray-400"
+                      : "bg-indigo-600 text-white hover:bg-indigo-700"
+                  }`}
+                >
+                  Prev
+                </button>
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === totalPages
+                      ? "bg-gray-200 text-gray-400"
+                      : "bg-indigo-600 text-white hover:bg-indigo-700"
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* DETAILS MODAL */}

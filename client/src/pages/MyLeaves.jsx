@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useMyLeaves } from "../hooks/useLeaves";
 import LeaveModal from "../components/LeaveModal";
@@ -9,7 +9,23 @@ export default function MyLeaves() {
   const { data = [], isLoading } = useMyLeaves();
 
   const [open, setOpen] = useState(false);
-  const [selectedLeave, setSelectedLeave] = useState(null); // ✅ NEW
+  const [selectedLeave, setSelectedLeave] = useState(null);
+
+  // PAGINATION
+  const [currentPage, setCurrentPage] = useState(1);
+  const LEAVES_PER_PAGE = 6;
+
+  // reset page when data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [data]);
+
+  const totalPages = Math.ceil(data.length / LEAVES_PER_PAGE);
+
+  const paginatedLeaves = useMemo(() => {
+    const start = (currentPage - 1) * LEAVES_PER_PAGE;
+    return data.slice(start, start + LEAVES_PER_PAGE);
+  }, [data, currentPage]);
 
   if (isLoading) return <PageLoader />;
 
@@ -49,14 +65,14 @@ export default function MyLeaves() {
             </thead>
 
             <tbody>
-              {data.length === 0 ? (
+              {paginatedLeaves.length === 0 ? (
                 <tr>
                   <td colSpan="3" className="p-6 text-gray-500">
                     No leaves applied yet.
                   </td>
                 </tr>
               ) : (
-                data.map((leave) => (
+                paginatedLeaves.map((leave) => (
                   <tr
                     key={leave._id}
                     onClick={() => setSelectedLeave(leave)}
@@ -71,7 +87,6 @@ export default function MyLeaves() {
                         {leave.reason}
                       </div>
 
-                      {/* OPTIONAL PREVIEW COMMENT */}
                       {leave.adminComment && (
                         <div className="text-xs text-indigo-500 mt-1 line-clamp-1">
                           Note: {leave.adminComment}
@@ -104,6 +119,41 @@ export default function MyLeaves() {
               )}
             </tbody>
           </table>
+
+          {/* PAGINATION */}
+          {totalPages > 1 && (
+            <div className="flex justify-between items-center p-4 border-t">
+              <p className="text-sm text-gray-500">
+                Page {currentPage} of {totalPages}
+              </p>
+
+              <div className="flex gap-2">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === 1
+                      ? "bg-gray-200 text-gray-400"
+                      : "bg-indigo-600 text-white hover:bg-indigo-700"
+                  }`}
+                >
+                  Prev
+                </button>
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === totalPages
+                      ? "bg-gray-200 text-gray-400"
+                      : "bg-indigo-600 text-white hover:bg-indigo-700"
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* DETAILS MODAL */}

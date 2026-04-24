@@ -51,9 +51,6 @@ export default function Employee() {
       })}
   );
 
-  /* -------------------------
-     STATS
-  ------------------------- */
   const approvedLeaves = leaves.filter(l => l.status === "approved").length;
   const pendingLeaves = leaves.filter(l => l.status === "pending").length;
 
