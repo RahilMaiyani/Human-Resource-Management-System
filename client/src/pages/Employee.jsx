@@ -4,6 +4,7 @@ import { useCheckIn, useCheckOut } from "../hooks/useAttendance";
 import { useMyLeaves } from "../hooks/useLeaves";
 import { useAuth } from "../context/AuthContext"; 
 import EmployeeProfileModal from "../components/EmployeeProfileModal";
+import toast from "react-hot-toast";
 
 export default function Employee() {
   const { user } = useAuth();
@@ -21,29 +22,33 @@ export default function Employee() {
   };
 
   const checkInMutation = useCheckIn(
-    () =>
+    () =>{
+      toast.success("Cheked in Successfully");
       setStatus({
         message: `Checked in at ${getTimeString()}`,
         type: "success"
-      }),
-    (err) =>
+    })},
+    (err) =>{
+      toast.error(err.response?.data?.msg)
       setStatus({
         message: err.response?.data?.msg || "Error",
         type: "error"
-      })
+      })}
   );
 
   const checkOutMutation = useCheckOut(
-    () =>
+    () =>{
+      toast.success("Cheked out Successfully");
       setStatus({
         message: `Checked out at ${getTimeString()}`,
         type: "success"
-      }),
-    (err) =>
+      })},
+    (err) =>{
+      toast.error(err.response?.data?.msg)
       setStatus({
         message: err.response?.data?.msg || "Error",
         type: "error"
-      })
+      })}
   );
 
   /* -------------------------

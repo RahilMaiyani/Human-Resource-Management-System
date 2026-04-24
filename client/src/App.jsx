@@ -8,9 +8,22 @@ import PageLoader from "./components/PageLoader";
 import Users from "./pages/Users";
 import MyLeaves from "./pages/MyLeaves";
 import AdminLeaves from "./pages/AdminLeaves";
+import LeaveReports from "./pages/LeaveReport";
+import { Toaster } from 'react-hot-toast';
 
 export default function App() {
   return (
+    <>
+    <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            borderRadius: "8px",
+            fontSize: "14px"
+          }
+        }}
+      />
     <BrowserRouter>
       <Suspense fallback={<PageLoader />}>
         <Routes>
@@ -59,8 +72,17 @@ export default function App() {
             </ProtectedRoute>
           }
           />
+
+          <Route path="/admin/reports"
+           element={
+            <ProtectedRoute>
+              <LeaveReports />
+            </ProtectedRoute>
+          }
+          />
         </Routes>
       </Suspense>
     </BrowserRouter>
+    </>
   );
 }

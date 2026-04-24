@@ -41,6 +41,11 @@ const leaveSchema = new mongoose.Schema(
       ref: "User"
     },
 
+    adminComment: {
+      type: String,
+      default: ""
+    },
+
     reviewedAt: Date
   },
   { timestamps: true }

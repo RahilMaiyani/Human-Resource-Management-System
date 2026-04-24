@@ -5,6 +5,8 @@ import Button from "./ui/Button";
 export default function Header({ onAddUser }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  
+  const isActive = (path) => location.pathname === path;
 
   return (
     <div className="h-16 bg-white border-b flex items-center justify-between px-6">
@@ -12,7 +14,7 @@ export default function Header({ onAddUser }) {
 
       <div className="flex items-center gap-3">
         {user?.role === "admin" && (
-          <Button onClick={onAddUser}>+ Add User</Button>
+          <Button onClick={onAddUser} className={`${isActive("/users") ? "" : "hidden"}`}>+ Add User</Button>
         )}
 
         <Button

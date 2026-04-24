@@ -9,6 +9,7 @@ export default function Button({
 
   const styles = {
     primary: "bg-indigo-500 text-white hover:bg-indigo-600",
+    success: "bg-green-500 text-white hover:bg-green-600",
     danger: "bg-red-500 text-white hover:bg-red-600",
     secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300"
   };

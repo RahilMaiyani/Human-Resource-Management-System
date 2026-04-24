@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import API from "../api/axios";
 
-export const usePendingLeavesCount = () =>
+export const usePendingLeavesCount = (enabled = false) =>
   useQuery({
-    queryKey: ["pending-leaves-count"],
+    queryKey: ["pendingLeavesCount"],
     queryFn: async () => {
       const { data } = await API.get("/leaves/pending-count");
       return data.count;
     },
-    refetchInterval: 10000
+    enabled,
+    refetchInterval: enabled ? 10000 : false,
   });

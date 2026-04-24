@@ -3,7 +3,10 @@ import { usePendingLeavesCount } from "../hooks/useLeaveNotifications";
 
 export default function Sidebar({ user }) {
   const location = useLocation();
-  const { data: pendingCount = 0 } = usePendingLeavesCount();
+
+  const isAdmin = user?.role === "admin";
+
+  const { data: pendingCount = 0 } = usePendingLeavesCount(isAdmin);
 
   const isActive = (path) => location.pathname === path;
 
@@ -15,7 +18,7 @@ export default function Sidebar({ user }) {
 
   return (
     <div className="w-60 bg-gray-900 text-white p-4 flex flex-col h-screen sticky top-0">
-      <h2 className="text-xl font-bold mb-6">HRMS</h2>
+      <h2 className="text-xl font-bold mb-6">OfficeLink</h2>
 
       <nav className="flex flex-col gap-2">
 
@@ -46,13 +49,19 @@ export default function Sidebar({ user }) {
                 isActive("/admin/leaves") ? activeClass : inactiveClass
               }`}
             >
-              <span>Leaves</span>
+              <span>Leave Management</span>
 
               {pendingCount > 0 && (
                 <span className="text-xs bg-red-500 px-2 py-0.5 rounded-full animate-pulse">
                   {pendingCount}
                 </span>
               )}
+            </Link>
+
+            <Link to="/admin/reports" className={`${baseClass} ${
+                isActive("/admin/reports") ? activeClass : inactiveClass
+              }`}>
+              All Leaves
             </Link>
           </>
         )}

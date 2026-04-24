@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useLogin } from "../hooks/useAuth";
+import toast from "react-hot-toast";
 
 export default function Login() {
   const [form, setForm] = useState({
@@ -22,7 +23,10 @@ export default function Login() {
   }, [user, navigate]);
 
   const mutation = useLogin(
-    (data) => login(data),
+    (data) => {
+      login(data)
+      toast.success("Logged in successfully")
+    },
     (err) => {
       setServerError(err.response?.data?.msg || "Login failed");
     }
@@ -69,7 +73,7 @@ export default function Login() {
     <div className="h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-gray-100">
       <div className="bg-white shadow-2xl rounded-2xl p-8 w-96">
         <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
-          HRMS Login
+          OfficeLink Login
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
