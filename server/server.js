@@ -7,9 +7,7 @@ import userRoutes from "./routes/userRoutes.js";
 import attendanceRoutes from "./routes/attendanceRoutes.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 import leaveRoutes from "./routes/leaveRoutes.js";
-
-import nodemailer from 'nodemailer';
-
+import emailRoutes from "./routes/emailRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -26,39 +24,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/leaves", leaveRoutes);
-
-// console.log("EMAIL_USER:", process.env.EMAIL_USER);
-// console.log("EMAIL_PASS:", process.env.EMAIL_PASS );
+app.use("/api/email", emailRoutes);
 
 app.get("/", (req, res) => {
-    res.send("HRMS API Running");
-});
-
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
-
-app.get("/test-mail", async (req, res) => {
-  try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER,
-      subject: "Test Email",
-      text: "Working!"
-    });
-
-    res.send("Email sent");
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Error sending email");
-  }
+    res.send("OfficeLink API Running");
 });
 
 app.listen(process.env.PORT, () => {

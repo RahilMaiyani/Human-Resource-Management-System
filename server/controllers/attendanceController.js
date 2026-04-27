@@ -1,7 +1,6 @@
 import Attendance from "../models/Attendance.js";
 import mongoose from "mongoose";
 
-// CHECK-IN
 export const checkIn = async (req, res) => {
   try {
     const today = new Date().toISOString().split("T")[0];
@@ -27,7 +26,6 @@ export const checkIn = async (req, res) => {
   }
 };
 
-// CHECK-OUT
 export const checkOut = async (req, res) => {
   try {
     const today = new Date().toISOString().split("T")[0];
@@ -50,7 +48,7 @@ export const checkOut = async (req, res) => {
   }
 };
 
-// TODAY ATTENDANCE
+
 export const todayAttendance = async (req, res) => {
   try {
     const today = new Date().toISOString().split("T")[0];
@@ -86,7 +84,7 @@ export const getUserAttendance = async (req, res) => {
 
     const record = await Attendance.findOne({
       userId: new mongoose.Types.ObjectId(userId)
-    }).sort({ checkIn: -1 }); // 🔥 IMPORTANT
+    }).sort({ checkIn: -1 });
 
     res.json(record || null);
   } catch (err) {

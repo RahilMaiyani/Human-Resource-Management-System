@@ -53,7 +53,7 @@ export const useUpdateLeave = () => {
       }),
 
     onSuccess: () => {
-      toast.success("Leave updated successfully");
+      toast.success("Email sent successfully");
 
       qc.invalidateQueries(["allLeaves"]);
       qc.invalidateQueries(["activeLeaves"]);

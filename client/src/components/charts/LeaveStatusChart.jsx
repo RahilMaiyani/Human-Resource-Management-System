@@ -38,7 +38,7 @@ export default function LeaveStatusChart({ leaves = [] }) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: "68%",
+    cutout: "60%",
     plugins: {
       legend: {
         position: "bottom",

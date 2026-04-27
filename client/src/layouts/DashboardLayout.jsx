@@ -11,10 +11,8 @@ export default function DashboardLayout({ children, onAddUser }) {
 
       <div className="flex-1 bg-gray-100 flex flex-col overflow-hidden">
         
-        {/* HEADER */}
         <Header onAddUser={onAddUser} />
 
-        {/* CONTENT */}
         <div className="flex-1 overflow-auto p-4">
           {children}
         </div>

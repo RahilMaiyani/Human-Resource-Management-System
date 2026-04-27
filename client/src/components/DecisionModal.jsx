@@ -6,7 +6,7 @@ export default function DecisionModal({
   isOpen,
   onClose,
   onSubmit,
-  type // "approved" | "rejected"
+  type
 }) {
   const [comment, setComment] = useState("");
   const [error, setError] = useState("");
@@ -26,7 +26,7 @@ export default function DecisionModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-[420px] max-w-full">
+      <div className="w-105 max-w-full">
         <h2 className="text-lg font-semibold mb-2 capitalize">
           {type === "approved" ? "Approve Leave" : "Reject Leave"}
         </h2>

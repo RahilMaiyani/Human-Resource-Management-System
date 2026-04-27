@@ -3,7 +3,8 @@ const errorMiddleware = (err, req, res, next) => {
 
   res.status(500).json({
     success: false,
-    message: "Something went wrong"
+    message: "Something went wrong in server",
+    error : err
   });
 };
 

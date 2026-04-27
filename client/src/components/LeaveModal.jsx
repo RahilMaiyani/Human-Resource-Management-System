@@ -4,9 +4,7 @@ import Modal from "./ui/Modal";
 import Button from "./ui/Button";
 import { useApplyLeave } from "../hooks/useLeaves";
 
-/* --------------------------
-   DATE HELPERS (FIXED)
--------------------------- */
+
 function parseDate(dateStr) {
   const [y, m, d] = dateStr.split("-");
   return new Date(y, m - 1, d); 
@@ -31,9 +29,6 @@ function rangeHasWeekend(fromDate, toDate) {
   return false;
 }
 
-/* --------------------------
-   COMPONENT
--------------------------- */
 export default function LeaveModal({ isOpen, onClose }) {
   const {
     register,
@@ -58,9 +53,6 @@ export default function LeaveModal({ isOpen, onClose }) {
   const fromDate = watch("fromDate");
   const toDate = watch("toDate");
 
-  /* --------------------------
-     DATE LIMITS
-  -------------------------- */
   const today = new Date();
   const minDate = today.toISOString().split("T")[0];
 
@@ -68,9 +60,7 @@ export default function LeaveModal({ isOpen, onClose }) {
   max.setDate(today.getDate() + 14);
   const maxDate = max.toISOString().split("T")[0];
 
-  /* --------------------------
-     VALIDATION
-  -------------------------- */
+  
   const validateDate = (value, fieldName) => {
     if (!value) return `${fieldName} is required`;
 
@@ -82,9 +72,6 @@ export default function LeaveModal({ isOpen, onClose }) {
     return true;
   };
 
-  /* --------------------------
-     SUBMIT
-  -------------------------- */
   const onSubmit = (data) => {
     setApiError("");
     clearErrors("toDate");
@@ -108,7 +95,7 @@ export default function LeaveModal({ isOpen, onClose }) {
     mutation.mutate(data, {
       onSuccess: () => {
         reset();
-        onClose(); // FIXED: close AFTER success
+        onClose(); 
       },
       onError: (err) => {
         setApiError(err?.response?.data?.msg || "Failed to apply leave");

@@ -1,5 +1,6 @@
 import Leave from "../models/Leave.js";
 import { sendEmail } from "../utils/sendEmail.js";
+import { buildEmailTemplate } from "../utils/emailTemplate.js";
 import User from "../models/User.js";
 
 export const applyLeave = async (req, res) => {
@@ -38,7 +39,6 @@ export const applyLeave = async (req, res) => {
   }
 };
 
-
 export const getMyLeaves = async (req, res) => {
   try {
     const leaves = await Leave.find({ userId: req.user.id }).sort({ createdAt: -1 });
@@ -48,11 +48,10 @@ export const getMyLeaves = async (req, res) => {
   }
 };
 
-
 export const getAllLeaves = async (req, res) => {
   try {
     const leaves = await Leave.find()
-      .populate("userId", "name email")
+      .populate("userId", "name email profilePic")
       .sort({ createdAt: -1 });
 
     res.json(leaves);
@@ -72,7 +71,7 @@ export const getActiveLeaves = async (req, res) => {
         { toDate: { $gte: today } }
       ]
     })
-      .populate("userId", "name email")
+      .populate("userId", "name email profilePic")
       .sort({ createdAt: -1 });
 
     res.json(leaves);
@@ -89,7 +88,6 @@ export const getPendingLeavesCount = async (req, res) => {
     res.status(500).json({ msg: "Failed to fetch pending count" });
   }
 };
-
 
 export const updateLeaveStatus = async (req, res) => {
   try {
@@ -120,101 +118,71 @@ export const updateLeaveStatus = async (req, res) => {
           ? "#dc2626"
           : "#f59e0b";
 
+      const html = buildEmailTemplate({
+        title: `Leave ${status.toUpperCase()}`,
+        color: statusColor,
+        message: `
+          <p style="margin:0 0 16px 0;">
+            Hello <b>${user.name}</b>,
+          </p>
+
+          <p style="margin:0 0 18px 0;font-size:15px;">
+            Your leave request has been 
+            <span style="
+              background:${statusColor}15;
+              color:${statusColor};
+              padding:4px 10px;
+              border-radius:6px;
+              font-weight:600;
+              text-transform:capitalize;
+            ">
+              ${status}
+            </span>
+          </p>
+
+          <div style="
+            background:#f9fafb;
+            border:1px solid #e5e7eb;
+            border-radius:10px;
+            padding:18px;
+            margin-bottom:20px;
+          ">
+            <p style="margin:6px 0;"><b>Leave Type:</b> ${leave.type}</p>
+            <p style="margin:6px 0;"><b>From:</b> ${leave.fromDate.toISOString().slice(0, 10)}</p>
+            <p style="margin:6px 0;"><b>To:</b> ${leave.toDate.toISOString().slice(0, 10)}</p>
+          </div>
+
+          ${
+            adminComment
+              ? `
+              <div style="
+                background:#fff7ed;
+                border:1px solid #fed7aa;
+                border-radius:10px;
+                padding:16px;
+                margin-bottom:20px;
+              ">
+                <p style="margin:0 0 6px 0;font-weight:600;color:#9a3412;">
+                  Admin Comment
+                </p>
+                <p style="margin:0;color:#7c2d12;">
+                  ${adminComment}
+                </p>
+              </div>
+            `
+              : ""
+          }
+
+          <p style="font-size:14px;color:#6b7280;margin-top:10px;">
+            If you have any questions, feel free to reach out to HR.
+          </p>
+        `
+      });
+
       await sendEmail({
         to: user.email,
         subject: "Leave Request Update",
-        html: `
-        <div style="background:#f3f4f6;padding:30px 0;font-family:Inter,Arial,sans-serif;">
-          
-          <div style="max-width:620px;margin:auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
-            
-            <!-- HEADER -->
-            <div style="background:${statusColor};padding:22px;text-align:center;color:white;">
-              <h2 style="margin:0;font-size:22px;font-weight:600;">
-                Leave ${status.toUpperCase()}
-              </h2>
-              <p style="margin:6px 0 0 0;font-size:13px;opacity:0.9;">
-                HR Management System
-              </p>
-            </div>
-
-            <!-- BODY -->
-            <div style="padding:28px;color:#374151;line-height:1.6;">
-              
-              <p style="margin:0 0 16px 0;">
-                Hello <b>${user.name}</b>,
-              </p>
-
-              <p style="margin:0 0 18px 0;font-size:15px;">
-                Your leave request has been 
-                <span style="
-                  background:${statusColor}15;
-                  color:${statusColor};
-                  padding:4px 10px;
-                  border-radius:6px;
-                  font-weight:600;
-                  text-transform:capitalize;
-                ">
-                  ${status}
-                </span>
-              </p>
-
-              <!-- DETAILS -->
-              <div style="
-                background:#f9fafb;
-                border:1px solid #e5e7eb;
-                border-radius:10px;
-                padding:18px;
-                margin-bottom:20px;
-              ">
-                <p style="margin:6px 0;"><b>Leave Type:</b> ${leave.type}</p>
-                <p style="margin:6px 0;"><b>From:</b> ${leave.fromDate.toISOString().slice(0, 10)}</p>
-                <p style="margin:6px 0;"><b>To:</b> ${leave.toDate.toISOString().slice(0, 10)}</p>
-              </div>
-
-              <!-- ADMIN COMMENT -->
-              ${
-                adminComment
-                  ? `
-                <div style="
-                  background:#fff7ed;
-                  border:1px solid #fed7aa;
-                  border-radius:10px;
-                  padding:16px;
-                  margin-bottom:20px;
-                ">
-                  <p style="margin:0 0 6px 0;font-weight:600;color:#9a3412;">
-                    Admin Comment
-                  </p>
-                  <p style="margin:0;color:#7c2d12;">
-                    ${adminComment}
-                  </p>
-                </div>
-              `
-                  : ""
-              }
-
-              <p style="font-size:14px;color:#6b7280;margin-top:10px;">
-                If you have any questions, feel free to reach out to HR.
-              </p>
-
-            </div>
-
-            <!-- FOOTER -->
-            <div style="
-              background:#f9fafb;
-              padding:16px;
-              text-align:center;
-              font-size:12px;
-              color:#9ca3af;
-            ">
-              © ${new Date().getFullYear()} HRMS • All rights reserved
-            </div>
-
-          </div>
-
-        </div>
-        `
+        html
       });
     }
 

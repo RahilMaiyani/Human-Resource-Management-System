@@ -3,15 +3,11 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-//   console.error("❌ EMAIL ENV NOT LOADED");
-//   console.log("EMAIL_USER:", process.env.EMAIL_USER);
-//   console.log("EMAIL_PASS:", process.env.EMAIL_PASS);
-// }
-
-
+// -----------------------------
+// TRANSPORTER CONFIG
+// -----------------------------
 const transporter = nodemailer.createTransport({
-  service: "gmail", 
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -19,26 +15,27 @@ const transporter = nodemailer.createTransport({
 });
 
 
-transporter.verify((error, success) => {
+transporter.verify((error) => {
   if (error) {
-    console.error("❌ Mail transporter error:", error.message);
+    console.error("Mail transporter error:", error.message);
   } else {
-    console.log("✅ Mail server is ready");
+    console.log("Mail server is ready");
   }
 });
-
 
 export const sendEmail = async ({ to, subject, html }) => {
   try {
     await transporter.sendMail({
-      from: `"HRMS" <${process.env.EMAIL_USER}>`,
+      from: `"OfficeLink" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html
     });
 
+    
     console.log("Email sent to:", to);
   } catch (err) {
     console.error("Email error:", err.message);
+    throw err; 
   }
 };

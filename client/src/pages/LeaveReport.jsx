@@ -172,14 +172,28 @@ export default function LeaveReports() {
                     className="border-t hover:bg-gray-50 cursor-pointer"
                   >
                     <td className="p-4">
-                      <div className="font-medium">
-                        {leave.userId?.name}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        {leave.userId?.email}
+                      <div className="flex items-center gap-3">
+                        {console.log(leave.userId)}
+                        <img
+                          src={
+                            leave.userId?.profilePic ||
+                            `https://ui-avatars.com/api/?name=${leave.userId?.name}`
+                          }
+                          className="w-9 h-9 rounded-full object-cover border"
+                        />
+
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {leave.userId?.name}
+                          </div>
+
+                          <div className="text-xs text-gray-400">
+                            {leave.userId?.email}
+                          </div>
+                        </div>
+
                       </div>
                     </td>
-
                     <td className="capitalize">{leave.type}</td>
 
                     <td>
@@ -206,7 +220,7 @@ export default function LeaveReports() {
             </tbody>
           </table>
 
-          {/* ✅ PAGINATION CONTROLS */}
+          {/* PAGINATION CONTROLS */}
           {totalPages > 1 && (
             <div className="flex justify-between items-center p-4 border-t">
               <p className="text-sm text-gray-500">

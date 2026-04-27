@@ -2,6 +2,7 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import { useActiveLeaves, useUpdateLeave } from "../hooks/useLeaves";
 import { useState, useMemo, useEffect } from "react";
 import Button from "../components/ui/Button";
+import { Navigate } from "react-router-dom";
 
 import DecisionModal from "../components/DecisionModal";
 import LeaveDetailsModal from "../components/LeaveDetailsModal";
@@ -16,7 +17,6 @@ export default function AdminLeaves() {
   const [currentPage, setCurrentPage] = useState(1);
   const LEAVES_PER_PAGE = 8;
 
-  // RESET PAGE WHEN DATA CHANGES
   useEffect(() => {
     setCurrentPage(1);
   }, [data]);
@@ -78,9 +78,26 @@ export default function AdminLeaves() {
                     className="border-t hover:bg-gray-50 cursor-pointer"
                   >
                     <td className="p-4">
-                      <div>{leave.userId?.name}</div>
-                      <div className="text-xs text-gray-400">
-                        {leave.userId?.email}
+                      <div className="flex items-center gap-3">
+                        {console.log(leave.userId)}
+                        <img
+                          src={
+                            leave.userId?.profilePic ||
+                            `https://ui-avatars.com/api/?name=${leave.userId?.name}`
+                          }
+                          className="w-9 h-9 rounded-full object-cover border"
+                        />
+
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {leave.userId?.name}
+                          </div>
+
+                          <div className="text-xs text-gray-400">
+                            {leave.userId?.email}
+                          </div>
+                        </div>
+
                       </div>
                     </td>
 
@@ -95,7 +112,7 @@ export default function AdminLeaves() {
                         {leave.status}
                       </span>
                     </td>
-
+                    
                     <td
                       className="p-4"
                       onClick={(e) => e.stopPropagation()}

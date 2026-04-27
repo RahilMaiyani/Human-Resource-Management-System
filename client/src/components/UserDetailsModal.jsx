@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import Modal from "./ui/Modal";
 import API from "../api/axios";
+import EmailModal from "./EmailModal";
 
 export default function UserDetailsModal({ user, onClose }) {
   const [attendance, setAttendance] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // ✅ EMAIL STATE
+  const [openEmail, setOpenEmail] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -27,81 +31,110 @@ export default function UserDetailsModal({ user, onClose }) {
   if (!user) return null;
 
   return (
-    <Modal isOpen={!!user} onClose={onClose}>
-      <div className="space-y-6">
+    <>
+      <Modal isOpen={!!user} onClose={onClose}>
+        <div className="space-y-6">
 
-        {/* HEADER */}
-        <div className="flex flex-col items-center text-center">
-          <img
-            src={
-              user.profilePic ||
-              `https://ui-avatars.com/api/?name=${user.name}`
-            }
-            className="w-24 h-24 rounded-full object-cover border"
-          />
+          {/* HEADER */}
+          <div className="flex flex-col items-center text-center">
+            <img
+              src={
+                user.profilePic ||
+                `https://ui-avatars.com/api/?name=${user.name}`
+              }
+              onError={(e) =>
+                (e.target.src = `https://ui-avatars.com/api/?name=${user.name}`)
+              }
+              className="w-24 h-24 rounded-full object-cover border"
+            />
 
-          <h2 className="text-lg font-semibold mt-3">
-            {user.name}
-          </h2>
+            <h2 className="text-lg font-semibold mt-3">
+              {user.name}
+            </h2>
 
-          <p className="text-sm text-gray-500">{user.email}</p>
-        </div>
-
-        {/* USER INFO */}
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <p className="text-gray-400 text-xs">Role</p>
-            <p className="font-medium">{user.role}</p>
+            <p className="text-sm text-gray-500">{user.email}</p>
           </div>
 
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <p className="text-gray-400 text-xs">Department</p>
-            <p className="font-medium">{user.department}</p>
-          </div>
-        </div>
-
-        {/* ATTENDANCE */}
-        <div className="border-t pt-4">
-          <h3 className="text-sm font-semibold mb-3">
-            Last Attendance
-          </h3>
-
-          {loading ? (
-            <p className="text-gray-400 text-sm">Loading...</p>
-          ) : attendance ? (
-            <div className="grid grid-cols-3 gap-3 text-sm">          
-              <div className="bg-green-50 p-3 rounded-lg">
-                <p className="text-xs text-gray-400">Date</p>
-                <p className="font-medium">{attendance.date}</p>
-              </div>
-
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <p className="text-xs text-gray-400">Check-in</p>
-                <p className="font-medium">
-                  {attendance.checkIn
-                    ? new Date(attendance.checkIn).toLocaleTimeString()
-                    : "—"}
-                </p>
-              </div>
-
-              <div className="bg-red-50 p-3 rounded-lg">
-                <p className="text-xs text-gray-400">Check-out</p>
-                <p className="font-medium">
-                  {attendance.checkout
-                    ? new Date(attendance.checkout).toLocaleTimeString()
-                    : "—"}
-                </p>
-              </div>
-
+          {/* USER INFO */}
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p className="text-gray-400 text-xs">Role</p>
+              <p className="font-medium capitalize">{user.role}</p>
             </div>
-          ) : (
-            <p className="text-gray-400 text-sm">
-              No attendance found
-            </p>
-          )}
-        </div>
 
-      </div>
-    </Modal>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p className="text-gray-400 text-xs">Department</p>
+              <p className="font-medium">{user.department || "—"}</p>
+            </div>
+          </div>
+
+          {/* ATTENDANCE */}
+          <div className="border-t pt-4">
+            <h3 className="text-sm font-semibold mb-3">
+              Last Attendance
+            </h3>
+
+            {loading ? (
+              <p className="text-gray-400 text-sm">Loading...</p>
+            ) : attendance ? (
+              <div className="grid grid-cols-3 gap-3 text-sm">
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <p className="text-xs text-gray-400">Date</p>
+                  <p className="font-medium">{attendance.date}</p>
+                </div>
+
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <p className="text-xs text-gray-400">Check-in</p>
+                  <p className="font-medium">
+                    {attendance.checkIn
+                      ? new Date(attendance.checkIn).toLocaleTimeString()
+                      : "—"}
+                  </p>
+                </div>
+
+                <div className="bg-red-50 p-3 rounded-lg">
+                  <p className="text-xs text-gray-400">Check-out</p>
+                  <p className="font-medium">
+                    {attendance.checkout
+                      ? new Date(attendance.checkout).toLocaleTimeString()
+                      : "—"}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-400 text-sm">
+                No attendance found
+              </p>
+            )}
+          </div>
+
+          {/* ACTIONS */}
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <button
+              onClick={() => setOpenEmail(true)}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+            >
+              Send Email
+            </button>
+
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+            >
+              Close
+            </button>
+          </div>
+
+        </div>
+      </Modal>
+
+      {/* EMAIL MODAL */}
+      <EmailModal
+        isOpen={openEmail}
+        onClose={() => setOpenEmail(false)}
+        user={user}
+        template={null} // custom message
+      />
+    </>
   );
 }

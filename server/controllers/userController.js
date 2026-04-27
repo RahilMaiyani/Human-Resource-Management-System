@@ -3,7 +3,6 @@ import Leave from "../models/Leave.js";
 import Attendance from "../models/Attendance.js"; // make sure this exists
 import bcrypt from "bcryptjs";
 
-// CREATE USER
 export const createUser = async (req, res) => {
   try {
     const { name, email, password, role, department, profilePic } = req.body;
@@ -34,7 +33,6 @@ export const createUser = async (req, res) => {
   }
 };
 
-// GET USERS
 export const getUsers = async (req, res) => {
   try {
     const { search, sort } = req.query;
@@ -57,7 +55,6 @@ export const getUsers = async (req, res) => {
   }
 };
 
-// UPDATE USER
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -87,7 +84,6 @@ export const updateUser = async (req, res) => {
   }
 };
 
-// DELETE USER (FIXED)
 export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -98,11 +94,9 @@ export const deleteUser = async (req, res) => {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    
     if (user.role === "admin") {
       return res.status(400).json({ msg: "Cannot delete admin" });
     }
-
     
     await Leave.deleteMany({ userId: id });
     await Attendance.deleteMany({ userId: id });
