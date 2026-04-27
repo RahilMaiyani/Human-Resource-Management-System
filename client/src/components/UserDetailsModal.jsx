@@ -133,7 +133,7 @@ export default function UserDetailsModal({ user, onClose }) {
         isOpen={openEmail}
         onClose={() => setOpenEmail(false)}
         user={user}
-        template={null} // custom message
+        template={null} 
       />
     </>
   );

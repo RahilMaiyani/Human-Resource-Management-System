@@ -161,7 +161,7 @@ export default function LeaveReports() {
               ) : paginatedLeaves.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="p-6 text-gray-500">
-                    No data found.
+                    No Leaves found.
                   </td>
                 </tr>
               ) : (

@@ -158,11 +158,14 @@ export default function Admin() {
                     const attendanceRecord = validAttendance.find(
                       (a) => a.userId === u._id && a.date === todayDate
                     );
-
+                    const isCheckedOut = attendanceRecord.checkout;
+                    // console.log(attendanceRecord.ch)
+                    // console.log(isCheckedOut)
                     return (
                       <HoverItem
                         key={u._id}
                         user={u}
+                        isCheckedout = {isCheckedOut}
                         content={
                           attendanceRecord && (
                             <>
