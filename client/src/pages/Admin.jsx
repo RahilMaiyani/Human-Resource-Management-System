@@ -9,6 +9,7 @@ import LeaveStatusChart from "../components/charts/LeaveStatusChart";
 import LeaveTrendChart from "../components/charts/LeaveTrendChart";
 
 import EmailModal from "../components/EmailModal";
+import HoverItem from "../components/HoverItem";
 
 import { useAllLeaves } from "../hooks/useLeaves";
 import Button from "../components/ui/Button";
@@ -39,9 +40,7 @@ export default function Admin() {
   const employees = users.filter((u) => u.role !== "admin");
   const employeeIds = new Set(employees.map((u) => u._id));
 
-  const validAttendance = attendance.filter((a) =>
-    employeeIds.has(a.userId)
-  );
+  const validAttendance = attendance.filter((a) => employeeIds.has(a.userId));
 
   const totalEmployees = employees.length;
   const todayDate = new Date().toISOString().split("T")[0];
@@ -52,7 +51,14 @@ export default function Admin() {
 
   const totalRecords = validAttendance.length;
 
-  
+  const formatTime = (value) => {
+    if (!value) return "—";
+    return new Date(value).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  };
+
   const today = new Date();
 
   const last7Days = [...Array(7)].map((_, i) => {
@@ -72,8 +78,6 @@ export default function Admin() {
     count: grouped[date] || 0
   }));
 
-  
-
   const checkedInUserIds = new Set(
     validAttendance
       .filter((a) => a.date === todayDate)
@@ -91,24 +95,15 @@ export default function Admin() {
       .map((l) => l.userId?._id)
   );
 
-  const checkedInUsers = employees.filter((u) =>
-    checkedInUserIds.has(u._id)
-  );
-
-  const onLeaveUsers = employees.filter((u) =>
-    onLeaveUserIds.has(u._id)
-  );
-
+  const checkedInUsers = employees.filter((u) => checkedInUserIds.has(u._id));
+  const onLeaveUsers = employees.filter((u) => onLeaveUserIds.has(u._id));
   const absentUsers = employees.filter(
-    (u) =>
-      !checkedInUserIds.has(u._id) &&
-      !onLeaveUserIds.has(u._id)
+    (u) => !checkedInUserIds.has(u._id) && !onLeaveUserIds.has(u._id)
   );
 
   return (
     <DashboardLayout>
       <div className="p-6 max-w-350 mx-auto space-y-6">
-
         {/* HEADER */}
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
@@ -149,29 +144,48 @@ export default function Admin() {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
             {/* CHECKED IN */}
             <div className="bg-white p-4 rounded-xl border">
               <h3 className="text-sm text-gray-500 mb-2">
                 Checked-in ({checkedInUsers.length})
               </h3>
 
-              <div className="space-y-2 max-h-100 overflow-auto">
+              <div className="space-y-2 max-h-85 overflow-y-auto pr-1">
                 {checkedInUsers.length === 0 ? (
                   <p className="text-xs text-gray-400">No check-ins yet</p>
                 ) : (
-                  checkedInUsers.map((u) => (
-                    <div key={u._id} className="flex items-center gap-3">
-                      <img
-                        src={
-                          u.profilePic ||
-                          `https://ui-avatars.com/api/?name=${u.name}`
+                  checkedInUsers.map((u) => {
+                    const attendanceRecord = validAttendance.find(
+                      (a) => a.userId === u._id && a.date === todayDate
+                    );
+
+                    return (
+                      <HoverItem
+                        key={u._id}
+                        user={u}
+                        content={
+                          attendanceRecord && (
+                            <>
+                              <p className="font-semibold mb-1">
+                                Attendance Details
+                              </p>
+                              <p>
+                                <span className="text-gray-400">Check-in:</span>{" "}
+                                {formatTime(attendanceRecord.checkIn)}
+                              </p>
+                              <p>
+                                <span className="text-gray-400">Check-out:</span>{" "}
+                                {formatTime(
+                                  attendanceRecord.checkOut ||
+                                    attendanceRecord.checkout
+                                )}
+                              </p>
+                            </>
+                          )
                         }
-                        className="w-10 h-10 rounded-full"
                       />
-                      <p className="font-medium">{u.name}</p>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -182,22 +196,41 @@ export default function Admin() {
                 On Leave ({onLeaveUsers.length})
               </h3>
 
-              <div className="space-y-2 max-h-40 overflow-auto">
+              <div className="space-y-2 max-h-85 overflow-y-auto pr-1">
                 {onLeaveUsers.length === 0 ? (
                   <p className="text-xs text-gray-400">No one on leave</p>
                 ) : (
-                  onLeaveUsers.map((u) => (
-                    <div key={u._id} className="flex items-center gap-3">
-                      <img
-                        src={
-                          u.profilePic ||
-                          `https://ui-avatars.com/api/?name=${u.name}`
+                  onLeaveUsers.map((u) => {
+                    const leave = leaves.find(
+                      (l) =>
+                        l.userId?._id === u._id &&
+                        l.status === "approved" &&
+                        l.fromDate.slice(0, 10) <= todayDate &&
+                        l.toDate.slice(0, 10) >= todayDate
+                    );
+
+                    return (
+                      <HoverItem
+                        key={u._id}
+                        user={u}
+                        content={
+                          leave && (
+                            <>
+                              <p className="font-semibold mb-1">Leave Details</p>
+                              <p className="mb-1">
+                                <span className="text-gray-400">Reason:</span>{" "}
+                                {leave.reason || "—"}
+                              </p>
+                              <p>
+                                <span className="text-gray-400">Till:</span>{" "}
+                                {leave.toDate.slice(0, 10)}
+                              </p>
+                            </>
+                          )
                         }
-                        className="w-10 h-10 rounded-full"
                       />
-                      <p className="font-medium">{u.name}</p>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -208,7 +241,7 @@ export default function Admin() {
                 Absent ({absentUsers.length})
               </h3>
 
-              <div className="space-y-2 max-h-40 overflow-auto">
+              <div className="space-y-2 max-h-85 overflow-y-auto pr-1">
                 {absentUsers.length === 0 ? (
                   <p className="text-xs text-gray-400">
                     Everyone accounted for
@@ -219,18 +252,24 @@ export default function Admin() {
                       key={u._id}
                       className="flex items-center justify-between text-sm"
                     >
-                    <div key={u._id} className="flex items-center gap-3">
-                      <img
-                        src={
-                          u.profilePic ||
-                          `https://ui-avatars.com/api/?name=${u.name}`
-                        }
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <p className="font-medium">{u.name}</p>
-                    </div>
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={
+                            u.profilePic ||
+                            `https://ui-avatars.com/api/?name=${u.name}`
+                          }
+                          onError={(e) =>
+                            (e.target.src = `https://ui-avatars.com/api/?name=${u.name}`)
+                          }
+                          className="w-10 h-10 rounded-full object-cover"
+                          alt={u.name}
+                        />
+                        <p className="font-medium">{u.name}</p>
+                      </div>
 
-                      <Button variant="primary"
+                      <Button
+                        variant="primary"
+                        className="text-xs mx-2"
                         onClick={() => {
                           setEmailUser(u);
                           setEmailTemplate({
@@ -246,7 +285,6 @@ export default function Admin() {
                 )}
               </div>
             </div>
-
           </div>
         </div>
 
@@ -272,11 +310,13 @@ export default function Admin() {
 
         <EmailModal
           isOpen={!!emailUser}
-          onClose={() => setEmailUser(null)}
+          onClose={() => {
+            setEmailUser(null);
+            setEmailTemplate(null);
+          }}
           user={emailUser}
           template={emailTemplate}
         />
-
       </div>
     </DashboardLayout>
   );

@@ -10,7 +10,6 @@ export default function EmailModal({ isOpen, onClose, user, template }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  // ✅ Initialize values when modal opens / template changes
   useEffect(() => {
     if (isOpen) {
       setSubject(template?.subject || "");
@@ -46,7 +45,7 @@ export default function EmailModal({ isOpen, onClose, user, template }) {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-[500px] max-w-full space-y-5">
+      <div className="w-125 max-w-full space-y-5">
 
         {/* HEADER */}
         <div>

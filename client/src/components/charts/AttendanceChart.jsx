@@ -44,7 +44,7 @@ export default function AttendanceChart({ data }) {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: true
+        display: true,
       }
     },
     scales: {
