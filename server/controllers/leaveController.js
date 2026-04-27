@@ -41,7 +41,7 @@ export const applyLeave = async (req, res) => {
 
 export const getMyLeaves = async (req, res) => {
   try {
-    const leaves = await Leave.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    const leaves = await Leave.find({ userId: req.user.id }).populate("userId", "name email profilePic").sort({ createdAt: -1 });
     res.json(leaves);
   } catch (err) {
     res.status(500).json({ msg: err.message });

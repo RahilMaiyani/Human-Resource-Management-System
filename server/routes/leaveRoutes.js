@@ -13,11 +13,11 @@ import { authorize } from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
-// Employee
+
 router.post("/", protect, applyLeave);
 router.get("/me", protect, getMyLeaves);
 
-// Admin
+
 router.get("/", protect, authorize('admin'), getAllLeaves);
 router.patch("/:id", protect, authorize('admin'), updateLeaveStatus);
 router.get("/pending-count", protect, authorize('admin'), getPendingLeavesCount);
