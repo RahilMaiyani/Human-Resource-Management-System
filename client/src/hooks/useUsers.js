@@ -28,7 +28,7 @@ export const useCreateUser = () => {
   return useMutation({
     mutationFn: createUser,
     onSuccess: () => {
-      toast.success("User added successfully")
+      toast.success("User added and Welcome Email successfully")
       queryClient.invalidateQueries(["users"]);
     }
   });

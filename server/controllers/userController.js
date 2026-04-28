@@ -3,6 +3,9 @@ import Leave from "../models/Leave.js";
 import Attendance from "../models/Attendance.js"; // make sure this exists
 import bcrypt from "bcryptjs";
 
+import { sendEmail } from "../utils/sendEmail.js";
+import { buildEmailTemplate } from "../utils/emailTemplate.js";
+
 export const createUser = async (req, res) => {
   try {
     const { name, email, password, role, department, profilePic } = req.body;
@@ -25,9 +28,46 @@ export const createUser = async (req, res) => {
       profilePic
     });
 
-    const { password: _, ...safeUser } = user._doc;
+    try {
+      const welcomeHtml = buildEmailTemplate({
+        title: "Account Created Successfully",
+        color: "#4f46e5",
+        message: `
+          <p style="margin-bottom:20px;">Hello <b>${name}</b>,</p>
+          <p style="margin-bottom:20px;">Welcome to the team! Your <b>OfficeLink</b> account has been provisioned by the administrator. You can now access the system using the credentials below:</p>
+          
+          <div style="background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:24px; margin-bottom:24px;">
+            <p style="margin:0 0 10px 0; font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase;">Access Credentials</p>
+            <p style="margin:4px 0; font-size:14px; color:#1e293b;"><b>Portal ID:</b> ${email}</p>
+            <p style="margin:4px 0; font-size:14px; color:#1e293b;"><b>Temporary Password:</b> ${password}</p>
+          </div>
 
+          <p style="margin-bottom:20px; font-size:14px; color:#475569;">
+            For security reasons, we strongly recommend that you update your password immediately after your first login via the Profile Settings.
+          </p>
+
+          <div style="text-align:center; margin-top:32px;">
+            <a href="${process.env.CLIENT_URL || '#'}" style="background-color:#4f46e5; color:#ffffff; padding:12px 32px; border-radius:10px; font-weight:700; text-decoration:none; display:inline-block;">
+              Login to OfficeLink
+            </a>
+          </div>
+        `
+      });
+
+      await sendEmail({
+        to: email,
+        subject: "Welcome to OfficeLink - Your Account is Ready",
+        html: welcomeHtml
+      });
+    } catch (mailErr) {
+      // We log the error but don't stop the request 
+      // so the user creation isn't rolled back just because of an email glitch
+      console.error("Welcome email failed to send:", mailErr.message);
+    }
+
+    const { password: _, ...safeUser } = user._doc;
     res.json(safeUser);
+    
   } catch (err) {
     res.status(500).json({ msg: "Error creating user" });
   }

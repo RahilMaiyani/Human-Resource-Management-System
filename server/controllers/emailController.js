@@ -1,6 +1,7 @@
 import { sendEmail } from "../utils/sendEmail.js";
 import { buildEmailTemplate } from "../utils/emailTemplate.js";
 
+
 export const sendCustomEmail = async (req, res) => {
   try {
     if (req.user.role !== "admin") {

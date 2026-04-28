@@ -35,10 +35,12 @@ export default function Users() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editUser, setEditUser] = useState(null);
 
+  const employees = users.filter((u) => u.role != 'admin');
+  // console.log(employees)
   const departments = useMemo(() => {
-    const deps = users.map((u) => u.department).filter(Boolean);
+    const deps = employees.map((u) => u.department).filter(Boolean);
     return ["", ...new Set(deps)];
-  }, [users]);
+  }, [users, employees]);
 
   const filteredUsers = useMemo(() => {
     return users.filter((u) => {
