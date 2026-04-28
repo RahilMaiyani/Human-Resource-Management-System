@@ -7,6 +7,17 @@ import PageLoader from "../components/PageLoader";
 import Button from "../components/ui/Button";
 import DeleteModal from "../components/DeleteModal";
 import UserDetailsModal from "../components/UserDetailsModal";
+import { 
+  Search, 
+  Filter, 
+  Trash2, 
+  Edit3, 
+  ChevronLeft, 
+  ChevronRight, 
+  UserPlus,
+  Mail,
+  Briefcase
+} from "lucide-react";
 
 export default function Users() {
   const [search, setSearch] = useState("");
@@ -15,50 +26,41 @@ export default function Users() {
   const [selectedUser, setSelectedUser] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const USERS_PER_PAGE = 6;
+  const USERS_PER_PAGE = 10;
 
   const { user } = useAuth();
-
   const { data: users = [], isLoading } = useUsers();
   const deleteMutation = useDeleteUser();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editUser, setEditUser] = useState(null);
 
-  // UNIQUE DEPARTMENTS
   const departments = useMemo(() => {
     const deps = users.map((u) => u.department).filter(Boolean);
     return ["", ...new Set(deps)];
   }, [users]);
 
-  // FILTER USERS
   const filteredUsers = useMemo(() => {
     return users.filter((u) => {
-      const matchSearch = u.name
-        .toLowerCase()
-        .includes(search.toLowerCase());
-
-      const matchDepartment =
-        !department || u.department === department;
-
+      const matchSearch = u.name.toLowerCase().includes(search.toLowerCase());
+      const matchDepartment = !department || u.department === department;
       const notSelf = u.email !== user.email;
-
       return matchSearch && matchDepartment && notSelf;
     });
-  }, [users, search, department]);
+  }, [users, search, department, user.email]);
 
-  // RESET PAGE WHEN FILTER CHANGES
   useMemo(() => {
     setCurrentPage(1);
   }, [search, department]);
 
-  // PAGINATION LOGIC
   const totalPages = Math.ceil(filteredUsers.length / USERS_PER_PAGE);
 
   const paginatedUsers = useMemo(() => {
     const start = (currentPage - 1) * USERS_PER_PAGE;
     return filteredUsers.slice(start, start + USERS_PER_PAGE);
   }, [filteredUsers, currentPage]);
+
+  if (isLoading) return <PageLoader />;
 
   return (
     <DashboardLayout
@@ -67,155 +69,159 @@ export default function Users() {
         setIsModalOpen(true);
       }}
     >
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4 p-1">
-        <h1 className="text-2xl font-bold">Users</h1>
+      <div className="p-10 max-w-350 mx-auto space-y-8 bg-slate-50/30 min-h-screen">
+        
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-slate-200 pb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">User Management</h1>
+            <p className="text-slate-500 text-sm mt-1 font-medium">Manage employee access, roles, and departmental assignments.</p>
+          </div>
 
-        <div className="flex gap-3">
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="p-2 border rounded-lg w-48 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          />
+          <div className="flex items-center gap-4">
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+              <input
+                type="text"
+                placeholder="Search by name..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 pr-4 h-11 border border-slate-200 rounded-lg w-64 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-white shadow-sm"
+              />
+            </div>
 
-          <select
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-            className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          >
-            {departments.map((dep, i) => (
-              <option key={i} value={dep}>
-                {dep || "All Departments"}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {isLoading && <PageLoader />}
-
-      {/* TABLE */}
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-gray-500 text-sm">
-            <tr>
-              <th className="p-4 text-left">User</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Department</th>
-              <th className="text-right pr-4">Action</th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y">
-            {paginatedUsers.length === 0 ? (
-              <tr>
-                <td colSpan="5" className="p-6 text-gray-500 text-center">
-                  No users found
-                </td>
-              </tr>
-            ) : (
-              paginatedUsers.map((user) => (
-                <tr
-                  key={user._id}
-                  onClick={() => setSelectedUser(user)}
-                  className="hover:bg-gray-50 cursor-pointer"
-                >
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={
-                          user.profilePic ||
-                          `https://ui-avatars.com/api/?name=${user.name}`
-                        }
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <p className="font-medium">{user.name}</p>
-                    </div>
-                  </td>
-
-                  <td>{user.email}</td>
-
-                  <td>
-                    <span className="px-2 py-1 text-xs rounded-full bg-indigo-100 text-indigo-600">
-                      {user.role}
-                    </span>
-                  </td>
-
-                  <td>
-                    {user.department || (
-                      <span className="text-gray-400 text-xs">—</span>
-                    )}
-                  </td>
-
-                  <td className="text-right pr-4">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="secondary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditUser(user);
-                          setIsModalOpen(true);
-                        }}
-                      >
-                        Edit
-                      </Button>
-
-                      <Button
-                        variant="danger"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteUserId(user._id);
-                        }}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-
-        {/* PAGINATION CONTROLS */}
-        {totalPages > 1 && (
-          <div className="flex justify-between items-center p-4 border-t">
-            <p className="text-sm text-gray-500">
-              Page {currentPage} of {totalPages}
-            </p>
-
-            <div className="flex gap-2">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-                className={`px-3 py-1 rounded ${
-                  currentPage === 1
-                    ? "bg-gray-200 text-gray-400"
-                    : "bg-indigo-600 text-white hover:bg-indigo-700"
-                }`}
+            <div className="relative group">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              <select
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                className="pl-10 pr-8 h-11 border border-slate-200 rounded-lg text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all bg-white shadow-sm cursor-pointer min-w-45"
               >
-                Prev
-              </button>
-
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-                className={`px-3 py-1 rounded ${
-                  currentPage === totalPages
-                    ? "bg-gray-200 text-gray-400"
-                    : "bg-indigo-600 text-white hover:bg-indigo-700"
-                }`}
-              >
-                Next
-              </button>
+                {departments.map((dep, i) => (
+                  <option key={i} value={dep}>
+                    {dep || "All Departments"}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* MODALS */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <table className="w-full border-collapse">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Employee</th>
+                <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Contact Info</th>
+                <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Organization</th>
+                <th className="px-6 py-4 text-right text-[11px] font-bold text-slate-400 uppercase tracking-widest">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-slate-100">
+              {paginatedUsers.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="px-6 py-20 text-center text-slate-400 italic text-sm font-medium">
+                    No matching records found.
+                  </td>
+                </tr>
+              ) : (
+                paginatedUsers.map((u) => (
+                  <tr
+                    key={u._id}
+                    onClick={() => setSelectedUser(u)}
+                    className="hover:bg-slate-50/80 cursor-pointer transition-colors group"
+                  >
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={u.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=f1f5f9&color=475569`}
+                          className="w-11 h-11 rounded-full object-cover border border-slate-100 shadow-sm transition-transform group-hover:scale-105"
+                          alt={u.name}
+                        />
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-slate-800">{u.name}</span>
+                          <span className="text-[10px] font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 w-fit px-2 py-0.5 rounded mt-1">
+                            {u.role}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-2 text-sm text-slate-600">
+                        <Mail className="w-3.5 h-3.5 text-slate-300" />
+                        <span className="font-medium">{u.email}</span>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-2 text-sm text-slate-600">
+                        <Briefcase className="w-3.5 h-3.5 text-slate-300" />
+                        <span className="font-medium">
+                          {u.department || <span className="text-slate-300 italic">Not Assigned</span>}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-5">
+                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditUser(u);
+                            setIsModalOpen(true);
+                          }}
+                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                          title="Edit User"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteUserId(u._id);
+                          }}
+                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                          title="Delete User"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+
+          {totalPages > 1 && (
+            <div className="flex justify-between items-center px-6 py-4 bg-slate-50 border-t border-slate-200">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                Displaying Page {currentPage} of {totalPages}
+              </p>
+
+              <div className="flex gap-2">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={(e) => { e.stopPropagation(); setCurrentPage((p) => p - 1); }}
+                  className="p-2 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={(e) => { e.stopPropagation(); setCurrentPage((p) => p + 1); }}
+                  className="p-2 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-all"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
         <DeleteModal
           isOpen={!!deleteUserId}
           onClose={() => setDeleteUserId(null)}

@@ -2,10 +2,18 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import { useActiveLeaves, useUpdateLeave } from "../hooks/useLeaves";
 import { useState, useMemo, useEffect } from "react";
 import Button from "../components/ui/Button";
-import { Navigate } from "react-router-dom";
-
 import DecisionModal from "../components/DecisionModal";
 import LeaveDetailsModal from "../components/LeaveDetailsModal";
+import { 
+  FileText, 
+  ChevronLeft, 
+  ChevronRight, 
+  Clock, 
+  CheckCircle2, 
+  XCircle,
+  CalendarDays,
+  User
+} from "lucide-react";
 
 export default function AdminLeaves() {
   const { data = [], isLoading } = useActiveLeaves();
@@ -15,7 +23,7 @@ export default function AdminLeaves() {
   const [decision, setDecision] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const LEAVES_PER_PAGE = 8;
+  const LEAVES_PER_PAGE = 10;
 
   useEffect(() => {
     setCurrentPage(1);
@@ -28,46 +36,60 @@ export default function AdminLeaves() {
     return data.slice(start, start + LEAVES_PER_PAGE);
   }, [data, currentPage]);
 
-  const badgeClass = (status) => {
-    if (status === "approved") return "bg-green-100 text-green-700";
-    if (status === "rejected") return "bg-red-100 text-red-700";
-    return "bg-amber-100 text-amber-700";
+  const getStatusStyle = (status) => {
+    if (status === "approved") return "bg-emerald-50 text-emerald-700 border-emerald-100";
+    if (status === "rejected") return "bg-rose-50 text-rose-700 border-rose-100";
+    return "bg-amber-50 text-amber-700 border-amber-100";
   };
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-350 mx-auto space-y-6">
+      <div className="p-10 max-w-350 mx-auto space-y-8 bg-slate-50/30 min-h-screen">
 
         {/* HEADER */}
-        <div className="bg-white rounded-xl shadow-sm border p-6">
-          <h1 className="text-2xl font-semibold">Leave Management</h1>
-          <p className="text-sm text-gray-500">
-            Active & pending leave requests
-          </p>
-        </div>
+        <header className="flex items-end justify-between border-b border-slate-200 pb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Leave Requests</h1>
+            <p className="text-slate-500 text-sm mt-1 font-medium">
+              Review, approve, or decline employee time-off applications.
+            </p>
+          </div>
+          <div className="text-right">
+             <span className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest shadow-sm">
+                <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                {data.filter(l => l.status === 'pending').length} Pending Requests
+             </span>
+          </div>
+        </header>
 
-        {/* TABLE */}
-        <div className="bg-white rounded-xl border overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 text-sm text-gray-600">
+        {/* DATA TABLE */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <table className="w-full border-collapse">
+            <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="p-4 text-left">Employee</th>
-                <th className="p-4 text-left">Type</th>
-                <th className="p-4 text-left">Dates</th>
-                <th className="p-4 text-left">Status</th>
-                <th className="p-4 text-left">Action</th>
+                <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Employee</th>
+                <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Type</th>
+                <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Duration</th>
+                <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
+                <th className="px-6 py-4 text-right text-[11px] font-bold text-slate-400 uppercase tracking-widest">Review</th>
               </tr>
             </thead>
 
-            <tbody>
+            <tbody className="divide-y divide-slate-100 text-sm">
               {isLoading ? (
                 <tr>
-                  <td colSpan="5" className="p-6">Loading...</td>
+                  <td colSpan="5" className="px-6 py-12 text-center text-slate-400 font-medium">
+                    <div className="flex items-center justify-center gap-2">
+                       <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                       Loading requests...
+                    </div>
+                  </td>
                 </tr>
               ) : paginatedLeaves.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="p-6 text-gray-500">
-                    No leave requests found.
+                  <td colSpan="5" className="px-6 py-20 text-center">
+                    <FileText className="w-12 h-12 text-slate-200 mx-auto mb-3" />
+                    <p className="text-slate-400 font-medium italic">No active leave requests found.</p>
                   </td>
                 </tr>
               ) : (
@@ -75,69 +97,66 @@ export default function AdminLeaves() {
                   <tr
                     key={leave._id}
                     onClick={() => setSelectedLeave(leave)}
-                    className="border-t hover:bg-gray-50 cursor-pointer"
+                    className="hover:bg-slate-50/80 cursor-pointer transition-colors group"
                   >
-                    <td className="p-4">
+                    <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
-                        {console.log(leave.userId)}
                         <img
-                          src={
-                            leave.userId?.profilePic ||
-                            `https://ui-avatars.com/api/?name=${leave.userId?.name}`
-                          }
-                          className="w-9 h-9 rounded-full object-cover border"
+                          src={leave.userId?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(leave.userId?.name)}&background=f1f5f9&color=475569`}
+                          className="w-10 h-10 rounded-full object-cover border border-slate-100 shadow-sm transition-transform group-hover:scale-105"
+                          alt="Employee"
                         />
-
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {leave.userId?.name}
-                          </div>
-
-                          <div className="text-xs text-gray-400">
-                            {leave.userId?.email}
-                          </div>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-slate-800 tracking-tight">{leave.userId?.name}</span>
+                          <span className="text-xs text-slate-500">{leave.userId?.email}</span>
                         </div>
-
                       </div>
                     </td>
 
-                    <td className="p-4 capitalize">{leave.type}</td>
-
-                    <td className="p-4 text-sm">
-                      {leave.fromDate.slice(0, 10)} → {leave.toDate.slice(0, 10)}
+                    <td className="px-6 py-5">
+                      <span className="font-semibold text-slate-700 capitalize flex items-center gap-2">
+                        <CalendarDays className="w-3.5 h-3.5 text-slate-400" />
+                        {leave.type}
+                      </span>
                     </td>
 
-                    <td className="p-4">
-                      <span className={`px-2 py-1 rounded-full text-xs ${badgeClass(leave.status)}`}>
+                    <td className="px-6 py-5 text-slate-600 font-medium tabular-nums">
+                      {leave.fromDate.slice(0, 10)} 
+                      <span className="mx-2 text-slate-300">→</span> 
+                      {leave.toDate.slice(0, 10)}
+                    </td>
+
+                    <td className="px-6 py-5">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border ${getStatusStyle(leave.status)}`}>
                         {leave.status}
                       </span>
                     </td>
                     
                     <td
-                      className="p-4"
+                      className="px-6 py-5"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {leave.status === "pending" ? (
-                        <div className="flex gap-2">
-                          <Button
-                            variant="success"
-                            onClick={() =>
-                              setDecision({ id: leave._id, type: "approved" })
-                            }
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => setDecision({ id: leave._id, type: "approved" })}
+                            className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                            title="Approve Request"
                           >
-                            Approve
-                          </Button>
+                            <CheckCircle2 className="w-5 h-5" />
+                          </button>
 
-                          <Button
-                            variant="danger"
-                            onClick={() =>
-                              setDecision({ id: leave._id, type: "rejected" })
-                            }
+                          <button
+                            onClick={() => setDecision({ id: leave._id, type: "rejected" })}
+                            className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                            title="Reject Request"
                           >
-                            Reject
-                          </Button>
+                            <XCircle className="w-5 h-5" />
+                          </button>
                         </div>
-                      ) : "—"}
+                      ) : (
+                        <div className="text-right pr-4 italic text-slate-400 text-xs font-medium">Processed</div>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -147,34 +166,26 @@ export default function AdminLeaves() {
 
           {/* PAGINATION */}
           {totalPages > 1 && (
-            <div className="flex justify-between items-center p-4 border-t">
-              <p className="text-sm text-gray-500">
-                Page {currentPage} of {totalPages}
+            <div className="flex justify-between items-center px-6 py-4 bg-slate-50 border-t border-slate-200">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                Viewing Page {currentPage} of {totalPages}
               </p>
 
               <div className="flex gap-2">
                 <button
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((p) => p - 1)}
-                  className={`px-3 py-1 rounded ${
-                    currentPage === 1
-                      ? "bg-gray-200 text-gray-400"
-                      : "bg-indigo-600 text-white hover:bg-indigo-700"
-                  }`}
+                  className="p-2 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors"
                 >
-                  Prev
+                  <ChevronLeft className="w-4 h-4" />
                 </button>
 
                 <button
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage((p) => p + 1)}
-                  className={`px-3 py-1 rounded ${
-                    currentPage === totalPages
-                      ? "bg-gray-200 text-gray-400"
-                      : "bg-indigo-600 text-white hover:bg-indigo-700"
-                  }`}
+                  className="p-2 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors"
                 >
-                  Next
+                  <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>

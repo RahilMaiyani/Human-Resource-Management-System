@@ -1,96 +1,123 @@
 import { Link, useLocation } from "react-router-dom";
 import { usePendingLeavesCount } from "../hooks/useLeaveNotifications";
+import { 
+  LayoutDashboard, 
+  Users, 
+  ClipboardList, 
+  FileStack, 
+  CalendarDays,
+  ShieldCheck
+} from "lucide-react";
 
 export default function Sidebar({ user }) {
   const location = useLocation();
-
   const isAdmin = user?.role === "admin";
-
   const { data: pendingCount = 0 } = usePendingLeavesCount(isAdmin);
 
   const isActive = (path) => location.pathname === path;
 
-  const baseClass =
-    "flex items-center justify-between px-3 py-2 rounded-md transition";
-
-  const activeClass = "bg-gray-700";
-  const inactiveClass = "hover:bg-gray-700";
+  const baseClass = "group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium text-sm";
+  const activeClass = "bg-indigo-600 text-white shadow-lg shadow-indigo-900/20";
+  const inactiveClass = "text-slate-400 hover:bg-slate-800 hover:text-slate-100";
 
   return (
-    <div className="w-60 bg-gray-900 text-white p-4 flex flex-col h-screen sticky top-0">
-      <h2 className="text-xl font-bold mb-10 flex gap-3 mt-1 justify-center">OfficeLink
-        <span className="mt-1"><svg fill="#5C6BC0" version="1.1" id="Capa_1" width="25px" height="25px" viewBox="0 0 442.246 442.246" stroke="#3F51B5"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <g> <path d="M409.657,32.474c-43.146-43.146-113.832-43.146-156.978,0l-84.763,84.762c29.07-8.262,60.589-6.12,88.129,6.732 l44.063-44.064c17.136-17.136,44.982-17.136,62.118,0c17.136,17.136,17.136,44.982,0,62.118l-55.386,55.386l-36.414,36.414 c-17.136,17.136-44.982,17.136-62.119,0l-47.43,47.43c11.016,11.017,23.868,19.278,37.332,24.48 c36.415,14.382,78.643,8.874,110.467-16.219c3.06-2.447,6.426-5.201,9.18-8.262l57.222-57.222l34.578-34.578 C453.109,146.306,453.109,75.926,409.657,32.474z"></path> <path d="M184.135,320.114l-42.228,42.228c-17.136,17.137-44.982,17.137-62.118,0c-17.136-17.136-17.136-44.981,0-62.118 l91.8-91.799c17.136-17.136,44.982-17.136,62.119,0l47.43-47.43c-11.016-11.016-23.868-19.278-37.332-24.48 c-38.25-15.3-83.232-8.262-115.362,20.502c-1.53,1.224-3.06,2.754-4.284,3.978l-91.8,91.799 c-43.146,43.146-43.146,113.832,0,156.979c43.146,43.146,113.832,43.146,156.978,0l82.927-83.845 C230.035,335.719,220.243,334.496,184.135,320.114z"></path> </g> </g> </g></svg></span>
-      </h2>
+    <div className="w-64 bg-slate-950 text-white flex flex-col h-screen sticky top-0 border-r border-slate-800/50">
+      
+      {/* BRANDING */}
+      <div className="p-8 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="bg-indigo-600 p-1.5 rounded-lg shadow-lg shadow-indigo-500/20">
+            <ShieldCheck className="w-6 h-6 text-white" />
+          </div>
+          <h1 className="text-xl font-black tracking-tighter uppercase">
+            OfficeLink
+          </h1>
+        </div>
+      </div>
 
-      <nav className="flex flex-col gap-2">
+      {/* NAVIGATION */}
+      <nav className="flex-1 px-4 space-y-2">
+        
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 ml-4">
+          Main Menu
+        </p>
 
-        {/* ADMIN */}
-        {user.role === "admin" && (
+        {/* ADMIN ROUTES */}
+        {isAdmin && (
           <>
             <Link
               to="/admin"
-              className={`${baseClass} ${
-                isActive("/admin") ? activeClass : inactiveClass
-              }`}
+              className={`${baseClass} ${isActive("/admin") ? activeClass : inactiveClass}`}
             >
-              Dashboard
+              <LayoutDashboard className="w-5 h-5" />
+              Overview
             </Link>
 
             <Link
               to="/users"
-              className={`${baseClass} ${
-                isActive("/users") ? activeClass : inactiveClass
-              }`}
+              className={`${baseClass} ${isActive("/users") ? activeClass : inactiveClass}`}
             >
-              Users
+              <Users className="w-5 h-5" />
+              Employees
             </Link>
 
             <Link
               to="/admin/leaves"
-              className={`${baseClass} ${
-                isActive("/admin/leaves") ? activeClass : inactiveClass
-              }`}
+              className={`${baseClass} ${isActive("/admin/leaves") ? activeClass : inactiveClass}`}
             >
-              <span>Leave Management</span>
-
+              <ClipboardList className="w-5 h-5" />
+              <span className="flex-1">Management</span>
               {pendingCount > 0 && (
-                <span className="text-xs bg-red-500 px-2 py-0.5 rounded-full animate-pulse">
+                <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-black bg-rose-500 text-white rounded-full ring-4 ring-slate-950">
                   {pendingCount}
                 </span>
               )}
             </Link>
 
-            <Link to="/admin/reports" className={`${baseClass} ${
-                isActive("/admin/reports") ? activeClass : inactiveClass
-              }`}>
-              All Leaves
+            <Link 
+              to="/admin/reports" 
+              className={`${baseClass} ${isActive("/admin/reports") ? activeClass : inactiveClass}`}
+            >
+              <FileStack className="w-5 h-5" />
+              Leave Logs
             </Link>
           </>
         )}
 
-        {/* EMPLOYEE */}
-        {user.role === "employee" && (
+        {/* EMPLOYEE ROUTES */}
+        {!isAdmin && (
           <>
             <Link
               to="/employee"
-              className={`${baseClass} ${
-                isActive("/employee") ? activeClass : inactiveClass
-              }`}
+              className={`${baseClass} ${isActive("/employee") ? activeClass : inactiveClass}`}
             >
+              <LayoutDashboard className="w-5 h-5" />
               Dashboard
             </Link>
 
             <Link
               to="/employee/leaves"
-              className={`${baseClass} ${
-                isActive("/employee/leaves") ? activeClass : inactiveClass
-              }`}
+              className={`${baseClass} ${isActive("/employee/leaves") ? activeClass : inactiveClass}`}
             >
-              Leaves
+              <CalendarDays className="w-5 h-5" />
+              My Leaves
             </Link>
           </>
         )}
       </nav>
+
+      {/* USER CONTEXT FOOTER */}
+      <div className="p-4 border-t border-slate-900 bg-slate-900/30">
+        <div className="flex items-center gap-3 px-2">
+          <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-indigo-400">
+            {user?.name?.charAt(0)}
+          </div>
+          <div className="flex flex-col truncate">
+            <span className="text-xs font-bold text-slate-200 truncate">{user?.name}</span>
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">{user?.role}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { useState } from "react";
 import Modal from "./ui/Modal";
 import Button from "./ui/Button";
 import { useApplyLeave } from "../hooks/useLeaves";
-
+import { Calendar, AlertCircle } from "lucide-react";
 
 function parseDate(dateStr) {
   const [y, m, d] = dateStr.split("-");
@@ -60,15 +60,11 @@ export default function LeaveModal({ isOpen, onClose }) {
   max.setDate(today.getDate() + 14);
   const maxDate = max.toISOString().split("T")[0];
 
-  
   const validateDate = (value, fieldName) => {
     if (!value) return `${fieldName} is required`;
-
-    if (value < minDate) return "Only future dates allowed";
+    if (value < minDate) return "Future dates only";
     if (value > maxDate) return "Max 2 weeks window";
-
-    if (isWeekend(value)) return "Weekends not allowed";
-
+    if (isWeekend(value)) return "Weekends restricted";
     return true;
   };
 
@@ -79,7 +75,7 @@ export default function LeaveModal({ isOpen, onClose }) {
     if (data.fromDate > data.toDate) {
       setError("toDate", {
         type: "manual",
-        message: "To date must be after from date"
+        message: "Check-out date must follow check-in"
       });
       return;
     }
@@ -87,7 +83,7 @@ export default function LeaveModal({ isOpen, onClose }) {
     if (rangeHasWeekend(data.fromDate, data.toDate)) {
       setError("toDate", {
         type: "manual",
-        message: "Range cannot include Saturday or Sunday"
+        message: "Range includes weekend days"
       });
       return;
     }
@@ -98,120 +94,131 @@ export default function LeaveModal({ isOpen, onClose }) {
         onClose(); 
       },
       onError: (err) => {
-        setApiError(err?.response?.data?.msg || "Failed to apply leave");
+        setApiError(err?.response?.data?.msg || "Failed to process request");
       }
     });
   };
 
-  if (!isOpen) return null;
-
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-full max-w-md">
-        <div className="mb-5">
-          <h2 className="text-xl font-semibold text-gray-800">
-            Apply Leave
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Future weekdays only • Max 2 weeks
-          </p>
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <Calendar className="w-5 h-5 text-indigo-600" />
+          Request Leave
+        </h2>
+        <p className="text-sm text-slate-500 mt-1 font-medium">
+          Submit your absence request for approval.
+        </p>
+      </div>
+
+      <div className="mb-6 p-3 bg-slate-50 border border-slate-100 rounded-lg flex gap-3 items-start">
+        <AlertCircle className="w-4 h-4 text-slate-400 mt-0.5" />
+        <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+          Policy: Leave can only be applied for future weekdays within a 14-day window. Weekend dates are automatically restricted.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        
+        <div className="space-y-1">
+          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+            Category
+          </label>
+          <select
+            {...register("type", { required: "Required" })}
+            className="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:border-indigo-500 outline-none transition-all"
+          >
+            <option value="sick">Sick Leave</option>
+            <option value="casual">Casual Leave</option>
+            <option value="earned">Earned Leave</option>
+          </select>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* TYPE */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Leave Type
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+              Start Date
             </label>
-            <select
-              {...register("type", { required: "Required" })}
-              className="w-full h-11 mt-1 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500"
-            >
-              <option value="sick">Sick</option>
-              <option value="casual">Casual</option>
-              <option value="earned">Earned</option>
-            </select>
-          </div>
-
-          {/* DATES */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                From Date
-              </label>
-              <input
-                type="date"
-                min={minDate}
-                max={maxDate}
-                {...register("fromDate", {
-                  validate: (v) => validateDate(v, "From date")
-                })}
-                className="w-full h-11 mt-1 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500"
-              />
-              {errors.fromDate && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.fromDate.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                To Date
-              </label>
-              <input
-                type="date"
-                min={fromDate || minDate}
-                max={maxDate}
-                {...register("toDate", {
-                  validate: (v) => validateDate(v, "To date")
-                })}
-                className="w-full h-11 mt-1 px-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500"
-              />
-              {errors.toDate && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.toDate.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* REASON */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Reason
-            </label>
-            <textarea
-              rows="3"
-              {...register("reason", {
-                required: "Reason required",
-                minLength: { value: 5, message: "Too short" }
+            <input
+              type="date"
+              min={minDate}
+              max={maxDate}
+              {...register("fromDate", {
+                validate: (v) => validateDate(v, "From date")
               })}
-              className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500"
+              className="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all"
             />
-            {errors.reason && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.reason.message}
+            {errors.fromDate && (
+              <p className="text-rose-500 text-[10px] font-bold uppercase mt-1 ml-1 tracking-tighter">
+                {errors.fromDate.message}
               </p>
             )}
           </div>
 
-          {/* API ERROR */}
-          {apiError && (
-            <p className="text-sm text-red-500">{apiError}</p>
-          )}
-
-          {/* ACTIONS */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button type="button" variant="secondary" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit">
-              {mutation.isPending ? "Submitting..." : "Apply Leave"}
-            </Button>
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+              End Date
+            </label>
+            <input
+              type="date"
+              min={fromDate || minDate}
+              max={maxDate}
+              {...register("toDate", {
+                validate: (v) => validateDate(v, "To date")
+              })}
+              className="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all"
+            />
+            {errors.toDate && (
+              <p className="text-rose-500 text-[10px] font-bold uppercase mt-1 ml-1 tracking-tighter">
+                {errors.toDate.message}
+              </p>
+            )}
           </div>
-        </form>
-      </div>
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+            Reason for Absence
+          </label>
+          <textarea
+            rows="3"
+            placeholder="Briefly describe the reason for your leave request..."
+            {...register("reason", {
+              required: "Reason required",
+              minLength: { value: 5, message: "Provide more detail" }
+            })}
+            className="w-full p-4 rounded-xl border border-slate-200 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all resize-none"
+          />
+          {errors.reason && (
+            <p className="text-rose-500 text-[10px] font-bold uppercase mt-1 ml-1 tracking-tighter">
+              {errors.reason.message}
+            </p>
+          )}
+        </div>
+
+        {apiError && (
+          <div className="p-3 bg-rose-50 border border-rose-100 rounded-lg text-rose-600 text-[11px] font-bold text-center">
+            {apiError}
+          </div>
+        )}
+
+        <div className="flex gap-3 pt-6 border-t border-slate-100">
+          <button 
+            type="button" 
+            onClick={onClose}
+            className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+          >
+            Discard
+          </button>
+          <button 
+            type="submit"
+            disabled={mutation.isPending}
+            className="flex-1 h-11 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 disabled:opacity-50"
+          >
+            {mutation.isPending ? "Processing..." : "Submit Request"}
+          </button>
+        </div>
+      </form>
     </Modal>
   );
 }

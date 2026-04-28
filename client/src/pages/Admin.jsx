@@ -13,6 +13,15 @@ import HoverItem from "../components/HoverItem";
 
 import { useAllLeaves } from "../hooks/useLeaves";
 import Button from "../components/ui/Button";
+import { 
+  Users, 
+  Clock, 
+  BarChart3, 
+  CalendarCheck, 
+  UserMinus, 
+  Mail,
+  ArrowUpRight
+} from "lucide-react";
 
 export default function Admin() {
   const { data: users = [], isLoading } = useUsers();
@@ -28,10 +37,9 @@ export default function Admin() {
         const res = await API.get("/attendance/all");
         setAttendance(res.data);
       } catch (err) {
-        console.log(err);
+        console.error("Attendance fetch error:", err);
       }
     };
-
     fetchAttendance();
   }, []);
 
@@ -39,31 +47,21 @@ export default function Admin() {
 
   const employees = users.filter((u) => u.role !== "admin");
   const employeeIds = new Set(employees.map((u) => u._id));
-
   const validAttendance = attendance.filter((a) => employeeIds.has(a.userId));
-
+  
   const totalEmployees = employees.length;
   const todayDate = new Date().toISOString().split("T")[0];
-
-  const todayCheckins = validAttendance.filter(
-    (a) => a.date === todayDate
-  ).length;
-
+  const todayCheckins = validAttendance.filter((a) => a.date === todayDate).length;
   const totalRecords = validAttendance.length;
 
   const formatTime = (value) => {
     if (!value) return "—";
-    return new Date(value).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit"
-    });
+    return new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
-
-  const today = new Date();
 
   const last7Days = [...Array(7)].map((_, i) => {
     const d = new Date();
-    d.setDate(today.getDate() - (6 - i));
+    d.setDate(new Date().getDate() - (6 - i));
     return d.toISOString().split("T")[0];
   });
 
@@ -79,18 +77,15 @@ export default function Admin() {
   }));
 
   const checkedInUserIds = new Set(
-    validAttendance
-      .filter((a) => a.date === todayDate)
-      .map((a) => a.userId)
+    validAttendance.filter((a) => a.date === todayDate).map((a) => a.userId)
   );
 
   const onLeaveUserIds = new Set(
     leaves
-      .filter(
-        (l) =>
-          l.status === "approved" &&
-          l.fromDate.slice(0, 10) <= todayDate &&
-          l.toDate.slice(0, 10) >= todayDate
+      .filter((l) => 
+        l.status === "approved" &&
+        l.fromDate.slice(0, 10) <= todayDate &&
+        l.toDate.slice(0, 10) >= todayDate
       )
       .map((l) => l.userId?._id)
   );
@@ -103,88 +98,104 @@ export default function Admin() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-350 mx-auto space-y-6">
+      <div className="p-10 max-w-400 mx-auto space-y-10 bg-slate-50/30 min-h-screen">
+        
         {/* HEADER */}
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Overview of employees, attendance, and leaves
-          </p>
-        </div>
-
-        {/* STATS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white p-5 rounded-xl shadow-sm border">
-            <p className="text-xs text-gray-500">Total Employees</p>
-            <h2 className="text-2xl font-bold mt-1">{totalEmployees}</h2>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-sm border">
-            <p className="text-xs text-gray-500">Today's Check-ins</p>
-            <h2 className="text-2xl font-bold mt-1">{todayCheckins}</h2>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-sm border">
-            <p className="text-xs text-gray-500">Total Records</p>
-            <h2 className="text-2xl font-bold mt-1">{totalRecords}</h2>
+        <div className="border-b border-slate-200 pb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Administrative Overview</h1>
+            <p className="text-slate-500 text-sm mt-1 font-medium">
+              Real-time monitoring of workforce operations and leave metrics.
+            </p>
           </div>
         </div>
 
-        {/* CHART */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-3 h-80">
+        {/* TOP LEVEL STATS */}
+        <div className="grid grid-cols-3 gap-8">
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden group">
+            <div className="flex justify-between items-start relative z-10">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Workforce</p>
+                <h2 className="text-3xl font-bold mt-2 text-slate-800">{totalEmployees}</h2>
+              </div>
+              <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                <Users className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-[10px] font-bold text-emerald-600 bg-emerald-50 w-fit px-2 py-0.5 rounded">
+              <ArrowUpRight className="w-3 h-3 mr-1" /> Active Employees
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Today's Presence</p>
+                <h2 className="text-3xl font-bold mt-2 text-slate-800">{todayCheckins}</h2>
+              </div>
+              <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+                <CalendarCheck className="w-5 h-5" />
+              </div>
+            </div>
+            <p className="mt-4 text-xs text-slate-500 font-medium">Checked in for {todayDate}</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">System Records</p>
+                <h2 className="text-3xl font-bold mt-2 text-slate-800">{totalRecords}</h2>
+              </div>
+              <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
+                <BarChart3 className="w-5 h-5" />
+              </div>
+            </div>
+            <p className="mt-4 text-xs text-slate-500 font-medium">Aggregated attendance entries</p>
+          </div>
+        </div>
+
+        {/* MAIN VISUALIZATION */}
+        <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
+          {/* <div className="flex items-center gap-2 mb-8"> */}
+            {/* <Clock className="w-5 h-5 text-indigo-600" /> */}
+            {/* <h2 className="text-lg font-bold text-slate-800 tracking-tight">Attendance Velocity (7 Days)</h2> */}
+          {/* </div> */}
+          <div className="h-90 w-full">
             <AttendanceChart data={chartData} />
           </div>
         </div>
 
-        {/* DAILY WORKFORCE STATUS */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">
-            Today's Workforce Status
-          </h2>
+        {/* WORKFORCE SEGMENTATION */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-slate-400" />
+            <h2 className="text-lg font-bold text-slate-800 tracking-tight">Daily Workforce Status</h2>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* CHECKED IN */}
-            <div className="bg-white p-4 rounded-xl border">
-              <h3 className="text-sm text-gray-500 mb-2">
-                Checked-in ({checkedInUsers.length})
-              </h3>
-
-              <div className="space-y-2 max-h-85 overflow-y-auto pr-1">
+          <div className="grid grid-cols-3 gap-8">
+            {/* COLUMN: CHECKED IN */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-125">
+              <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 className="text-[11px] font-black uppercase tracking-widest text-emerald-700">Checked-in</h3>
+                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full">{checkedInUsers.length}</span>
+              </div>
+              <div className="p-4 overflow-y-auto space-y-3 flex-1 custom-scrollbar">
                 {checkedInUsers.length === 0 ? (
-                  <p className="text-xs text-gray-400">No check-ins yet</p>
+                  <div className="h-full flex flex-col items-center justify-center opacity-40 italic text-xs">No active sessions</div>
                 ) : (
                   checkedInUsers.map((u) => {
-                    const attendanceRecord = validAttendance.find(
-                      (a) => a.userId === u._id && a.date === todayDate
-                    );
-                    const isCheckedOut = attendanceRecord.checkout;
-                    // console.log(attendanceRecord.ch)
-                    // console.log(isCheckedOut)
+                    const record = validAttendance.find(a => a.userId === u._id && a.date === todayDate);
                     return (
                       <HoverItem
                         key={u._id}
                         user={u}
-                        isCheckedout = {isCheckedOut}
+                        isCheckedout={!!record?.checkout}
                         content={
-                          attendanceRecord && (
-                            <>
-                              <p className="font-semibold mb-1">
-                                Attendance Details
-                              </p>
-                              <p>
-                                <span className="text-gray-400">Check-in:</span>{" "}
-                                {formatTime(attendanceRecord.checkIn)}
-                              </p>
-                              <p>
-                                <span className="text-gray-400">Check-out:</span>{" "}
-                                {formatTime(
-                                  attendanceRecord.checkOut ||
-                                    attendanceRecord.checkout
-                                )}
-                              </p>
-                            </>
-                          )
+                          <div className="text-[11px] space-y-1">
+                            <p className="font-bold border-b border-slate-100 pb-1 mb-1">Session Data</p>
+                            <p><span className="text-slate-400">In:</span> {formatTime(record?.checkIn)}</p>
+                            <p><span className="text-slate-400">Out:</span> {formatTime(record?.checkOut || record?.checkout)}</p>
+                          </div>
                         }
                       />
                     );
@@ -193,43 +204,29 @@ export default function Admin() {
               </div>
             </div>
 
-            {/* ON LEAVE */}
-            <div className="bg-white p-4 rounded-xl border">
-              <h3 className="text-sm text-gray-500 mb-2">
-                On Leave ({onLeaveUsers.length})
-              </h3>
-
-              <div className="space-y-2 max-h-85 overflow-y-auto pr-1">
+            {/* COLUMN: ON LEAVE */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-125">
+              <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 className="text-[11px] font-black uppercase tracking-widest text-amber-700">On Leave</h3>
+                <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-full">{onLeaveUsers.length}</span>
+              </div>
+              <div className="p-4 overflow-y-auto space-y-3 flex-1">
                 {onLeaveUsers.length === 0 ? (
-                  <p className="text-xs text-gray-400">No one on leave</p>
+                  <div className="h-full flex flex-col items-center justify-center opacity-40 italic text-xs">Full attendance</div>
                 ) : (
                   onLeaveUsers.map((u) => {
-                    const leave = leaves.find(
-                      (l) =>
-                        l.userId?._id === u._id &&
-                        l.status === "approved" &&
-                        l.fromDate.slice(0, 10) <= todayDate &&
-                        l.toDate.slice(0, 10) >= todayDate
-                    );
-
+                    const leave = leaves.find(l => l.userId?._id === u._id && l.status === "approved" && l.fromDate.slice(0, 10) <= todayDate && l.toDate.slice(0, 10) >= todayDate);
                     return (
                       <HoverItem
                         key={u._id}
                         user={u}
+                        toDate={leave?.toDate.slice(0, 10)}
                         content={
-                          leave && (
-                            <>
-                              <p className="font-semibold mb-1">Leave Details</p>
-                              <p className="mb-1">
-                                <span className="text-gray-400">Reason:</span>{" "}
-                                {leave.reason || "—"}
-                              </p>
-                              <p>
-                                <span className="text-gray-400">Till:</span>{" "}
-                                {leave.toDate.slice(0, 10)}
-                              </p>
-                            </>
-                          )
+                          <div className="text-[11px] space-y-1">
+                            <p className="font-bold border-b border-slate-100 pb-1 mb-1">Leave Info</p>
+                            <p className="italic">"{leave?.reason || 'No reason provided'}"</p>
+                            <p><span className="text-slate-400">Returning:</span> {leave?.toDate.slice(0, 10)}</p>
+                          </div>
                         }
                       />
                     );
@@ -238,51 +235,39 @@ export default function Admin() {
               </div>
             </div>
 
-            {/* ABSENT */}
-            <div className="bg-white p-4 rounded-xl border">
-              <h3 className="text-sm text-gray-500 mb-2">
-                Absent ({absentUsers.length})
-              </h3>
-
-              <div className="space-y-2 max-h-85 overflow-y-auto pr-1">
+            {/* COLUMN: ABSENT */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-125">
+              <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 className="text-[11px] font-black uppercase tracking-widest text-rose-700">Absent</h3>
+                <span className="px-2 py-0.5 bg-rose-100 text-rose-800 text-[10px] font-bold rounded-full">{absentUsers.length}</span>
+              </div>
+              <div className="p-4 overflow-y-auto space-y-3 flex-1">
                 {absentUsers.length === 0 ? (
-                  <p className="text-xs text-gray-400">
-                    Everyone accounted for
-                  </p>
+                  <div className="h-full flex flex-col items-center justify-center opacity-40 italic text-xs">Zero absences</div>
                 ) : (
                   absentUsers.map((u) => (
-                    <div
-                      key={u._id}
-                      className="flex items-center justify-between text-sm"
-                    >
+                    <div key={u._id} className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
                       <div className="flex items-center gap-3">
                         <img
-                          src={
-                            u.profilePic ||
-                            `https://ui-avatars.com/api/?name=${u.name}`
-                          }
-                          onError={(e) =>
-                            (e.target.src = `https://ui-avatars.com/api/?name=${u.name}`)
-                          }
-                          className="w-10 h-10 rounded-full object-cover"
+                          src={u.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=f1f5f9&color=475569`}
+                          className="w-9 h-9 rounded-full object-cover grayscale"
                           alt={u.name}
                         />
-                        <p className="font-medium">{u.name}</p>
+                        <p className="text-sm font-bold text-slate-700">{u.name}</p>
                       </div>
-
-                      <Button
-                        variant="primary"
-                        className="text-xs mx-2"
+                      <button
                         onClick={() => {
                           setEmailUser(u);
                           setEmailTemplate({
                             subject: "Attendance Reminder",
-                            message: `Hi ${u.name}, you have not checked in today. Please update your attendance.`
+                            message: `Hi ${u.name}, our records show you haven't checked in for today (${todayDate}). Please update your status.`
                           });
                         }}
+                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                        title="Send Notification"
                       >
-                        Remind
-                      </Button>
+                        <Mail className="w-4 h-4" />
+                      </button>
                     </div>
                   ))
                 )}
@@ -291,21 +276,18 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* LEAVE ANALYTICS */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">
-            Leave Analytics
-          </h2>
-          <p className="text-sm text-gray-500 mb-4">
-            Insights into employee leave patterns
-          </p>
+        {/* ANALYTICS SECTION */}
+        <div className="pt-6 border-t border-slate-200">
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Leave Intelligence</h2>
+            <p className="text-slate-500 text-sm font-medium">Patterns and distribution of time-off requests.</p>
+          </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
-            <div className="xl:col-span-2">
+          <div className="grid grid-cols-5 gap-8">
+            <div className="col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-100">
               <LeaveStatusChart leaves={leaves} />
             </div>
-
-            <div className="xl:col-span-3">
+            <div className="col-span-3 bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-100">
               <LeaveTrendChart leaves={leaves} />
             </div>
           </div>

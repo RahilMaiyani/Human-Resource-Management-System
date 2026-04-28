@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Modal from "./ui/Modal";
-import Button from "./ui/Button";
+import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 export default function DecisionModal({
   isOpen,
@@ -15,7 +15,7 @@ export default function DecisionModal({
 
   const handleSubmit = () => {
     if (isReject && !comment.trim()) {
-      setError("Comment is required for rejection");
+      setError("Please provide a justification for this rejection.");
       return;
     }
 
@@ -24,42 +24,74 @@ export default function DecisionModal({
     setError("");
   };
 
+  if (!isOpen) return null;
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-105 max-w-full">
-        <h2 className="text-lg font-semibold mb-2 capitalize">
-          {type === "approved" ? "Approve Leave" : "Reject Leave"}
-        </h2>
+      <div className="w-full max-w-md">
+        
+        {/* HEADER */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className={`p-2 rounded-lg ${isReject ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
+            {isReject ? <XCircle className="w-6 h-6" /> : <CheckCircle2 className="w-6 h-6" />}
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight capitalize">
+              {type} Application
+            </h2>
+            <p className="text-sm text-slate-500 font-medium">
+              {isReject 
+                ? "State the reason for declining this request." 
+                : "Add an optional note for the employee."}
+            </p>
+          </div>
+        </div>
 
-        <p className="text-sm text-gray-500 mb-4">
-          {isReject
-            ? "Provide a reason for rejection"
-            : "Optional note for approval"}
-        </p>
+        {/* INPUT */}
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+              Administrator Comment
+            </label>
+            <textarea
+              value={comment}
+              onChange={(e) => {
+                setComment(e.target.value);
+                setError("");
+              }}
+              rows="4"
+              placeholder={isReject ? "Reason for rejection..." : "Notes (optional)..."}
+              className="w-full p-4 rounded-xl border border-slate-200 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all resize-none bg-slate-50/50 focus:bg-white"
+            />
+          </div>
 
-        <textarea
-          value={comment}
-          onChange={(e) => {
-            setComment(e.target.value);
-            setError("");
-          }}
-          rows="4"
-          placeholder="Enter comment..."
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        />
+          {error && (
+            <div className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-100 rounded-lg text-rose-600 text-[11px] font-bold uppercase tracking-tight">
+              <AlertCircle className="w-4 h-4" />
+              {error}
+            </div>
+          )}
+        </div>
 
-        {error && (
-          <p className="text-red-500 text-sm mt-1">{error}</p>
-        )}
-
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="secondary" onClick={onClose}>
+        {/* ACTIONS */}
+        <div className="flex justify-end gap-3 pt-6 mt-6 border-t border-slate-100">
+          <button
+            onClick={onClose}
+            className="px-6 h-11 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+          >
             Cancel
-          </Button>
+          </button>
 
-          <Button variant={isReject ? "danger" : "primary"} onClick={handleSubmit}>
-            {type === "approved" ? "Approve" : "Reject"}
-          </Button>
+          <button
+            onClick={handleSubmit}
+            className={`px-8 h-11 rounded-xl text-white text-sm font-bold shadow-lg transition-all active:scale-[0.98] ${
+              isReject 
+                ? "bg-rose-600 hover:bg-rose-700 shadow-rose-100" 
+                : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100"
+            }`}
+          >
+            Confirm {isReject ? "Rejection" : "Approval"}
+          </button>
         </div>
       </div>
     </Modal>

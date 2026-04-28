@@ -48,21 +48,31 @@ export const checkOut = async (req, res) => {
   }
 };
 
-
 export const todayAttendance = async (req, res) => {
   try {
     const today = new Date().toISOString().split("T")[0];
 
-    const data = await Attendance.find({ date: today }).populate(
-      "userId",
-      "-password"
-    );
+    const attendance = await Attendance.findOne({
+      userId: req.user.id,
+      date: today
+    });
 
-    res.json(data);
+    if (!attendance) {
+      return res.json({
+        checkIn: null,
+        checkOut: null
+      });
+    }
+
+    res.json({
+      checkIn: attendance.checkIn,
+      checkOut: attendance.checkout
+    });
   } catch (err) {
     res.status(500).json({ msg: "Error fetching attendance" });
   }
 };
+
 
 export const getAllAttendance = async (req, res) => {
   try {

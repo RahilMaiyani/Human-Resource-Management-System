@@ -5,10 +5,11 @@ import {
   LinearScale,
   PointElement,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 } from "chart.js";
-
 import { Line } from "react-chartjs-2";
+import { TrendingUp } from "lucide-react";
 
 ChartJS.register(
   LineElement,
@@ -16,7 +17,8 @@ ChartJS.register(
   LinearScale,
   PointElement,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 export default function AttendanceChart({ data }) {
@@ -28,13 +30,18 @@ export default function AttendanceChart({ data }) {
     ),
     datasets: [
       {
-        label: "Check-ins",
+        label: "Daily Check-ins",
         data: data.map((d) => d.count),
-        borderColor: "#6366f1",
-        backgroundColor: "rgba(99,102,241,0.2)",
-        tension: 0.3,
+        borderColor: "#4f46e5", // Indigo-600
+        backgroundColor: "rgba(79, 70, 229, 0.05)",
+        borderWidth: 3,
+        tension: 0.4,
         fill: true,
-        pointRadius: 4
+        pointBackgroundColor: "#ffffff",
+        pointBorderColor: "#4f46e5",
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
       }
     ]
   };
@@ -44,30 +51,64 @@ export default function AttendanceChart({ data }) {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: true,
+        display: false, // Cleaner for dashboard overview
+      },
+      tooltip: {
+        backgroundColor: "#1e293b", // Slate-800
+        padding: 12,
+        titleFont: { size: 12, weight: "bold" },
+        bodyFont: { size: 12 },
+        cornerRadius: 8,
+        displayColors: false,
       }
     },
     scales: {
+      x: {
+        grid: {
+          display: false, // Hide vertical lines for a modern look
+        },
+        ticks: {
+          color: "#94a3b8", // Slate-400
+          font: { size: 11, weight: "500" }
+        }
+      },
       y: {
         beginAtZero: true,
+        grid: {
+          color: "#f1f5f9", // Slate-100
+        },
         ticks: {
-          stepSize: 1
+          stepSize: 1,
+          color: "#94a3b8", // Slate-400
+          font: { size: 11 }
         }
       }
     }
   };
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow-sm border h-full">
-      <h2 className="text-sm font-semibold mb-3">
-        Last 7 Days Attendance
-      </h2>
+    <div className="bg-white p-6 rounded-xl h-full flex flex-col">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+            <TrendingUp className="w-4 h-4" />
+          </div>
+          <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+            Attendance Velocity
+          </h2>
+        </div>
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-1 rounded">
+          Last 7 Days
+        </span>
+      </div>
 
-      <div className="h-64">
+      <div className="flex-1 min-h-0">
         {data.length === 0 ? (
-          <p className="text-gray-400 text-sm">
-            No attendance data available
-          </p>
+          <div className="h-full flex items-center justify-center border-2 border-dashed border-slate-100 rounded-xl">
+            <p className="text-slate-400 text-xs font-medium italic">
+              Insufficient data for analysis
+            </p>
+          </div>
         ) : (
           <Line data={chartData} options={options} />
         )}

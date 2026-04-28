@@ -9,6 +9,7 @@ import {
   Filler
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import { TrendingUp, Calendar } from "lucide-react";
 
 ChartJS.register(
   LineElement,
@@ -23,12 +24,6 @@ ChartJS.register(
 function toDateKey(value) {
   if (!value) return "";
   return new Date(value).toISOString().slice(0, 10);
-}
-
-function isWeekend(dateStr) {
-  const date = new Date(`${dateStr}T00:00:00`);
-  const day = date.getDay();
-  return day === 0 || day === 6;
 }
 
 export default function LeaveTrendChart({ leaves = [] }) {
@@ -57,17 +52,18 @@ export default function LeaveTrendChart({ leaves = [] }) {
     ),
     datasets: [
       {
-        label: "Approved Leaves",
+        label: "Approved Requests",
         data: last7Days.map((date) => grouped[date] || 0),
-        borderColor: "#6366f1",
-        backgroundColor: "rgba(99,102,241,0.15)",
-        fill: true,
+        borderColor: "#4f46e5", // Indigo-600
+        backgroundColor: "rgba(79, 70, 229, 0.05)",
+        borderWidth: 3,
         tension: 0.4,
-        pointRadius: 3,
-        pointHoverRadius: 5,
-        pointBackgroundColor: "#6366f1",
-        pointBorderColor: "#ffffff",
-        pointBorderWidth: 2
+        fill: true,
+        pointBackgroundColor: "#ffffff",
+        pointBorderColor: "#4f46e5",
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
       }
     ]
   };
@@ -81,20 +77,15 @@ export default function LeaveTrendChart({ leaves = [] }) {
     },
     plugins: {
       legend: {
-        display: true,
-        position: "top",
-        labels: {
-          usePointStyle: true,
-          pointStyle: "line"
-        }
+        display: false // Cleaner desktop UI
       },
       tooltip: {
-        backgroundColor: "#111827",
-        titleColor: "#ffffff",
-        bodyColor: "#e5e7eb",
-        padding: 10,
+        backgroundColor: "#1e293b", // Slate-800
+        padding: 12,
+        titleFont: { size: 12, weight: "bold" },
+        bodyFont: { size: 12 },
         cornerRadius: 8,
-        displayColors: false
+        displayColors: false,
       }
     },
     scales: {
@@ -103,37 +94,52 @@ export default function LeaveTrendChart({ leaves = [] }) {
           display: false
         },
         ticks: {
-          color: "#6b7280"
+          color: "#94a3b8", // Slate-400
+          font: { size: 11, weight: "500" }
         }
       },
       y: {
         beginAtZero: true,
         grid: {
-          color: "#f3f4f6"
+          color: "#f1f5f9" // Slate-100
         },
         ticks: {
           stepSize: 1,
-          color: "#6b7280"
+          color: "#94a3b8", // Slate-400
+          font: { size: 11 }
         }
       }
     }
   };
 
   return (
-    <div className="bg-white p-5 rounded-xl shadow-sm border h-[320px] flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-gray-800">
-          Approved Leave Trend
-        </h2>
-        <span className="text-xs text-gray-400">Last 7 days</span>
+    <div className="bg-white p-6 rounded-xl h-90 flex flex-col transition-all hover:shadow-md">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+            <Calendar className="w-4 h-4" />
+          </div>
+          <h2 className="text-sm font-bold text-slate-800 uppercase tracking-widest">
+            Approval Velocity
+          </h2>
+        </div>
+        <div className="flex items-center gap-2 px-2.5 py-1 bg-slate-50 rounded-md border border-slate-100">
+          <TrendingUp className="w-3 h-3 text-slate-400" />
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+            Last 7 Days
+          </span>
+        </div>
       </div>
 
       <div className="flex-1 min-h-0">
         {approvedLeaves.length === 0 ? (
-          <div className="h-full flex items-center justify-center">
-            <p className="text-gray-400 text-sm">
-              No approved leave data available
-            </p>
+          <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-slate-100 rounded-xl space-y-2">
+             <div className="p-2 bg-slate-50 rounded-full">
+                <Calendar className="w-5 h-5 text-slate-200" />
+             </div>
+             <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">
+               No Approval Data
+             </p>
           </div>
         ) : (
           <Line data={chartData} options={options} />

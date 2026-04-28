@@ -3,14 +3,16 @@ export default function Modal({ isOpen, onClose, children }) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center z-50 h-screen"
+      className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-50 p-4 h-full"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-lg p-6 w-96"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {children}
+        <div className="p-8 max-h-[90vh] overflow-y-auto custom-scrollbar">
+          {children}
+        </div>
       </div>
     </div>
   );

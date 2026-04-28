@@ -2,211 +2,142 @@ import { useForm } from "react-hook-form";
 import { useEffect, useRef, useState } from "react";
 import Modal from "./ui/Modal";
 import Button from "./ui/Button";
-import { useUpdateUser } from "../hooks/useUsers";
+import { useCreateUser, useUpdateUser } from "../hooks/useUsers";
+import { Camera, X, User } from "lucide-react";
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"];
 
-export default function EmployeeProfileModal({ isOpen, onClose, user }) {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors }
-  } = useForm();
-
+export default function UserModal({ isOpen, onClose, editUser }) {
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
   const [preview, setPreview] = useState("");
   const [imageError, setImageError] = useState("");
   const [apiError, setApiError] = useState("");
-
   const fileRef = useRef(null);
+
+  const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
 
   useEffect(() => {
-    if (!isOpen || !user) return;
-
-    reset({
-      name: user.name || "",
-      email: user.email || "",
-      password: ""
-    });
-
-    setPreview(user.profilePic || "");
+    if (!isOpen) return;
+    if (editUser) {
+      reset({
+        name: editUser.name || "",
+        email: editUser.email || "",
+        department: editUser.department || "",
+        role: editUser.role || "employee"
+      });
+      setPreview(editUser.profilePic || "");
+    } else {
+      reset({ name: "", email: "", password: "", department: "", role: "employee" });
+      setPreview("");
+    }
     setImageError("");
     setApiError("");
-
-    if (fileRef.current) fileRef.current.value = "";
-  }, [isOpen, user, reset]);
+  }, [editUser, isOpen, reset]);
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setImageError("Only JPG or PNG allowed");
-      setPreview("");
+      setImageError("Format must be JPG or PNG");
       return;
     }
-
     if (file.size > MAX_IMAGE_SIZE) {
-      setImageError("Max size 2MB");
-      setPreview("");
+      setImageError("Image size exceeds 2MB");
       return;
     }
-
     setImageError("");
-
     const reader = new FileReader();
     reader.onloadend = () => setPreview(reader.result);
     reader.readAsDataURL(file);
   };
 
-  const removeImage = () => {
-    setPreview("");
-    if (fileRef.current) fileRef.current.value = "";
-  };
-
   const onSubmit = (data) => {
     setApiError("");
-
-    if (imageError) return;
-
-    const payload = {
-      name: data.name,
-      profilePic: preview
-    };
-
-    if (data.password) {
-      payload.password = data.password;
-    }
-
-    updateMutation.mutate(
-      { id: user._id, data: payload },
-      {
-        onSuccess: onClose,
-        onError: (err) =>
-          setApiError(err?.response?.data?.msg || "Update failed")
-      }
+    data.profilePic = preview || "";
+    const mutation = editUser ? updateMutation : createMutation;
+    mutation.mutate(
+      editUser ? { id: editUser._id, data } : data,
+      { onSuccess: onClose, onError: (err) => setApiError(err?.response?.data?.msg || "Action failed") }
     );
   };
 
-  if (!isOpen) return null;
-
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-full max-w-md">
-        <div className="mb-5">
-          <h2 className="text-xl font-semibold">Edit Profile</h2>
-          <p className="text-sm text-gray-500">
-            Update your personal information
-          </p>
-        </div>
+      <div className="mb-8">
+        <h2 className="text-xl font-bold text-slate-900">{editUser ? "Update Employee" : "Register New Employee"}</h2>
+        <p className="text-sm text-slate-500 mt-1 font-medium text-pretty">Provide the employee details and system access level.</p>
+      </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-
-          {/* IMAGE */}
-          <div className="flex flex-col items-center gap-3">
-            <div className="relative">
-              <img
-                src={preview || "https://ui-avatars.com/api/?name=User"}
-                className="w-24 h-24 rounded-full object-cover border"
-              />
-
-              <label className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center cursor-pointer">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                >
-                  <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293z" />
-                </svg>
-                
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png"
-                  ref={fileRef}
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-              </label>
-
-              {preview && (
-                <button
-                  type="button"
-                  onClick={removeImage}
-                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full"
-                >
-                  ×
-                </button>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* IMAGE UPLOAD */}
+        <div className="flex flex-col items-center">
+          <div className="relative group">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-slate-100 shadow-sm bg-slate-50">
+              {preview ? (
+                <img src={preview} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-slate-300">
+                  <User className="w-10 h-10" />
+                </div>
               )}
             </div>
-
-            <p className="text-xs text-gray-400">JPG/PNG • Max 2MB</p>
-            {imageError && (
-              <p className="text-red-500 text-xs">{imageError}</p>
-            )}
-          </div>
-
-          {/* NAME */}
-          <div>
-            <label className="text-sm font-medium">Full Name</label>
-            <input
-              {...register("name", { required: "Required" })}
-              className="w-full h-11 mt-1 px-3 border rounded-lg"
-            />
-            {errors.name && (
-              <p className="text-red-500 text-xs">{errors.name.message}</p>
-            )}
-          </div>
-
-          {/* EMAIL (READ ONLY) */}
-          <div>
-            <label className="text-sm font-medium">Email</label>
-            <input
-              {...register("email")}
-              disabled
-              className="w-full h-11 mt-1 px-3 border rounded-lg bg-gray-100"
-            />
-          </div>
-
-          {/* PASSWORD */}
-          <div>
-            <label className="text-sm font-medium">
-              New Password (optional)
+            <label className="absolute bottom-0 right-0 w-8 h-8 bg-indigo-600 rounded-full border-2 border-white flex items-center justify-center cursor-pointer shadow-md hover:bg-indigo-700 transition-colors">
+              <Camera className="w-4 h-4 text-white" />
+              <input type="file" ref={fileRef} onChange={handleImageChange} className="hidden" accept="image/*" />
             </label>
-            <input
-              type="password"
-              {...register("password", {
-                minLength: {
-                  value: 6,
-                  message: "Min 6 characters"
-                }
-              })}
-              className="w-full h-11 mt-1 px-3 border rounded-lg"
-            />
-            {errors.password && (
-              <p className="text-red-500 text-xs">
-                {errors.password.message}
-              </p>
+            {preview && (
+              <button type="button" onClick={() => setPreview("")} className="absolute -top-1 -right-1 bg-white border border-slate-200 rounded-full p-1 shadow-sm text-slate-400 hover:text-rose-500">
+                <X className="w-3.5 h-3.5" />
+              </button>
             )}
           </div>
+          {imageError && <p className="text-rose-500 text-[10px] font-bold uppercase mt-2 tracking-tighter">{imageError}</p>}
+        </div>
 
-          {apiError && (
-            <p className="text-sm text-red-500">{apiError}</p>
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
+            <input {...register("name", { required: "Name is required" })} className="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all" />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+            <input {...register("email", { required: "Email is required" })} className="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all" />
+          </div>
+
+          {!editUser && (
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Account Password</label>
+              <input type="password" {...register("password", { required: "Password required" })} className="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all" />
+            </div>
           )}
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button variant="secondary" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit">
-              {updateMutation.isPending ? "Saving..." : "Save Changes"}
-            </Button>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Department</label>
+              <input {...register("department", { required: "Required" })} className="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">System Role</label>
+              <select {...register("role")} className="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium bg-white focus:border-indigo-500 outline-none">
+                <option value="employee">Employee</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </div>
           </div>
-        </form>
-      </div>
+        </div>
+
+        {apiError && <div className="p-3 bg-rose-50 border border-rose-100 rounded-lg text-rose-600 text-xs font-bold text-center">{apiError}</div>}
+
+        <div className="flex gap-3 pt-6 border-t border-slate-100">
+          <button type="button" onClick={onClose} className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors">Cancel</button>
+          <button type="submit" className="flex-1 h-11 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-100">
+            {editUser ? "Update Account" : "Create Account"}
+          </button>
+        </div>
+      </form>
     </Modal>
   );
 }
