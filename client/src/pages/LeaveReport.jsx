@@ -209,7 +209,7 @@ export default function LeaveReports() {
                         />
                         <div className="flex flex-col">
                           <span className="font-bold text-slate-800 tracking-tight">{leave.userId?.name}</span>
-                          <span className="text-[10px] text-slate-400 font-medium uppercase">{leave.userId?.email}</span>
+                          <span className="text-[10px] text-slate-400 font-medium">{leave.userId?.email}</span>
                         </div>
                       </div>
                     </td>

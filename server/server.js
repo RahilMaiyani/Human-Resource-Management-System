@@ -8,6 +8,7 @@ import attendanceRoutes from "./routes/attendanceRoutes.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 import leaveRoutes from "./routes/leaveRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
+import { apiLimiter } from "./middleware/rateLimiter.js";
 
 dotenv.config();
 connectDB();
@@ -18,7 +19,7 @@ app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-app.use(errorMiddleware);
+app.use("/api", apiLimiter);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -29,6 +30,8 @@ app.use("/api/email", emailRoutes);
 app.get("/", (req, res) => {
     res.send("OfficeLink API Running");
 });
+
+app.use(errorMiddleware);
 
 app.listen(process.env.PORT, () => {
     console.log(`Server running on port : ${process.env.PORT}`);
