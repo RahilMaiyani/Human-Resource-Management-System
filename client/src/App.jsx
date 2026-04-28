@@ -11,6 +11,7 @@ import Users from "./pages/Users";
 import MyLeaves from "./pages/MyLeaves";
 import AdminLeaves from "./pages/AdminLeaves";
 import LeaveReports from "./pages/LeaveReport";
+import AttendanceHistory from "./pages/AttendanceHistory";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PageLoader from "./components/PageLoader";
 import NotFound from "./NotFound";
@@ -35,7 +36,7 @@ function OfflineBanner() {
   if (!isOffline) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] animate-in slide-in-from-bottom-10 duration-300">
+    <div className="fixed bottom-6 right-6 z-9999 animate-in slide-in-from-bottom-10 duration-300">
       <div className="bg-slate-900 border border-slate-700 text-white px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-4">
         <div className="flex items-center justify-center w-10 h-10 bg-rose-500/20 rounded-xl">
           <WifiOff className="w-5 h-5 text-rose-500 animate-pulse" />
@@ -85,59 +86,16 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Login />} />
 
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <Admin />
-                </ProtectedRoute>
-              }
-            />
+            {/* ADMIN ROUTES */}
+            <Route path="/admin" element={<ProtectedRoute role="admin"><Admin /></ProtectedRoute>} />
+            <Route path="/users" element={<ProtectedRoute role="admin"><Users /></ProtectedRoute>} />
+            <Route path="/admin/leaves" element={<ProtectedRoute role="admin"><AdminLeaves /></ProtectedRoute>} />
+            <Route path="/admin/reports" element={<ProtectedRoute role="admin"><LeaveReports /></ProtectedRoute>} />
 
-            <Route
-              path="/employee"
-              element={
-                <ProtectedRoute>
-                  <Employee />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/users"
-              element={
-                <ProtectedRoute>
-                  <Users />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route 
-              path="/employee/leaves"
-              element={
-                <ProtectedRoute>
-                  <MyLeaves />
-                </ProtectedRoute>
-              } 
-            />
-
-            <Route 
-              path="/admin/leaves"
-              element={
-                <ProtectedRoute>
-                  <AdminLeaves />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route 
-              path="/admin/reports"
-              element={
-                <ProtectedRoute>
-                  <LeaveReports />
-                </ProtectedRoute>
-              }
-            />
+            {/* EMPLOYEE ROUTES - Flat structure, no nesting */}
+            <Route path="/employee" element={<ProtectedRoute role="employee"><Employee /></ProtectedRoute>} />
+            <Route path="/employee/leaves" element={<ProtectedRoute role="employee"><MyLeaves /></ProtectedRoute>} />
+            <Route path="/employee/attendance" element={<ProtectedRoute role="employee"><AttendanceHistory /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -102,3 +102,75 @@ export const getUserAttendance = async (req, res) => {
     res.status(500).json({ msg: "Error fetching attendance" });
   }
 };
+
+export const getAttendanceFilters = async (req, res) => {
+  try {
+    if (!req.user?.id) return res.status(401).json({ msg: "Unauthorized" });
+
+    const filters = await Attendance.aggregate([
+      { 
+        $match: { 
+          userId: new mongoose.Types.ObjectId(req.user.id),
+          date: { $ne: null, $ne: "" } 
+        } 
+      },
+      {
+        $addFields: {
+          validDate: { $toDate: "$date" }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$validDate" },
+            month: { $month: "$validDate" }
+          }
+        }
+      },
+      { $sort: { "_id.year": -1, "_id.month": -1 } }
+    ]);
+
+    res.json(filters);
+  } catch (err) {
+    console.error("Filter Fetch Error:", err);
+    res.status(500).json({ msg: "Server error fetching filters" });
+  }
+};
+
+export const getMyAttendance = async (req, res) => {
+  try {
+    const { month, year, page = 1 } = req.query;
+    const limit = 31; 
+    const skip = (page - 1) * limit;
+
+    let query = { userId: req.user.id };
+
+    if (month && year) {
+      
+      const formattedMonth = month.toString().padStart(2, '0');
+      const startStr = `${year}-${formattedMonth}-01`;
+      const endStr = `${year}-${formattedMonth}-31T23:59:59`;
+
+      query.date = { $gte: startStr, $lte: endStr };
+    }
+
+    const logs = await Attendance.find(query)
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Attendance.countDocuments(query);
+
+    res.json({
+      logs,
+      pagination: { 
+        total, 
+        page: parseInt(page), 
+        pages: Math.ceil(total / limit) 
+      }
+    });
+  } catch (err) {
+    console.error("Attendance Fetch Error:", err);
+    res.status(500).json({ msg: "Server error fetching attendance" });
+  }
+};

@@ -4,7 +4,9 @@ import {
   checkOut,
   todayAttendance,
   getAllAttendance,
-  getUserAttendance
+  getUserAttendance,
+  getMyAttendance,
+  getAttendanceFilters
 } from "../controllers/attendanceController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -16,5 +18,7 @@ router.get("/today", protect, todayAttendance);
 router.get("/all", protect, getAllAttendance);
 router.get("/user/:userId", protect, getUserAttendance);
 
+router.get("/filters", protect, getAttendanceFilters);
+router.get("/me", protect, getMyAttendance);
 
 export default router;

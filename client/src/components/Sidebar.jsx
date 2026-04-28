@@ -6,7 +6,8 @@ import {
   ClipboardList, 
   FileStack, 
   CalendarDays,
-  ShieldCheck
+  ShieldCheck,
+  DoorOpen
 } from "lucide-react";
 
 export default function Sidebar({ user }) {
@@ -99,8 +100,16 @@ export default function Sidebar({ user }) {
               to="/employee/leaves"
               className={`${baseClass} ${isActive("/employee/leaves") ? activeClass : inactiveClass}`}
             >
-              <CalendarDays className="w-5 h-5" />
+              <DoorOpen className="w-5 h-5" />
               My Leaves
+            </Link>
+
+            <Link
+              to="/employee/attendance"
+              className={`${baseClass} ${isActive("/employee/attendance") ? activeClass : inactiveClass}`}
+            >
+              <CalendarDays className="w-5 h-5" />
+              Attendance
             </Link>
           </>
         )}
