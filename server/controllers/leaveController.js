@@ -111,70 +111,51 @@ export const updateLeaveStatus = async (req, res) => {
     const user = await User.findById(leave.userId);
 
     if (user) {
-      const statusColor =
-        status === "approved"
-          ? "#16a34a"
-          : status === "rejected"
-          ? "#dc2626"
-          : "#f59e0b";
+      
+      const statusColor = 
+        status === "approved" ? "#10b981" : 
+        status === "rejected" ? "#f43f5e" : "#f59e0b";
 
       const html = buildEmailTemplate({
-        title: `Leave ${status.toUpperCase()}`,
+        title: "Leave Application Update",
         color: statusColor,
         message: `
-          <p style="margin:0 0 16px 0;">
-            Hello <b>${user.name}</b>,
-          </p>
-
-          <p style="margin:0 0 18px 0;font-size:15px;">
-            Your leave request has been 
-            <span style="
-              background:${statusColor}15;
-              color:${statusColor};
-              padding:4px 10px;
-              border-radius:6px;
-              font-weight:600;
-              text-transform:capitalize;
-            ">
+          <p style="margin-bottom:24px;">Hello <b>${user.name}</b>,</p>
+          
+          <p style="margin-bottom:32px;">Your leave request status has been updated to:</p>
+          
+          <div style="text-align:center; margin-bottom:32px;">
+            <span style="background-color:${statusColor}; color:#ffffff; padding:10px 24px; border-radius:50px; font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:0.05em;">
               ${status}
             </span>
-          </p>
-
-          <div style="
-            background:#f9fafb;
-            border:1px solid #e5e7eb;
-            border-radius:10px;
-            padding:18px;
-            margin-bottom:20px;
-          ">
-            <p style="margin:6px 0;"><b>Leave Type:</b> ${leave.type}</p>
-            <p style="margin:6px 0;"><b>From:</b> ${leave.fromDate.toISOString().slice(0, 10)}</p>
-            <p style="margin:6px 0;"><b>To:</b> ${leave.toDate.toISOString().slice(0, 10)}</p>
           </div>
 
-          ${
-            adminComment
-              ? `
-              <div style="
-                background:#fff7ed;
-                border:1px solid #fed7aa;
-                border-radius:10px;
-                padding:16px;
-                margin-bottom:20px;
-              ">
-                <p style="margin:0 0 6px 0;font-weight:600;color:#9a3412;">
-                  Admin Comment
-                </p>
-                <p style="margin:0;color:#7c2d12;">
-                  ${adminComment}
-                </p>
-              </div>
-            `
-              : ""
-          }
+          <div style="background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:24px; margin-bottom:24px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding-bottom:12px; font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase;">Leave Type</td>
+                <td style="padding-bottom:12px; font-size:14px; color:#1e293b; font-weight:600; text-align:right;">${leave.type}</td>
+              </tr>
+              <tr>
+                <td style="padding-bottom:12px; font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase;">From Date</td>
+                <td style="padding-bottom:12px; font-size:14px; color:#1e293b; font-weight:600; text-align:right;">${leave.fromDate.toISOString().slice(0, 10)}</td>
+              </tr>
+              <tr>
+                <td style="font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase;">To Date</td>
+                <td style="font-size:14px; color:#1e293b; font-weight:600; text-align:right;">${leave.toDate.toISOString().slice(0, 10)}</td>
+              </tr>
+            </table>
+          </div>
 
-          <p style="font-size:14px;color:#6b7280;margin-top:10px;">
-            If you have any questions, feel free to reach out to HR.
+          ${adminComment ? `
+            <div style="border-left:4px solid #e2e8f0; padding-left:20px; margin:24px 0;">
+              <p style="margin:0 0 4px 0; font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase;">Administrator Comment</p>
+              <p style="margin:0; font-style:italic; color:#475569;">"${adminComment}"</p>
+            </div>
+          ` : ""}
+
+          <p style="font-size:13px; color:#94a3b8; margin-top:32px; text-align:center;">
+            Please login to the OfficeLink dashboard for more details.
           </p>
         `
       });

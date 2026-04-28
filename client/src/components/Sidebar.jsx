@@ -68,7 +68,7 @@ export default function Sidebar({ user }) {
               <ClipboardList className="w-5 h-5" />
               <span className="flex-1">Management</span>
               {pendingCount > 0 && (
-                <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-black bg-rose-500 text-white rounded-full ring-4 ring-slate-950">
+                <span className="flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-black bg-rose-500 text-white rounded-full ring-4 ring-slate-950">
                   {pendingCount}
                 </span>
               )}
@@ -109,9 +109,11 @@ export default function Sidebar({ user }) {
       {/* USER CONTEXT FOOTER */}
       <div className="p-4 border-t border-slate-900 bg-slate-900/30">
         <div className="flex items-center gap-3 px-2">
-          <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-indigo-400">
-            {user?.name?.charAt(0)}
-          </div>
+          <img
+            src={user?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name)}&background=f1f5f9&color=475569`}
+            className="w-9 h-9 rounded-full object-cover border border-slate-100 shadow-sm transition-transform group-hover:scale-105"
+            alt={user?.name}
+          />
           <div className="flex flex-col truncate">
             <span className="text-xs font-bold text-slate-200 truncate">{user?.name}</span>
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">{user?.role}</span>

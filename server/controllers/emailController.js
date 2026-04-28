@@ -13,18 +13,16 @@ export const sendCustomEmail = async (req, res) => {
       title: subject,
       color: "#4f46e5",
       message: `
-        <p style="margin:0 0 16px 0;">
-          Hello,
-        </p>
+        <p style="margin-bottom:24px; font-size:16px; color:#0f172a;"><b>Important Update</b></p>
+        
+        <div style="color:#475569; font-size:15px; line-height:1.7;">
+          ${message.replace(/\n/g, '<br/>')}
+        </div>
 
-        <p style="margin:0 0 16px 0;">
-          ${message}
-        </p>
-
-        <p style="margin-top:20px;">
-          Regards,<br/>
-          HR Team
-        </p>
+        <div style="margin-top:40px; padding-top:24px; border-top:1px solid #f1f5f9; color:#94a3b8; font-size:13px;">
+          Best regards,<br/>
+          <b style="color:#475569;">Human Resources Team</b>
+        </div>
       `
     });
 

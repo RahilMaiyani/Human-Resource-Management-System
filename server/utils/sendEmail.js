@@ -3,9 +3,6 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// -----------------------------
-// TRANSPORTER CONFIG
-// -----------------------------
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -13,7 +10,6 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS
   }
 });
-
 
 transporter.verify((error) => {
   if (error) {

@@ -90,18 +90,18 @@ export default function UserModal({ isOpen, onClose, editUser }) {
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="w-full max-w-md">
         {/* HEADER */}
-        <div className="mb-8">
+        <div className="mb-5">
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">
             {editUser ? "Update Identity" : "New Registration"}
           </h2>
-          <p className="text-sm text-slate-500 mt-1 font-medium">
+          {/* <p className="text-sm text-slate-500 mt-1 font-medium">
             Configure employee profile and system credentials.
-          </p>
+          </p> */}
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* PHOTO UPLOADER */}
-          <div className="flex flex-col items-center gap-3 pb-2">
+          <div className="flex flex-col items-center gap-3">
             <div className="relative group">
               <div className="w-24 h-24 rounded-full border-2 border-slate-100 shadow-sm bg-slate-50 overflow-hidden flex items-center justify-center">
                 {preview ? (
@@ -132,9 +132,9 @@ export default function UserModal({ isOpen, onClose, editUser }) {
                 </button>
               )}
             </div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            {/* <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               ID Photo • Max 2MB
-            </p>
+            </p> */}
             {imageError && (
               <p className="text-rose-500 text-[10px] font-bold uppercase tracking-tighter">
                 {imageError}
@@ -232,7 +232,7 @@ export default function UserModal({ isOpen, onClose, editUser }) {
           )}
 
           {/* ACTIONS */}
-          <div className="flex gap-3 pt-6 border-t border-slate-100">
+          <div className="flex gap-3 pt-4 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
