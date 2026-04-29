@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import UserModal from "../components/UserModal";
 import PageLoader from "../components/PageLoader";
-import Button from "../components/ui/Button";
 import DeleteModal from "../components/DeleteModal";
 import UserDetailsModal from "../components/UserDetailsModal";
 import { 
@@ -14,7 +13,6 @@ import {
   Edit3, 
   ChevronLeft, 
   ChevronRight, 
-  UserPlus,
   Mail,
   Briefcase
 } from "lucide-react";

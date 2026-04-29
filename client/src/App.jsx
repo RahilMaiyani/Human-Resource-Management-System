@@ -3,7 +3,6 @@ import { useState, useEffect, Suspense } from "react";
 import { Toaster } from 'react-hot-toast';
 import { WifiOff } from "lucide-react";
 
-// Pages & Components
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import Employee from "./pages/Employee";
@@ -16,7 +15,6 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import PageLoader from "./components/PageLoader";
 import NotFound from "./NotFound";
 
-// Internal Offline Overlay Component
 function OfflineBanner() {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
@@ -92,7 +90,7 @@ export default function App() {
             <Route path="/admin/leaves" element={<ProtectedRoute role="admin"><AdminLeaves /></ProtectedRoute>} />
             <Route path="/admin/reports" element={<ProtectedRoute role="admin"><LeaveReports /></ProtectedRoute>} />
 
-            {/* EMPLOYEE ROUTES - Flat structure, no nesting */}
+            {/* EMPLOYEE ROUTES */}
             <Route path="/employee" element={<ProtectedRoute role="employee"><Employee /></ProtectedRoute>} />
             <Route path="/employee/leaves" element={<ProtectedRoute role="employee"><MyLeaves /></ProtectedRoute>} />
             <Route path="/employee/attendance" element={<ProtectedRoute role="employee"><AttendanceHistory /></ProtectedRoute>} />

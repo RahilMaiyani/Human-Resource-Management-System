@@ -1,7 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useEffect, useRef, useState } from "react";
 import Modal from "./ui/Modal";
-import Button from "./ui/Button";
 import { useCreateUser, useUpdateUser } from "../hooks/useUsers";
 import { Camera, X, User, Mail, Shield, Briefcase, Lock } from "lucide-react";
 

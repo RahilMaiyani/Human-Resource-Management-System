@@ -7,8 +7,7 @@ import PageLoader from "../components/PageLoader";
 import { 
   Plus, 
   ChevronLeft, 
-  ChevronRight, 
-  Calendar, 
+  ChevronRight,
   MessageSquare, 
   FileText,
   Clock

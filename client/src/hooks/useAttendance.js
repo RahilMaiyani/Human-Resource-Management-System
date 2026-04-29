@@ -44,7 +44,7 @@ export const useAttendanceHistory = (selectedMonth, selectedYear, page) => {
     queryKey: ["my-attendance", selectedMonth, selectedYear, page],
     queryFn: () => getAttendanceHistory(selectedMonth, selectedYear, page),
     keepPreviousData: true,
-    enabled: !!selectedMonth && !!selectedYear // Only fetch when filters are ready
+    enabled: !!selectedMonth && !!selectedYear 
   });
 };
 

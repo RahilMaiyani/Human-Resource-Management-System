@@ -13,14 +13,11 @@ import toast from "react-hot-toast";
 
 import {
   Clock,
-  User,
   CheckCircle,
-  Calendar,
   LogOut,
   LogIn,
   Briefcase,
   Mail,
-  Timer,
   AlertCircle
 } from "lucide-react";
 

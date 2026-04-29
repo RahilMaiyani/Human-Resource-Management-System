@@ -28,9 +28,9 @@ export default function LeaveStatusChart({ leaves = [] }) {
       {
         data: [counts.approved, counts.pending, counts.rejected],
         backgroundColor: [
-          "#10b981", // Emerald-500
-          "#f59e0b", // Amber-500
-          "#f43f5e"  // Rose-500
+          "#10b981", 
+          "#f59e0b", 
+          "#f43f5e"
         ],
         hoverBackgroundColor: [
           "#059669", 
@@ -47,7 +47,7 @@ export default function LeaveStatusChart({ leaves = [] }) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: "75%", // Thinner doughnut for a more sophisticated look
+    cutout: "75%", 
     plugins: {
       legend: {
         position: "bottom",
@@ -60,11 +60,11 @@ export default function LeaveStatusChart({ leaves = [] }) {
             weight: "600",
             family: "'Inter', sans-serif"
           },
-          color: "#64748b" // Slate-500
+          color: "#64748b"
         }
       },
       tooltip: {
-        backgroundColor: "#1e293b", // Slate-800
+        backgroundColor: "#1e293b", 
         padding: 12,
         titleFont: { size: 12, weight: "bold" },
         bodyFont: { size: 12 },

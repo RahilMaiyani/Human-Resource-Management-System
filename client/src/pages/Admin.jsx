@@ -15,11 +15,9 @@ import { useAllLeaves } from "../hooks/useLeaves";
 import { useAllAttendance } from "../hooks/useAttendance";
 
 import { 
-  Users, 
-  Clock, 
+  Users,
   BarChart3, 
-  CalendarCheck, 
-  UserMinus, 
+  CalendarCheck,
   Mail,
   ArrowUpRight,
   RefreshCw
@@ -54,14 +52,11 @@ export default function Admin() {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     
-    // Refresh TanStack Query data (Users & Leaves)
     await Promise.all([
       queryClient.invalidateQueries(["users"]),
       queryClient.invalidateQueries(["leaves"]),
-      fetchAttendance() // Refresh the manual state attendance
+      fetchAttendance() 
     ]);
-
-    // Small delay for visual feedback
     setTimeout(() => setIsRefreshing(false), 600);
   };
 

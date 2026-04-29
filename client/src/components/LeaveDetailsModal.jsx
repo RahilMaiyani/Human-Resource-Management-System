@@ -1,5 +1,4 @@
-import Button from "./ui/Button";
-import { X, Calendar, FileText, MessageSquare, Info, User, ArrowRight } from "lucide-react";
+import { X, Calendar, FileText, MessageSquare, Info, ArrowRight } from "lucide-react";
 
 export default function LeaveDetailsModal({ leave, onClose }) {
   if (!leave) return null;

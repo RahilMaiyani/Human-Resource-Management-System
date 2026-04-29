@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Modal from "./ui/Modal";
 import EmailModal from "./EmailModal";
 import { Mail, Briefcase, Shield, Clock, LogIn, LogOut, Calendar } from "lucide-react";

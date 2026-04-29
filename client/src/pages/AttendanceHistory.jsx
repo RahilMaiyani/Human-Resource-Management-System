@@ -4,10 +4,7 @@ import PageLoader from "../components/PageLoader";
 import { 
   ChevronLeft, 
   ChevronRight, 
-  Calendar, 
-  FileText,
-  Clock,
-  AlertCircle
+  Calendar,
 } from "lucide-react";
 import { useAttendanceHistory, useFilterAttendance } from "../hooks/useAttendance";
 
@@ -16,11 +13,8 @@ export default function AttendanceHistory() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [page, setPage] = useState(1);
 
-  // 1. Fetch Dynamic Filters (Years/Months that actually have data)
   const { data: filterData } = useFilterAttendance();
 
-
-  // 2. Auto-set filters to the most recent record on first load
   useEffect(() => {
     if (filterData && filterData.length > 0) {
       setSelectedYear(filterData[0]._id.year);
@@ -28,14 +22,12 @@ export default function AttendanceHistory() {
     }
   }, [filterData]);
 
-  // 3. Fetch Logs based on selected filters
   const { data, isLoading, isFetching } = useAttendanceHistory(selectedMonth, selectedYear, page);
 
   if (isLoading) return <PageLoader />; 
 
   const { logs = [], pagination = {} } = data || {};
 
-  // Professional AM/PM Formatter
   const formatTime = (timeStr) => {
     if (!timeStr) return "--:--";
     const date = new Date(timeStr);

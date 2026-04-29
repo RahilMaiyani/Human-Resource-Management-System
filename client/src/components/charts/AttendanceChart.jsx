@@ -51,10 +51,10 @@ export default function AttendanceChart({ data }) {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: false, // Cleaner for dashboard overview
+        display: false, 
       },
       tooltip: {
-        backgroundColor: "#1e293b", // Slate-800
+        backgroundColor: "#1e293b",
         padding: 12,
         titleFont: { size: 12, weight: "bold" },
         bodyFont: { size: 12 },
@@ -65,21 +65,21 @@ export default function AttendanceChart({ data }) {
     scales: {
       x: {
         grid: {
-          display: false, // Hide vertical lines for a modern look
+          display: false,
         },
         ticks: {
-          color: "#94a3b8", // Slate-400
+          color: "#94a3b8", 
           font: { size: 11, weight: "500" }
         }
       },
       y: {
         beginAtZero: true,
         grid: {
-          color: "#f1f5f9", // Slate-100
+          color: "#f1f5f9",
         },
         ticks: {
           stepSize: 1,
-          color: "#94a3b8", // Slate-400
+          color: "#94a3b8", 
           font: { size: 11 }
         }
       }

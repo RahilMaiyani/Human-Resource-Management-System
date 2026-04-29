@@ -1,7 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import Modal from "./ui/Modal";
-import Button from "./ui/Button";
 import { useApplyLeave } from "../hooks/useLeaves";
 import { Calendar, AlertCircle } from "lucide-react";
 

@@ -3,7 +3,6 @@ import { useAllLeaves } from "../hooks/useLeaves";
 import { useUsers } from "../hooks/useUsers";
 import { useState, useMemo, useEffect } from "react";
 import LeaveDetailsModal from "../components/LeaveDetailsModal";
-import Button from "../components/ui/Button";
 import { 
   Search, 
   Filter, 
@@ -13,7 +12,6 @@ import {
   ChevronLeft, 
   ChevronRight,
   FileText,
-  Clock
 } from "lucide-react";
 
 export default function LeaveReports() {
