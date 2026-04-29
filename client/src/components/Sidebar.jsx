@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { usePendingLeavesCount } from "../hooks/useLeaveNotifications";
+import { usePendingLeavesCount } from "../hooks/useLeaves";
 import { 
   LayoutDashboard, 
   Users, 

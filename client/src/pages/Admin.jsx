@@ -1,8 +1,8 @@
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useUsers } from "../hooks/useUsers";
 import { useEffect, useState } from "react";
-import API from "../api/axios";
 import PageLoader from "../components/PageLoader";
+import { useQueryClient } from "@tanstack/react-query";
 
 import AttendanceChart from "../components/charts/AttendanceChart";
 import LeaveStatusChart from "../components/charts/LeaveStatusChart";
@@ -12,7 +12,8 @@ import EmailModal from "../components/EmailModal";
 import HoverItem from "../components/HoverItem";
 
 import { useAllLeaves } from "../hooks/useLeaves";
-import Button from "../components/ui/Button";
+import { useAllAttendance } from "../hooks/useAttendance";
+
 import { 
   Users, 
   Clock, 
@@ -20,28 +21,49 @@ import {
   CalendarCheck, 
   UserMinus, 
   Mail,
-  ArrowUpRight
+  ArrowUpRight,
+  RefreshCw
 } from "lucide-react";
 
 export default function Admin() {
+  const queryClient = useQueryClient();
   const { data: users = [], isLoading } = useUsers();
   const { data: leaves = [] } = useAllLeaves();
   const [attendance, setAttendance] = useState([]);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const [emailUser, setEmailUser] = useState(null);
   const [emailTemplate, setEmailTemplate] = useState(null);
 
-  useEffect(() => {
-    const fetchAttendance = async () => {
+  const { data : allAttendance, isPending, isError} = useAllAttendance();
+
+  const fetchAttendance = async () => {
       try {
-        const res = await API.get("/attendance/all");
-        setAttendance(res.data);
+        setAttendance(allAttendance);
+        
       } catch (err) {
         console.error("Attendance fetch error:", err);
       }
     };
+
+  useEffect(() => {
     fetchAttendance();
-  }, []);
+  }, [allAttendance, isPending, isError]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    
+    // Refresh TanStack Query data (Users & Leaves)
+    await Promise.all([
+      queryClient.invalidateQueries(["users"]),
+      queryClient.invalidateQueries(["leaves"]),
+      fetchAttendance() // Refresh the manual state attendance
+    ]);
+
+    // Small delay for visual feedback
+    setTimeout(() => setIsRefreshing(false), 600);
+  };
 
   if (isLoading) return <PageLoader />;
 
@@ -171,6 +193,15 @@ export default function Admin() {
             <Users className="w-5 h-5 text-slate-400" />
             <h2 className="text-lg font-bold text-slate-800 tracking-tight">Daily Workforce Status</h2>
           </div>
+
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-indigo-600 hover:border-indigo-100 hover:bg-indigo-50/50 transition-all active:scale-95 disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3 h-3 ${isRefreshing ? "animate-spin text-indigo-600" : ""}`} />
+            {isRefreshing ? "Updating..." : "Refresh Data"}
+          </button>
 
           <div className="grid grid-cols-3 gap-8">
             {/* COLUMN: CHECKED IN */}

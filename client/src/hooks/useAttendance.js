@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { checkIn, checkOut, todayAttn } from "../api/attendanceApi";
-import API from "../api/axios";
+import { checkIn, checkOut, todayAttn, getAllAttendance, getFilterAttendance, getUserAttendance, getAttendanceHistory } from "../api/attendanceApi";
 
 export const useCheckIn = (onSuccess, onError) => {
   const qc = useQueryClient();
@@ -43,11 +42,31 @@ export const useTodayAttendance = () => {
 export const useAttendanceHistory = (selectedMonth, selectedYear, page) => {
   return useQuery({
     queryKey: ["my-attendance", selectedMonth, selectedYear, page],
-    queryFn: async () => {
-      const res = await API.get(`/attendance/me?month=${selectedMonth}&year=${selectedYear}&page=${page}`);
-      return res.data;
-    },
+    queryFn: () => getAttendanceHistory(selectedMonth, selectedYear, page),
     keepPreviousData: true,
     enabled: !!selectedMonth && !!selectedYear // Only fetch when filters are ready
+  });
+};
+
+export const useAllAttendance = () => {
+  return useQuery({
+    queryKey : ["all-attendance"],
+    queryFn : getAllAttendance,
+  })
+}
+
+export const useFilterAttendance = () => {
+  return useQuery({
+    queryKey : ["attendance-filters"],
+    queryFn : getFilterAttendance,
+  });
+};
+
+export const useUserAttendance = (id) => {
+  return useQuery({
+    queryKey : ["user-attendance", id],
+    queryFn : () => getUserAttendance(id),
+    enabled: !!id && id !== 0, 
+    retry: false,
   });
 };

@@ -1,31 +1,14 @@
 import { useEffect, useState } from "react";
 import Modal from "./ui/Modal";
-import API from "../api/axios";
 import EmailModal from "./EmailModal";
 import { Mail, Briefcase, Shield, Clock, LogIn, LogOut, Calendar } from "lucide-react";
 
+import { useUserAttendance } from "../hooks/useAttendance";
+
 export default function UserDetailsModal({ user, onClose }) {
-  const [attendance, setAttendance] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [openEmail, setOpenEmail] = useState(false);
 
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchAttendance = async () => {
-      try {
-        setLoading(true);
-        const res = await API.get(`/attendance/user/${user._id}`);
-        setAttendance(res.data);
-      } catch (err) {
-        console.error("Failed to fetch attendance:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAttendance();
-  }, [user]);
+  const { data: attendance, isLoading, isError } = useUserAttendance(user?._id);
 
   if (!user) return null;
 
@@ -77,7 +60,7 @@ export default function UserDetailsModal({ user, onClose }) {
               <Clock className="w-4 h-4" /> Latest Activity
             </h3>
 
-            {loading ? (
+            {isLoading ? (
               <div className="py-6 flex justify-center">
                 <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
               </div>

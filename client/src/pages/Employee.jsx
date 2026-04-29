@@ -10,7 +10,6 @@ import { useAuth } from "../context/AuthContext";
 import EmployeeProfileModal from "../components/EmployeeProfileModal";
 import ConfirmModal from "../components/ConfirmModal";
 import toast from "react-hot-toast";
-import API from "../api/axios";
 
 import {
   Clock,
@@ -26,7 +25,7 @@ import {
 } from "lucide-react";
 
 export default function Employee() {
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
   const { data: leaves = [] } = useMyLeaves();
   const { data: todayAttendance, isLoading } = useTodayAttendance();
 

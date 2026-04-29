@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import API from "../api/axios";
 import DashboardLayout from "../layouts/DashboardLayout";
 import PageLoader from "../components/PageLoader";
 import { 
@@ -11,7 +9,7 @@ import {
   Clock,
   AlertCircle
 } from "lucide-react";
-import { useAttendanceHistory } from "../hooks/useAttendance";
+import { useAttendanceHistory, useFilterAttendance } from "../hooks/useAttendance";
 
 export default function AttendanceHistory() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
@@ -19,13 +17,8 @@ export default function AttendanceHistory() {
   const [page, setPage] = useState(1);
 
   // 1. Fetch Dynamic Filters (Years/Months that actually have data)
-  const { data: filterData } = useQuery({
-    queryKey: ["attendance-filters"],
-    queryFn: async () => {
-      const res = await API.get("/attendance/filters");
-      return res.data; // Expected format: [{_id: {year: 2026, month: 4}}, ...]
-    }
-  });
+  const { data: filterData } = useFilterAttendance();
+
 
   // 2. Auto-set filters to the most recent record on first load
   useEffect(() => {

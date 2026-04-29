@@ -1,13 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import API from "../api/axios";
 import toast from "react-hot-toast";
+import { applyLeave,
+  getActiveLeaves,
+  getAllLeaves, 
+  getMyLeaves, 
+  updateLeaveRequest, 
+  getPendingLeavesCount
+ } from "../api/leaveApi";
 
-// APPLY LEAVE
 export const useApplyLeave = () => {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (data) => API.post("/leaves", data),
+    mutationFn: applyLeave,
 
     onSuccess: () => {
       toast.success("Leave applied successfully");
@@ -20,44 +25,37 @@ export const useApplyLeave = () => {
   });
 };
 
-// MY LEAVES
 export const useMyLeaves = () => {
   return useQuery({
     queryKey: ["myLeaves"],
-    queryFn: async () => {
-      const res = await API.get("/leaves/me");
-      return res.data;
-    }
+    queryFn: getMyLeaves,
   });
 };
 
-// ALL LEAVES
 export const useAllLeaves = () => {
   return useQuery({
     queryKey: ["allLeaves"],
-    queryFn: async () => {
-      const res = await API.get("/leaves");
-      return res.data;
-    }
+    queryFn: getAllLeaves,
   });
 };
+
 
 export const useUpdateLeave = () => {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, status, adminComment }) =>
-      API.patch(`/leaves/${id}`, {
-        status,
-        adminComment
-      }),
+    mutationFn: updateLeaveRequest,
 
-    onSuccess: () => {
-      toast.success("Email sent successfully");
+    onSuccess: (data) => {
+      toast.success(`Leave ${data.status} successfully`);
 
+      // 2. Clear all related caches
       qc.invalidateQueries(["allLeaves"]);
       qc.invalidateQueries(["activeLeaves"]);
       qc.invalidateQueries(["myLeaves"]);
+      
+      // 3. IMPORTANT: Clear the pending count if you have a sidebar badge
+      qc.invalidateQueries(["pendingLeavesCount"]);
     },
 
     onError: (err) => {
@@ -66,13 +64,17 @@ export const useUpdateLeave = () => {
   });
 };
 
-// ACTIVE LEAVES
 export const useActiveLeaves = () => {
   return useQuery({
     queryKey: ["activeLeaves"], 
-    queryFn: async () => {
-      const { data } = await API.get("/leaves/active");
-      return data;
-    }
+    queryFn: getActiveLeaves
   });
 };
+
+export const usePendingLeavesCount = (enabled = false) =>
+  useQuery({
+    queryKey: ["pendingLeavesCount"],
+    queryFn: getPendingLeavesCount,
+    enabled,
+    refetchInterval: enabled ? 10000 : false,
+});

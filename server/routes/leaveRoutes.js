@@ -13,7 +13,6 @@ import { authorize } from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
-
 router.post("/", protect, applyLeave);
 router.get("/me", protect, getMyLeaves);
 
