@@ -159,6 +159,8 @@ export const getMyAttendance = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
+    // console.log(logs)
+
     const total = await Attendance.countDocuments(query);
 
     res.json({

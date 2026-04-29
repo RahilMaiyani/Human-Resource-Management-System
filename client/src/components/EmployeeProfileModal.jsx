@@ -1,10 +1,9 @@
 import { useForm } from "react-hook-form";
 import { useEffect, useRef, useState } from "react";
 import Modal from "./ui/Modal";
-import Button from "./ui/Button";
 import { useUpdateUser } from "../hooks/useUsers";
 import { Camera, X, User, Lock, Mail, BadgeCheck } from "lucide-react";
-
+import { useAuth } from "../context/AuthContext";
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"];
 
@@ -15,6 +14,8 @@ export default function EmployeeProfileModal({ isOpen, onClose, user }) {
     reset,
     formState: { errors }
   } = useForm();
+
+  const { updateUser } = useAuth();
 
   const [preview, setPreview] = useState("");
   const [imageError, setImageError] = useState("");
@@ -69,6 +70,9 @@ export default function EmployeeProfileModal({ isOpen, onClose, user }) {
   const onSubmit = (data) => {
     setApiError("");
     if (imageError) return;
+
+    updateUser(data, preview);
+    // console.log(preview);
 
     const payload = {
       name: data.name,

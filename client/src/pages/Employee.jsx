@@ -10,6 +10,7 @@ import { useAuth } from "../context/AuthContext";
 import EmployeeProfileModal from "../components/EmployeeProfileModal";
 import ConfirmModal from "../components/ConfirmModal";
 import toast from "react-hot-toast";
+import API from "../api/axios";
 
 import {
   Clock,
@@ -25,7 +26,7 @@ import {
 } from "lucide-react";
 
 export default function Employee() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { data: leaves = [] } = useMyLeaves();
   const { data: todayAttendance, isLoading } = useTodayAttendance();
 
@@ -219,7 +220,7 @@ export default function Employee() {
 
         <EmployeeProfileModal
           isOpen={openProfile}
-          onClose={() => setOpenProfile(false)}
+          onClose={async () => setOpenProfile(false)}
           user={user}
         />
 

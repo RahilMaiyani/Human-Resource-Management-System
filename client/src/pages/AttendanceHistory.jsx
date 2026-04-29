@@ -11,6 +11,7 @@ import {
   Clock,
   AlertCircle
 } from "lucide-react";
+import { useAttendanceHistory } from "../hooks/useAttendance";
 
 export default function AttendanceHistory() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
@@ -35,17 +36,9 @@ export default function AttendanceHistory() {
   }, [filterData]);
 
   // 3. Fetch Logs based on selected filters
-  const { data, isLoading, isFetching } = useQuery({
-    queryKey: ["my-attendance", selectedMonth, selectedYear, page],
-    queryFn: async () => {
-      const res = await API.get(`/attendance/me?month=${selectedMonth}&year=${selectedYear}&page=${page}`);
-      return res.data;
-    },
-    keepPreviousData: true,
-    enabled: !!selectedMonth && !!selectedYear // Only fetch when filters are ready
-  });
+  const { data, isLoading, isFetching } = useAttendanceHistory(selectedMonth, selectedYear, page);
 
-  if (isLoading) return <PageLoader />;
+  if (isLoading) return <PageLoader />; 
 
   const { logs = [], pagination = {} } = data || {};
 
@@ -122,7 +115,7 @@ export default function AttendanceHistory() {
                 className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center justify-between hover:border-indigo-200 transition-all group"
               >
                 {/* DATE COLUMN */}
-                <div className="flex items-center gap-5 min-w-[170px]">
+                <div className="flex items-center gap-5 min-w-42.5">
                   <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center justify-center group-hover:bg-indigo-50 transition-colors">
                     <span className="text-[10px] font-black text-slate-400 uppercase leading-none">
                       {new Date(log.date).toLocaleDateString('en-US', { month: 'short' })}
@@ -141,11 +134,11 @@ export default function AttendanceHistory() {
 
                 {/* TIMES COLUMN (IDENTICAL WIDTHS) */}
                 <div className="flex items-center gap-16 lg:gap-24">
-                  <div className="text-center min-w-[90px]">
+                  <div className="text-center min-w-22.5">
                     <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Check In</p>
                     <p className="text-sm font-bold text-slate-700 tabular-nums">{formatTime(log.checkIn)}</p>
                   </div>
-                  <div className="text-center min-w-[90px]">
+                  <div className="text-center min-w-22.5">
                     <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Check Out</p>
                     <p className="text-sm font-bold text-slate-700 tabular-nums">{formatTime(log.checkout)}</p>
                   </div>
@@ -153,11 +146,21 @@ export default function AttendanceHistory() {
 
                 {/* STATUS COLUMN (IDENTICAL WIDTHS) */}
                 <div className="flex items-center gap-10">
-                  <div className="text-right min-w-[70px]">
+                  <div className="text-right min-w-17.5">
                     <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Hours</p>
-                    <p className="text-sm font-bold text-slate-500">{log.workHours || "--"}</p>
+                    <p className="text-sm font-bold text-slate-500">
+                      {(() => {
+                        if (!log.checkout || !log.checkIn) return "--";
+                        
+                        const diffInMs = new Date(log.checkout) - new Date(log.checkIn);
+                        const hours = Math.floor(diffInMs / 3600000);
+                        const minutes = Math.round((diffInMs % 3600000) / 60000);
+                        
+                        return `${hours}h ${minutes}m`;
+                      })()}  
+                    </p>
                   </div>
-                  <div className="min-w-[120px] flex justify-end">
+                  <div className="min-w-30 flex justify-end">
                     <span className={`px-4 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest ${
                       log.checkout 
                         ? "bg-emerald-50 text-emerald-600 border-emerald-100" 

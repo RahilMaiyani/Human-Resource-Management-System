@@ -3,15 +3,15 @@ import rateLimit from "express-rate-limit";
 
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per window
+  max: 200, // Limit each IP to 100 requests per window
   message: { msg: "Too many requests, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
 export const strictLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 15, // Only 15 attempts per hour
+  windowMs: 30 * 60 * 1000, // 30 min
+  max: 15, // Only 15 attempts per 30 min
   message: { msg: "Security limit reached. Please try again in an hour." },
   standardHeaders: true,
   legacyHeaders: false,
