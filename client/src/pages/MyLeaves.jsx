@@ -5,6 +5,7 @@ import LeaveModal from "../components/LeaveModal";
 import LeaveDetailsModal from "../components/LeaveDetailsModal";
 import PageLoader from "../components/PageLoader";
 import { useTitle } from "../hooks/useTitle";
+import EmptyState from "../components/EmptyState";
 import { 
   Plus, 
   ChevronLeft, 
@@ -77,14 +78,12 @@ export default function MyLeaves() {
 
             <tbody className="divide-y divide-slate-100">
               {paginatedLeaves.length === 0 ? (
-                <tr>
-                  <td colSpan="4" className="px-6 py-20 text-center">
-                    <div className="flex flex-col items-center justify-center text-slate-400">
-                      <FileText className="w-10 h-10 mb-2 opacity-20" />
-                      <p className="text-sm font-medium">No leave records found.</p>
-                    </div>
-                  </td>
-                </tr>
+                <EmptyState 
+                  isTable={true} 
+                  colSpan={5} 
+                  iconType="leave" 
+                  message="We couldn't find any leave requests for this criteria." 
+                />
               ) : (
                 paginatedLeaves.map((leave) => (
                   <tr

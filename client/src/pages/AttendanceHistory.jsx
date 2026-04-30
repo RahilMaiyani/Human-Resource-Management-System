@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useAttendanceHistory, useFilterAttendance } from "../hooks/useAttendance";
 import AttendanceRowSkeleton from "../components/AttendanceRowSkeleton";
+import EmptyState from "../components/EmptyState";
 
 export default function AttendanceHistory() {
   useTitle("Attendance")
@@ -164,9 +165,10 @@ export default function AttendanceHistory() {
               </div>
             ))
           ) : (
-            <div className="bg-white border border-dashed border-slate-200 rounded-3xl py-24 text-center">
-              <p className="text-slate-400 font-bold text-sm italic">No records found for this period.</p>
-            </div>
+            <EmptyState 
+              iconType="attendance" 
+              message="You haven't logged any shifts for this month yet." 
+            />
           )
         )}
         </div>
