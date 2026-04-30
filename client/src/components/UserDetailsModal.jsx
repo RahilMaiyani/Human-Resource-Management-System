@@ -2,7 +2,7 @@ import { useState } from "react";
 import Modal from "./ui/Modal";
 import EmailModal from "./EmailModal";
 import { Mail, Briefcase, Shield, Clock, LogIn, LogOut, Calendar } from "lucide-react";
-
+import Skeleton from "./Skeleton";
 import { useUserAttendance } from "../hooks/useAttendance";
 
 export default function UserDetailsModal({ user, onClose }) {
@@ -61,8 +61,10 @@ export default function UserDetailsModal({ user, onClose }) {
             </h3>
 
             {isLoading ? (
-              <div className="py-6 flex justify-center">
-                <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+              <div className="space-y-4 mt-4">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-20 w-full" />
               </div>
             ) : attendance ? (
               <div className="grid grid-cols-1 gap-3">

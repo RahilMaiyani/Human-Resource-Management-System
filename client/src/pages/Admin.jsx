@@ -3,7 +3,7 @@ import { useUsers } from "../hooks/useUsers";
 import { useEffect, useState } from "react";
 import PageLoader from "../components/PageLoader";
 import { useQueryClient } from "@tanstack/react-query";
-
+import { useTitle } from "../hooks/useTitle";
 import AttendanceChart from "../components/charts/AttendanceChart";
 import LeaveStatusChart from "../components/charts/LeaveStatusChart";
 import LeaveTrendChart from "../components/charts/LeaveTrendChart";
@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 
 export default function Admin() {
+  useTitle("Admin")
   const queryClient = useQueryClient();
   const { data: users = [], isLoading } = useUsers();
   const { data: leaves = [] } = useAllLeaves();

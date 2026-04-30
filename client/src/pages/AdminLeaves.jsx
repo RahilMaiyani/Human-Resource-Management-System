@@ -3,6 +3,7 @@ import { useActiveLeaves, useUpdateLeave } from "../hooks/useLeaves";
 import { useState, useMemo, useEffect } from "react";
 import DecisionModal from "../components/DecisionModal";
 import LeaveDetailsModal from "../components/LeaveDetailsModal";
+import { useTitle } from "../hooks/useTitle";
 import { 
   FileText, 
   ChevronLeft, 
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 export default function AdminLeaves() {
+  useTitle("Leave Management");
   const { data = [], isLoading } = useActiveLeaves();
   const update = useUpdateLeave();
 

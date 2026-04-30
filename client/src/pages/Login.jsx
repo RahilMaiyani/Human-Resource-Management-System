@@ -4,8 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { useLogin } from "../hooks/useAuth";
 import toast from "react-hot-toast";
 import { Mail, Lock, ShieldCheck, ArrowRight } from "lucide-react";
+import { useTitle } from "../hooks/useTitle";
 
 export default function Login() {
+  useTitle("Login")
   const [form, setForm] = useState({
     email: "",
     password: ""

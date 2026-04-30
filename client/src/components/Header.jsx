@@ -8,7 +8,6 @@ export default function Header({ onAddUser }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // --- Clock Logic ---
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {

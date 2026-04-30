@@ -3,6 +3,7 @@ import { useAllLeaves } from "../hooks/useLeaves";
 import { useUsers } from "../hooks/useUsers";
 import { useState, useMemo, useEffect } from "react";
 import LeaveDetailsModal from "../components/LeaveDetailsModal";
+import { useTitle } from "../hooks/useTitle";
 import { 
   Search, 
   Filter, 
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 export default function LeaveReports() {
+  useTitle("Leaves")
   const { data: leaves = [], isLoading } = useAllLeaves();
   const { data: users = [] } = useUsers();
 

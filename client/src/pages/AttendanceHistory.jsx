@@ -1,14 +1,18 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import PageLoader from "../components/PageLoader";
+import { useTitle } from "../hooks/useTitle";
 import { 
   ChevronLeft, 
   ChevronRight, 
   Calendar,
 } from "lucide-react";
 import { useAttendanceHistory, useFilterAttendance } from "../hooks/useAttendance";
+import AttendanceRowSkeleton from "../components/AttendanceRowSkeleton";
 
 export default function AttendanceHistory() {
+  useTitle("Attendance")
+
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [page, setPage] = useState(1);
@@ -92,8 +96,10 @@ export default function AttendanceHistory() {
         {/* LIST SECTION */}
         <div className="relative space-y-3">
           {isFetching && <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-10 rounded-3xl" />}
-
-          {logs.length > 0 ? (
+          {isLoading ? (
+                [...Array(5)].map((_, i) => <AttendanceRowSkeleton key={i} />)
+          ) : (
+          logs.length > 0 ? (
             logs.map((log) => (
               <div 
                 key={log._id} 
@@ -161,7 +167,8 @@ export default function AttendanceHistory() {
             <div className="bg-white border border-dashed border-slate-200 rounded-3xl py-24 text-center">
               <p className="text-slate-400 font-bold text-sm italic">No records found for this period.</p>
             </div>
-          )}
+          )
+        )}
         </div>
 
         {/* PAGINATION */}

@@ -6,6 +6,7 @@ import UserModal from "../components/UserModal";
 import PageLoader from "../components/PageLoader";
 import DeleteModal from "../components/DeleteModal";
 import UserDetailsModal from "../components/UserDetailsModal";
+import { useTitle } from "../hooks/useTitle";
 import { 
   Search, 
   Filter, 
@@ -18,6 +19,7 @@ import {
 } from "lucide-react";
 
 export default function Users() {
+  useTitle("Employees")
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("");
   const [deleteUserId, setDeleteUserId] = useState(null);

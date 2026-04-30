@@ -4,6 +4,7 @@ import { useMyLeaves } from "../hooks/useLeaves";
 import LeaveModal from "../components/LeaveModal";
 import LeaveDetailsModal from "../components/LeaveDetailsModal";
 import PageLoader from "../components/PageLoader";
+import { useTitle } from "../hooks/useTitle";
 import { 
   Plus, 
   ChevronLeft, 
@@ -15,6 +16,7 @@ import {
 
 export default function MyLeaves() {
   const { data = [], isLoading } = useMyLeaves();
+  useTitle("My Leaves")
 
   const [open, setOpen] = useState(false);
   const [selectedLeave, setSelectedLeave] = useState(null);

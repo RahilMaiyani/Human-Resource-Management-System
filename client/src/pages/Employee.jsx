@@ -10,7 +10,7 @@ import { useAuth } from "../context/AuthContext";
 import EmployeeProfileModal from "../components/EmployeeProfileModal";
 import ConfirmModal from "../components/ConfirmModal";
 import toast from "react-hot-toast";
-
+import { useTitle } from "../hooks/useTitle";
 import {
   Clock,
   CheckCircle,
@@ -23,6 +23,9 @@ import {
 
 export default function Employee() {
   const { user } = useAuth();
+  
+  if(user){ useTitle(user?.name)}
+  
   const { data: leaves = [] } = useMyLeaves();
   const { data: todayAttendance, isLoading } = useTodayAttendance();
 
