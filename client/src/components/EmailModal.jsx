@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Modal from "./ui/Modal";
-import Button from "./ui/Button";
 import { useSendEmail } from "../hooks/useEmail";
 import { Mail, Send, AlertCircle, User } from "lucide-react";
 

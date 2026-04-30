@@ -101,7 +101,7 @@ export const updateUser = async (req, res) => {
 
     if (req.user.role === "employee" && req.user.id !== id) {
       return res.status(403).json({ msg: "Not allowed" });
-    }
+    } 
 
     const currentUser = await User.findById(id);
     if (!currentUser) {

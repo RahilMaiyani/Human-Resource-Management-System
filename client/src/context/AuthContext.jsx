@@ -1,16 +1,22 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+const getStoredUser = () => {
+  if (typeof window === "undefined") {
+    return null;
+  }
 
-  useEffect(() => {
+  try {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+    return storedUser ? JSON.parse(storedUser) : null;
+  } catch {
+    return null;
+  }
+};
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(getStoredUser);
 
   const login = (data) => {
     localStorage.setItem("token", data.token);
@@ -25,11 +31,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUser = (data, preview) => {
-    let updatedUser = JSON.parse(localStorage.getItem("user"));
-    updatedUser.name = data.name || JSON.parse(user).name;
-    updatedUser.email = data.email || JSON.parse(user).email;
+    const currentUser = user || getStoredUser() || {};
 
-    updatedUser.profilePic = preview || ""
+    const updatedUser = {
+      ...currentUser,
+      name: data.name || currentUser.name,
+      email: data.email || currentUser.email,
+      profilePic: preview || currentUser.profilePic || "",
+    };
 
     localStorage.setItem("user", JSON.stringify(updatedUser));
     setUser(updatedUser);

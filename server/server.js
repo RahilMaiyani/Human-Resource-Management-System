@@ -8,6 +8,7 @@ import attendanceRoutes from "./routes/attendanceRoutes.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 import leaveRoutes from "./routes/leaveRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
+import documentRoutes from "./routes/documentRoutes.js";
 import { apiLimiter } from "./middleware/rateLimiter.js";
 
 dotenv.config();
@@ -26,6 +27,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/leaves", leaveRoutes);
 app.use("/api/email", emailRoutes);
+app.use("/api/documents", documentRoutes);
 
 app.get("/", (req, res) => {
     res.send("OfficeLink API Running");

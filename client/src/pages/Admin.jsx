@@ -42,7 +42,7 @@ export default function Admin() {
         setAttendance(allAttendance);
         
       } catch (err) {
-        console.error("Attendance fetch error:", err);
+        console.error("Attendance fetch error:", err); 
       }
     };
 

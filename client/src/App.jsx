@@ -11,6 +11,8 @@ import MyLeaves from "./pages/MyLeaves";
 import AdminLeaves from "./pages/AdminLeaves";
 import LeaveReports from "./pages/LeaveReport";
 import AttendanceHistory from "./pages/AttendanceHistory";
+import DocumentVault from "./pages/DocumentVault";
+import AdminDocuments from "./pages/AdminDocuments";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PageLoader from "./components/PageLoader";
 import NotFound from "./NotFound";
@@ -89,11 +91,13 @@ export default function App() {
             <Route path="/users" element={<ProtectedRoute role="admin"><Users /></ProtectedRoute>} />
             <Route path="/admin/leaves" element={<ProtectedRoute role="admin"><AdminLeaves /></ProtectedRoute>} />
             <Route path="/admin/reports" element={<ProtectedRoute role="admin"><LeaveReports /></ProtectedRoute>} />
+            <Route path="/admin/documents" element={<ProtectedRoute role="admin"><AdminDocuments /></ProtectedRoute>} />
 
             {/* EMPLOYEE ROUTES */}
             <Route path="/employee" element={<ProtectedRoute role="employee"><Employee /></ProtectedRoute>} />
             <Route path="/employee/leaves" element={<ProtectedRoute role="employee"><MyLeaves /></ProtectedRoute>} />
             <Route path="/employee/attendance" element={<ProtectedRoute role="employee"><AttendanceHistory /></ProtectedRoute>} />
+            <Route path="/employee/vault" element={<ProtectedRoute role="employee"><DocumentVault /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

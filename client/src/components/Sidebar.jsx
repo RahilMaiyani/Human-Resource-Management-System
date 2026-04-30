@@ -7,7 +7,9 @@ import {
   FileStack, 
   CalendarDays,
   ShieldCheck,
-  DoorOpen
+  DoorOpen,
+  Vault,
+  FileBox
 } from "lucide-react";
 
 export default function Sidebar({ user }) {
@@ -82,6 +84,14 @@ export default function Sidebar({ user }) {
               <FileStack className="w-5 h-5" />
               Leave Logs
             </Link>
+
+            <Link 
+              to="/admin/documents" 
+              className={`${baseClass} ${isActive("/admin/documents") ? activeClass : inactiveClass}`}
+            >
+              <FileBox className="w-5 h-5" />
+              Documents
+            </Link>
           </>
         )}
 
@@ -110,6 +120,14 @@ export default function Sidebar({ user }) {
             >
               <CalendarDays className="w-5 h-5" />
               Attendance
+            </Link>
+
+            <Link
+              to="/employee/vault"
+              className={`${baseClass} ${isActive("/employee/vault") ? activeClass : inactiveClass}`}
+            >
+              <Vault className="w-5 h-5" />
+              Document Vault
             </Link>
           </>
         )}
