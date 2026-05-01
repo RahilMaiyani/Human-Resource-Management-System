@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
-import { useUserDocuments } from "../hooks/useDocuments.js";
+import { useDocuments, useUserDocuments } from "../hooks/useDocuments.js";
 import API from "../api/axios.js";
 import DocumentCard from "../components/DocumentCard.jsx";
 import DocumentSkeleton from "../components/DocumentSkeleton.jsx";
@@ -9,8 +9,10 @@ import DashboardLayout from "../layouts/DashboardLayout.jsx";
 import { Search } from "lucide-react";
 import toast from "react-hot-toast";
 import DocumentPreviewModal from "../components/DocumentPreviewModal.jsx";
+import DeleteModal from "../components/DeleteModal.jsx";
 
 const AdminDocuments = () => {
+  const { isDeleting, deleteDocument } = useDocuments();
   const { user } = useAuth();
   const [employees, setEmployees] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState("");
@@ -54,14 +56,17 @@ const AdminDocuments = () => {
 
   const selectedEmployee = employees.find((e) => e._id === selectedUserId);
 
-  const handleDelete = (docId) => {
-    if (window.confirm("Delete this document?")) {
-      API.delete(`/documents/${docId}`)
-        .then(() => {
-          toast.success("Document deleted");
-          window.location.reload();
-        })
-        .catch((err) => toast.error(err.response?.data?.msg || "Delete failed"));
+
+  const [deleteTarget, setDeleteTarget] = useState(null); 
+
+  const handleDeleteClick = (doc) => {
+    setDeleteTarget(doc);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deleteTarget) {
+      await deleteDocument(deleteTarget._id);
+      setDeleteTarget(null);
     }
   };
 
@@ -160,8 +165,8 @@ const AdminDocuments = () => {
                   <DocumentCard
                     key={doc._id}
                     document={doc}
-                    onDelete={handleDelete}
-                    isDeleting={false}
+                    onDelete={() => handleDeleteClick(doc)}
+                    isDeleting={isDeleting}
                     onPreview={() => {handlePreview(doc)}}
                   />
                 ))}
@@ -180,6 +185,15 @@ const AdminDocuments = () => {
       <DocumentPreviewModal 
         previewDoc={previewDoc} 
         closePreview={closePreview} 
+      />
+
+      <DeleteModal
+        isOpen={!!deleteTarget}
+        title={deleteTarget?.title}
+        type="Document"
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
       />
         
     </DashboardLayout>

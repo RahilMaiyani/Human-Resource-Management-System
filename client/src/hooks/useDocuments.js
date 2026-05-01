@@ -39,6 +39,8 @@ export const useDocuments = () => {
     onSuccess: (data) => {
       toast.success(data.data.msg || "Document deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+      // console.log(data.data)
+      queryClient.invalidateQueries({ queryKey: ["userDocuments", data.data.userId] });
     },
     onError: (error) => {
       const errorMsg = error.response?.data?.msg || error.message;
