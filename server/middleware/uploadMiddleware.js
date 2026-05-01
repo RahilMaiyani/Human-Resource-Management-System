@@ -9,7 +9,7 @@ cloudinary.v2.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Configure Cloudinary Storage - Simple setup
+
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary.v2,
   params: {
@@ -18,7 +18,7 @@ const storage = new CloudinaryStorage({
   },
 });
 
-// Multer instance with 5MB limit
+
 const upload = multer({
   storage,
   limits: {

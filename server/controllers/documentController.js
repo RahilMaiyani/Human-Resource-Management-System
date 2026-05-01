@@ -94,7 +94,6 @@ export const deleteDocument = async (req, res) => {
     if (!document) {
       return res.status(404).json({ msg: "Document not found" });
     }
-
     
     if (document.userId.toString() !== req.user.id && req.user.role !== "admin") {
       return res.status(403).json({ msg: "Access denied" });
