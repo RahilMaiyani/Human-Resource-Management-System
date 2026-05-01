@@ -50,7 +50,7 @@ const DocumentCard = ({ document, onDelete, isDeleting, onPreview }) => {
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100">
+        <div className="flex flex-wrap items-center gap-1 pt-3 border-t border-slate-100">
           {previewableTypes.includes(fileType) && onPreview ? (
             <button
               type="button"
@@ -75,7 +75,7 @@ const DocumentCard = ({ document, onDelete, isDeleting, onPreview }) => {
           {canDelete && onDelete ? (
             <button
               type="button"
-              onClick={() => onDelete(document._id)}
+              onClick={() => onDelete(document)}
               disabled={isDeleting}
               className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:border-red-300 hover:bg-red-100 transition disabled:cursor-not-allowed disabled:opacity-50"
             >

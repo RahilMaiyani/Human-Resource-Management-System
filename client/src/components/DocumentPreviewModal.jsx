@@ -29,6 +29,7 @@ export default function DocumentPreviewModal({ previewDoc, closePreview }) {
               download
               className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
               title="Download"
+              target="_blank"
             >
               <Download className="w-5 h-5" />
             </a>

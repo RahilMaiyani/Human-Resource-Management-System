@@ -48,7 +48,8 @@ const AdminDocuments = () => {
   }, [user]);
 
   const filteredEmployees = employees.filter((emp) =>
-    emp.name.toLowerCase().includes(searchText.toLowerCase())
+    emp.name.toLowerCase().includes(searchText.toLowerCase()) &&
+    emp.role == 'employee'
   );
 
   const selectedEmployee = employees.find((e) => e._id === selectedUserId);
@@ -178,7 +179,7 @@ const AdminDocuments = () => {
       
       <DocumentPreviewModal 
         previewDoc={previewDoc} 
-        closePreview={() => setPreviewDoc(null)} 
+        closePreview={closePreview} 
       />
         
     </DashboardLayout>

@@ -17,12 +17,14 @@ import {
   Mail,
   Briefcase
 } from "lucide-react";
+import { deleteUser } from "../api/userApi";
 
 export default function Users() {
   useTitle("Employees")
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("");
   const [deleteUserId, setDeleteUserId] = useState(null);
+  const [deleteUserName, setDeleteUserName] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -182,6 +184,7 @@ export default function Users() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
+                            setDeleteUserName(u.name);
                             setDeleteUserId(u._id);
                           }}
                           className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
@@ -227,6 +230,8 @@ export default function Users() {
         <DeleteModal
           isOpen={!!deleteUserId}
           onClose={() => setDeleteUserId(null)}
+          title={deleteUserName || 'user'}
+          type={'user'}
           onConfirm={() => {
             deleteMutation.mutate(deleteUserId);
             setDeleteUserId(null);

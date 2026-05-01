@@ -65,7 +65,7 @@ export default function Admin() {
 
   const employees = users.filter((u) => u.role !== "admin");
   const employeeIds = new Set(employees.map((u) => u._id));
-  const validAttendance = attendance.filter((a) => employeeIds.has(a.userId));
+  const validAttendance = attendance?.filter((a) => employeeIds.has(a.userId)) || [];
   
   const totalEmployees = employees.length;
   const todayDate = new Date().toISOString().split("T")[0];

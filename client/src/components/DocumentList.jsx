@@ -4,6 +4,7 @@ import DocumentSkeleton from "./DocumentSkeleton.jsx";
 import EmptyState from "./EmptyState.jsx";
 import { useDocuments } from "../hooks/useDocuments.js";
 import DocumentPreviewModal from "./DocumentPreviewModal.jsx";
+import DeleteModal from "./DeleteModal.jsx"; // 1. Import your custom modal
 
 const DocumentList = ({ onUploadClick }) => {
   const {
@@ -14,10 +15,19 @@ const DocumentList = ({ onUploadClick }) => {
   } = useDocuments();
 
   const [previewDoc, setPreviewDoc] = useState(null);
+  // 2. Track the document targeted for deletion
+  const [deleteTarget, setDeleteTarget] = useState(null); 
 
-  const handleDelete = (docId) => {
-    if (window.confirm("Are you sure you want to delete this document?")) {
-      deleteDocument(docId);
+  // 3. Open modal instead of window.confirm
+  const handleDeleteClick = (doc) => {
+    setDeleteTarget(doc);
+  };
+
+  // 4. Actual execution logic
+  const handleConfirmDelete = async () => {
+    if (deleteTarget) {
+      await deleteDocument(deleteTarget._id);
+      setDeleteTarget(null); // Close modal on success
     }
   };
 
@@ -55,11 +65,11 @@ const DocumentList = ({ onUploadClick }) => {
               <DocumentSkeleton key={i} />
             ))}
           </div>
-        ) : documents.length === 0 ? (
+        ) : (documents || []).length === 0 ? (
           <EmptyState
             icon="FileBox"
             title="No Documents Yet"
-            description="Upload your first document to get started. Your documents are securely stored and only visible to you."
+            description="Upload your first document to get started."
             actionText="Upload Document"
             onAction={onUploadClick}
           />
@@ -69,7 +79,8 @@ const DocumentList = ({ onUploadClick }) => {
               <DocumentCard
                 key={doc._id}
                 document={doc}
-                onDelete={handleDelete}
+                // Pass the whole doc so we have the title for the modal
+                onDelete={() => handleDeleteClick(doc)} 
                 isDeleting={isDeleting}
                 onPreview={handlePreview}
               />
@@ -78,10 +89,21 @@ const DocumentList = ({ onUploadClick }) => {
         )}
       </div>
 
-        <DocumentPreviewModal 
-          previewDoc={previewDoc}
-          closePreview = {closePreview}
-        />
+      {/* Preview Modal */}
+      <DocumentPreviewModal 
+        previewDoc={previewDoc}
+        closePreview={closePreview}
+      />
+
+      {/* 5. Custom Delete Confirmation Modal */}
+      <DeleteModal
+        isOpen={!!deleteTarget}
+        title={deleteTarget?.title}
+        type="Document"
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
+      />
     </>
   );
 };
