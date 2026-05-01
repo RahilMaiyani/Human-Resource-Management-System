@@ -78,7 +78,7 @@ export default function LeaveStatusChart({ leaves = [] }) {
   };
 
   return (
-    <div className="bg-white p-6 rounded-x h-90 flex flex-col transition-all hover:shadow-md">
+    <div className="bg-white p-6 rounded-x h-90 flex flex-col transition-all">
       {/* HEADER */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">

@@ -43,7 +43,7 @@ export default function DeleteModal({ isOpen, onClose, onConfirm, title, type = 
           <button
             onClick={onConfirm}
             disabled={isDeleting}
-            className="px-8 h-11 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold shadow-lg shadow-rose-100 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center min-w-[120px]"
+            className="px-8 h-11 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold shadow-lg shadow-rose-100 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center min-w-30"
           >
             {isDeleting ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

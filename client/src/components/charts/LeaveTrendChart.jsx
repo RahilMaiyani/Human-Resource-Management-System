@@ -113,7 +113,7 @@ export default function LeaveTrendChart({ leaves = [] }) {
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl h-90 flex flex-col transition-all hover:shadow-md">
+    <div className="bg-white p-6 rounded-xl h-90 flex flex-col transition-all">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">

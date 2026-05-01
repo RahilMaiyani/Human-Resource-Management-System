@@ -1,6 +1,6 @@
 # OfficeLink — HR Management System
 
-A full-stack Human Resource Management System built with the **MERN stack**, designed to simulate real-world organizational workflows. OfficeLink enables administrators to manage employees, track attendance, and handle leave requests — while giving employees a clean, functional dashboard to interact with their own data.
+A full-stack Human Resource Management System built with the **MERN stack**, designed to simulate real-world organizational workflows. OfficeLink enables administrators to manage employees, track attendance, handle leave requests, and manage employee documents — while giving employees a clean, functional dashboard to interact with their own data.
 
 ---
 
@@ -15,13 +15,12 @@ A full-stack Human Resource Management System built with the **MERN stack**, des
 - [API Reference](#api-reference)
 - [Data Models](#data-models)
 - [Route Structure (Frontend)](#route-structure-frontend)
-- [Limitations & Planned Improvements](#limitations--planned-improvements)
 
 ---
 
 ## Overview
 
-OfficeLink is a practical HR tool — not a simple CRUD demo. It incorporates role-based access control, workflow-driven features, business logic validation, and structured data handling to behave like a real internal company tool.
+OfficeLink is a practical HR tool — not a simple CRUD demo. It incorporates role-based access control, workflow-driven features, business logic validation, file management with Cloudinary, and structured data handling to behave like a real internal company tool.
 
 ---
 
@@ -35,7 +34,7 @@ OfficeLink is a practical HR tool — not a simple CRUD demo. It incorporates ro
 ### User Management *(Admin only)*
 - Create, update, and delete employee profiles
 - Assign roles (`admin` / `employee`) and departments
-- Profile picture support (base64-encoded)
+- Profile picture support (Cloudinary-hosted)
 - View detailed employee profiles via modal
 
 ### Attendance System
@@ -57,6 +56,15 @@ OfficeLink is a practical HR tool — not a simple CRUD demo. It incorporates ro
 - Active leave filtering for admin
 - Pending leave count badge
 
+### Document Management System ⭐ *New*
+- Employees can upload and manage documents (PDFs, images, Word docs, etc.)
+- Document categorization: **Contract**, **ID Proof**, **Certification**, **Other**
+- Supported file types: PDF, PNG, JPG, JPEG, GIF, DOC, DOCX, TXT
+- Document preview modal with file type detection
+- Cloudinary-powered file storage with automatic deletion on removal
+- Admin can view all employee documents via dedicated admin panel
+- File metadata tracking: size, type, upload date, category
+
 ### Data Visualization
 - Attendance trends over the last 7 days
 - Leave analytics: status distribution (approved / rejected / pending) and leave trends over time
@@ -68,12 +76,19 @@ OfficeLink is a practical HR tool — not a simple CRUD demo. It incorporates ro
 - Powered by **Nodemailer** over Gmail SMTP
 - Manual email trigger available via dedicated modal
 
+### Loading States & Skeleton Components
+- Professional skeleton loaders for all data tables
+- Admin dashboard skeleton
+- Attendance, leave, and document skeleton loaders
+- Empty state component for tables with no data
+
 ### Other UX Details
 - Offline detection banner (real-time network status)
 - Toast notifications for all actions (react-hot-toast)
 - Global page loader with Suspense
 - 404 Not Found page
 - Rate limiting on all API routes
+- Document preview modal with inline viewers
 
 ---
 
@@ -104,6 +119,9 @@ OfficeLink is a practical HR tool — not a simple CRUD demo. It incorporates ro
 | bcryptjs | ^3.0.3 |
 | jsonwebtoken | ^9.0.3 |
 | Nodemailer | ^8.0.5 |
+| **Cloudinary** | ^1.41.3 |
+| **Multer** | ^2.1.1 |
+| **Multer Storage Cloudinary** | ^4.0.0 |
 | express-rate-limit | ^8.4.1 |
 | dotenv | ^17.4.2 |
 | nodemon (dev) | ^3.1.14 |
@@ -125,7 +143,8 @@ HR-Management-System/
 │       │   ├── userApi.js
 │       │   ├── attendanceApi.js
 │       │   ├── leaveApi.js
-│       │   └── emailApi.js
+│       │   ├── emailApi.js
+│       │   └── documentApi.js            # NEW: Document API calls
 │       ├── components/
 │       │   ├── charts/       # AttendanceChart, LeaveStatusChart, LeaveTrendChart
 │       │   ├── ui/           # Button, Modal (base primitives)
@@ -141,7 +160,21 @@ HR-Management-System/
 │       │   ├── ConfirmModal.jsx
 │       │   ├── DeleteModal.jsx
 │       │   ├── HoverItem.jsx
-│       │   └── PageLoader.jsx
+│       │   ├── PageLoader.jsx
+│       │   ├── Skeleton.jsx                    # NEW: Base skeleton component
+│       │   ├── EmptyState.jsx                  # NEW: Empty state UI
+│       │   ├── DocumentUploadModal.jsx         # NEW: File upload interface
+│       │   ├── DocumentList.jsx                # NEW: Document listing
+│       │   ├── DocumentCard.jsx                # NEW: Individual document card
+│       │   ├── DocumentPreviewModal.jsx        # NEW: Document preview
+│       │   ├── AdminDocumentViewer.jsx         # NEW: Admin document viewer
+│       │   ├── AdminDashboardSkeleton.jsx      # NEW: Dashboard loader
+│       │   ├── AdminDocumentsSkeleton.jsx      # NEW: Docs loader
+│       │   ├── AdminLeavesSkeleton.jsx         # NEW: Leaves loader
+│       │   ├── LeaveTableSkeleton.jsx          # NEW: Table loader
+│       │   ├── LeaveReportsSkeleton.jsx        # NEW: Reports loader
+│       │   ├── AttendanceRowSkeleton.jsx       # NEW: Attendance loader
+│       │   └── DocumentSkeleton.jsx            # NEW: Document loader
 │       ├── context/
 │       │   └── AuthContext.jsx
 │       ├── hooks/            # TanStack Query wrappers per domain
@@ -149,7 +182,8 @@ HR-Management-System/
 │       │   ├── useUsers.js
 │       │   ├── useAttendance.js
 │       │   ├── useLeaves.js
-│       │   └── useEmail.js
+│       │   ├── useEmail.js
+│       │   └── useDocuments.js               # NEW: Document hooks
 │       ├── layouts/
 │       │   └── DashboardLayout.jsx
 │       ├── pages/
@@ -158,9 +192,11 @@ HR-Management-System/
 │       │   ├── Users.jsx             # Employee management
 │       │   ├── AdminLeaves.jsx       # Leave approval panel
 │       │   ├── LeaveReport.jsx       # Analytics & charts
+│       │   ├── AdminDocuments.jsx    # NEW: Admin document management
 │       │   ├── Employee.jsx          # Employee dashboard
 │       │   ├── MyLeaves.jsx          # Employee leave history
-│       │   └── AttendanceHistory.jsx
+│       │   ├── AttendanceHistory.jsx
+│       │   └── DocumentVault.jsx     # NEW: Employee document vault
 │       ├── routes/
 │       │   └── ProtectedRoute.jsx
 │       ├── App.jsx
@@ -174,22 +210,26 @@ HR-Management-System/
 │   │   ├── userController.js
 │   │   ├── attendanceController.js
 │   │   ├── leaveController.js
-│   │   └── emailController.js
+│   │   ├── emailController.js
+│   │   └── documentController.js     # NEW: Document handling
 │   ├── middleware/
 │   │   ├── authMiddleware.js
 │   │   ├── roleMiddleware.js
 │   │   ├── rateLimiter.js
-│   │   └── errorMiddleware.js
+│   │   ├── errorMiddleware.js
+│   │   └── uploadMiddleware.js       # NEW: Cloudinary upload config
 │   ├── models/
 │   │   ├── User.js
 │   │   ├── Attendance.js
-│   │   └── Leave.js
+│   │   ├── Leave.js
+│   │   └── Document.js               # NEW: Document schema
 │   ├── routes/
 │   │   ├── authRoutes.js
 │   │   ├── userRoutes.js
 │   │   ├── attendanceRoutes.js
 │   │   ├── leaveRoutes.js
-│   │   └── emailRoutes.js
+│   │   ├── emailRoutes.js
+│   │   └── documentRoutes.js         # NEW: Document endpoints
 │   ├── utils/
 │   │   ├── sendEmail.js
 │   │   └── emailTemplate.js
@@ -207,6 +247,7 @@ HR-Management-System/
 - Node.js v18+
 - MongoDB (local or Atlas)
 - A Gmail account with an [App Password](https://support.google.com/accounts/answer/185833) for email notifications
+- Cloudinary account (free tier available at [cloudinary.com](https://cloudinary.com)) for document storage
 
 ---
 
@@ -261,9 +302,21 @@ JWT_SECRET=your_jwt_secret_key
 
 EMAIL_USER=your_gmail_address@gmail.com
 EMAIL_PASS=your_gmail_app_password
+
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ```
 
-> **Note:** `EMAIL_PASS` should be a Gmail **App Password**, not your regular account password. Enable 2FA on your Google account first, then generate an App Password under *Security → App Passwords*.
+### Environment Variable Details
+
+- **MONGO_URI**: MongoDB connection string (Atlas or local)
+- **JWT_SECRET**: Secret key for JWT token signing (use a strong random string)
+- **EMAIL_USER**: Gmail address for sending notifications
+- **EMAIL_PASS**: Gmail **App Password** (not your regular password; enable 2FA first)
+- **CLOUDINARY_CLOUD_NAME**: Found in your Cloudinary dashboard
+- **CLOUDINARY_API_KEY**: Cloudinary API key
+- **CLOUDINARY_API_SECRET**: Cloudinary API secret
 
 ---
 
@@ -305,6 +358,17 @@ All routes are prefixed with `/api` and are subject to rate limiting (200 reques
 | GET | `/api/leaves/pending/count` | Get pending leave count |
 | PUT | `/api/leaves/:id` | Approve or reject a leave *(Admin)* |
 
+### Documents ⭐ *New*
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/documents/upload` | Upload a new document *(multipart/form-data)* |
+| GET | `/api/documents/my-documents` | Get own documents *(Employee)* |
+| GET | `/api/documents/:id` | Get document details by ID |
+| PUT | `/api/documents/:id` | Update document metadata (title, category) |
+| DELETE | `/api/documents/:id` | Delete a document (removes from Cloudinary) |
+| GET | `/api/documents/user/:userId` | Get all documents for a user *(Admin only)* |
+
 ### Email
 
 | Method | Endpoint | Description |
@@ -323,8 +387,9 @@ All routes are prefixed with `/api` and are subject to rate limiting (200 reques
   email:      String   // required, unique
   password:   String   // required, bcrypt-hashed
   role:       String   // "admin" | "employee" (default: "employee")
-  profilePic: String   // base64-encoded image
+  profilePic: String   // Cloudinary URL
   department: String
+  lastLogin:  Date     // Auto-updated on login
   createdAt, updatedAt // auto (timestamps)
 }
 ```
@@ -339,9 +404,9 @@ All routes are prefixed with `/api` and are subject to rate limiting (200 reques
   toDate:       Date
   reason:       String
   status:       String    // "pending" | "approved" | "rejected" (default: "pending")
-  reviewedBy:   ObjectId  // ref: User (admin)
-  adminComment: String
-  reviewedAt:   Date
+  reviewedBy:   ObjectId  // ref: User (admin who approved/rejected)
+  adminComment: String    // optional feedback from admin
+  reviewedAt:   Date      // when admin took action
   createdAt, updatedAt
 }
 ```
@@ -353,7 +418,22 @@ All routes are prefixed with `/api` and are subject to rate limiting (200 reques
   userId:    ObjectId  // ref: User
   checkIn:   Date
   checkOut:  Date
-  date:      Date
+  date:      Date      // day of attendance
+  createdAt, updatedAt
+}
+```
+
+### Document ⭐ *New*
+
+```js
+{
+  userId:    ObjectId  // ref: User (document owner)
+  title:     String    // required, user-defined
+  fileUrl:   String    // required, Cloudinary URL
+  publicId:  String    // required, Cloudinary public ID (for deletion)
+  fileType:  String    // enum: "pdf", "png", "jpg", "jpeg", "gif", "doc", "docx", "txt"
+  category:  String    // enum: "Contract", "ID Proof", "Certification", "Other"
+  fileSize:  Number    // in bytes
   createdAt, updatedAt
 }
 ```
@@ -362,40 +442,65 @@ All routes are prefixed with `/api` and are subject to rate limiting (200 reques
 
 ## Route Structure (Frontend)
 
-| Path | Role | Page |
-|---|---|---|
-| `/` | Public | Login |
-| `/admin` | Admin | Dashboard (stats + charts) |
-| `/users` | Admin | Employee management |
-| `/admin/leaves` | Admin | Leave approval panel |
-| `/admin/reports` | Admin | Leave analytics & charts |
-| `/employee` | Employee | Dashboard (check-in/out + summary) |
-| `/employee/leaves` | Employee | My leaves |
-| `/employee/attendance` | Employee | My attendance history |
-| `*` | Any | 404 Not Found |
+| Path | Role | Page | Purpose |
+|---|---|---|---|
+| `/` | Public | Login | Authentication |
+| `/admin` | Admin | Dashboard | Overview & key metrics |
+| `/users` | Admin | Employee Management | CRUD operations on users |
+| `/admin/leaves` | Admin | Leave Approval | Review & approve/reject leaves |
+| `/admin/reports` | Admin | Analytics | Leave & attendance charts |
+| `/admin/documents` | Admin | Document Viewer | Manage all employee documents |
+| `/employee` | Employee | Dashboard | Check-in/out & summary |
+| `/employee/leaves` | Employee | My Leaves | View leave history & apply |
+| `/employee/attendance` | Employee | Attendance History | View check-in/out logs |
+| `/employee/vault` | Employee | Document Vault | Upload & manage own documents |
+| `*` | Any | 404 | Not found |
 
 All routes behind `/admin/*` and `/employee/*` are wrapped in a `ProtectedRoute` component that validates the JWT and enforces the correct role.
 
 ---
 
-## Limitations & Planned Improvements
+## Features in Detail
 
-**Current limitations:**
-- Profile images stored as base64 strings (not scalable for large teams)
-- Email notifications rely on Gmail SMTP (subject to sending rate limits)
-- No real-time updates — UI refreshes via polling / manual refetch
-- Some analytics are computed on the frontend rather than aggregated in the backend
+### Document Management Workflow
 
-**Planned improvements:**
-- Cloudinary integration for scalable image uploads
-- Backend-aggregated dashboard stats API
-- Leave balance system with per-employee quotas
-- In-app notification system synced with email
-- Pagination and server-side filtering for large datasets
-- Performance optimization for chart rendering
+**Employee (Document Vault):**
+1. Navigate to `/employee/vault`
+2. Click "Upload Document"
+3. Select file, add title, and choose category
+4. Document is uploaded to Cloudinary and metadata saved to MongoDB
+5. View, download, or delete documents anytime
+
+**Admin (Document Viewer):**
+1. Navigate to `/admin/documents`
+2. Search and filter documents by category or user
+3. Preview documents inline (PDFs with embedded viewer)
+4. Download or delete documents on behalf of users
+5. Track document metadata: size, type, upload date
+
+### Cloudinary Integration
+
+- All documents are stored securely on Cloudinary
+- Automatic public ID tracking for safe deletion
+- Support for 8 file types with proper validation
+- Documents are organized by user and category
+- File size limits handled at upload middleware level
+
+### Loading States
+
+Every major section has dedicated skeleton loaders:
+- **AdminDashboardSkeleton** - Dashboard metrics skeleton
+- **AdminLeavesSkeleton** - Leave table skeleton
+- **AdminDocumentsSkeleton** - Document list skeleton
+- **LeaveTableSkeleton** - General leave table loader
+- **LeaveReportsSkeleton** - Charts skeleton
+- **AttendanceRowSkeleton** - Attendance table loader
+- **DocumentSkeleton** - Single document loader
+
+These provide better perceived performance during data fetching.
 
 ---
 
 ## Purpose
 
-This project was built to practice full-stack architecture with real business logic — not just basic CRUD. The focus is on role-based access, workflow-driven design, clean API structure, and a production-like developer experience.
+This project demonstrates full-stack architecture with real business logic — not just basic CRUD. The focus is on role-based access, workflow-driven design, file management integration, clean API structure, and a production-like developer experience with professional UX patterns.
