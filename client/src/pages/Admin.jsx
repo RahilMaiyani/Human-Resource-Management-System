@@ -1,12 +1,13 @@
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useUsers } from "../hooks/useUsers";
 import { useEffect, useState } from "react";
-import PageLoader from "../components/PageLoader";
+// import PageLoader from "../components/PageLoader";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTitle } from "../hooks/useTitle";
 import AttendanceChart from "../components/charts/AttendanceChart";
 import LeaveStatusChart from "../components/charts/LeaveStatusChart";
 import LeaveTrendChart from "../components/charts/LeaveTrendChart";
+import AdminDashboardSkeleton from "../components/AdminDashboardSkeleton";
 
 import EmailModal from "../components/EmailModal";
 import HoverItem from "../components/HoverItem";
@@ -61,7 +62,7 @@ export default function Admin() {
     setTimeout(() => setIsRefreshing(false), 600);
   };
 
-  if (isLoading) return <PageLoader />;
+  // if (isLoading) return <PageLoader />;
 
   const employees = users.filter((u) => u.role !== "admin");
   const employeeIds = new Set(employees.map((u) => u._id));
@@ -117,7 +118,10 @@ export default function Admin() {
   return (
     <DashboardLayout>
       <div className="p-10 max-w-400 mx-auto space-y-10 bg-slate-50/30 min-h-screen">
-        
+        {isLoading ? (
+          <AdminDashboardSkeleton />
+        ) : (
+          <>
         {/* HEADER */}
         <div className="border-b border-slate-200 pb-6">
           <div>
@@ -320,6 +324,8 @@ export default function Admin() {
           </div>
         </div>
 
+      </>)}
+      
         <EmailModal
           isOpen={!!emailUser}
           onClose={() => {
@@ -329,6 +335,7 @@ export default function Admin() {
           user={emailUser}
           template={emailTemplate}
         />
+      
       </div>
     </DashboardLayout>
   );

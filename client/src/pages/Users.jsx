@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import UserModal from "../components/UserModal";
 import PageLoader from "../components/PageLoader";
+import UsersTableSkeleton from "../components/UsersTableSkeleton";
 import DeleteModal from "../components/DeleteModal";
 import UserDetailsModal from "../components/UserDetailsModal";
 import { useTitle } from "../hooks/useTitle";
@@ -64,7 +65,7 @@ export default function Users() {
     return filteredUsers.slice(start, start + USERS_PER_PAGE);
   }, [filteredUsers, currentPage]);
 
-  if (isLoading) return <PageLoader />;
+  // if (isLoading) return <PageLoader />;
 
   return (
     <DashboardLayout
@@ -74,7 +75,11 @@ export default function Users() {
       }}
     >
       <div className="p-10 max-w-350 mx-auto space-y-8 bg-slate-50/30 min-h-screen">
-        
+      {isLoading ? (
+          <UsersTableSkeleton />
+        ) : (
+        <>
+
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-slate-200 pb-8">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">User Management</h1>
@@ -227,6 +232,9 @@ export default function Users() {
           )}
         </div>
 
+        
+        </>
+        )}
         <DeleteModal
           isOpen={!!deleteUserId}
           onClose={() => setDeleteUserId(null)}

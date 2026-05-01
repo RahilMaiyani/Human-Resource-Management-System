@@ -29,7 +29,7 @@ export default function AttendanceHistory() {
 
   const { data, isLoading, isFetching } = useAttendanceHistory(selectedMonth, selectedYear, page);
 
-  if (isLoading) return <PageLoader />; 
+  // if (isLoading) return <PageLoader />; 
 
   const { logs = [], pagination = {} } = data || {};
 

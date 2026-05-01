@@ -15,10 +15,8 @@ const DocumentList = ({ onUploadClick }) => {
   } = useDocuments();
 
   const [previewDoc, setPreviewDoc] = useState(null);
-  // 2. Track the document targeted for deletion
   const [deleteTarget, setDeleteTarget] = useState(null); 
 
-  // 3. Open modal instead of window.confirm
   const handleDeleteClick = (doc) => {
     setDeleteTarget(doc);
   };
@@ -27,7 +25,7 @@ const DocumentList = ({ onUploadClick }) => {
   const handleConfirmDelete = async () => {
     if (deleteTarget) {
       await deleteDocument(deleteTarget._id);
-      setDeleteTarget(null); // Close modal on success
+      setDeleteTarget(null); 
     }
   };
 

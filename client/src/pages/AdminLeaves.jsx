@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import DecisionModal from "../components/DecisionModal";
 import LeaveDetailsModal from "../components/LeaveDetailsModal";
 import { useTitle } from "../hooks/useTitle";
+import AdminLeavesSkeleton from "../components/AdminLeavesSkeleton";
 import { 
   FileText, 
   ChevronLeft, 
@@ -46,6 +47,10 @@ export default function AdminLeaves() {
   return (
     <DashboardLayout>
       <div className="p-10 max-w-350 mx-auto space-y-8 bg-slate-50/30 min-h-screen">
+      {isLoading ? (
+          <AdminLeavesSkeleton />
+        ) : (
+          <>
 
         {/* HEADER */}
         <header className="flex items-end justify-between border-b border-slate-200 pb-6">
@@ -192,6 +197,7 @@ export default function AdminLeaves() {
             </div>
           )}
         </div>
+        </>)}
 
         {/* MODALS */}
         <DecisionModal

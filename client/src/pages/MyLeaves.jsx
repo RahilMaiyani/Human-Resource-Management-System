@@ -3,9 +3,10 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import { useMyLeaves } from "../hooks/useLeaves";
 import LeaveModal from "../components/LeaveModal";
 import LeaveDetailsModal from "../components/LeaveDetailsModal";
-import PageLoader from "../components/PageLoader";
+// import PageLoader from "../components/PageLoader";
 import { useTitle } from "../hooks/useTitle";
 import EmptyState from "../components/EmptyState";
+import LeaveTableSkeleton from "../components/LeaveTableSkeleton";
 import { 
   Plus, 
   ChevronLeft, 
@@ -24,7 +25,7 @@ export default function MyLeaves() {
 
   // PAGINATION
   const [currentPage, setCurrentPage] = useState(1);
-  const LEAVES_PER_PAGE = 8; // Slightly increased for desktop view
+  const LEAVES_PER_PAGE = 8;
 
   useEffect(() => {
     setCurrentPage(1);
@@ -37,12 +38,15 @@ export default function MyLeaves() {
     return data.slice(start, start + LEAVES_PER_PAGE);
   }, [data, currentPage]);
 
-  if (isLoading) return <PageLoader />;
+  // if (isLoading) return <PageLoader />;
 
   return (
     <DashboardLayout>
       <div className="p-10 max-w-350 mx-auto space-y-8 bg-slate-50/30 min-h-screen">
-        
+        {isLoading ? (
+          <LeaveTableSkeleton />
+        ) : (
+        <>
         {/* HEADER */}
         <div className="flex items-center justify-between border-b border-slate-200 pb-6">
           <div>
@@ -180,7 +184,8 @@ export default function MyLeaves() {
             </div>
           )}
         </div>
-
+      </>
+      )}
         {/* DETAILS MODAL */}
         <LeaveDetailsModal
           leave={selectedLeave}

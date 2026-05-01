@@ -1,4 +1,5 @@
 import DashboardLayout from "../layouts/DashboardLayout";
+import LeaveReportsSkeleton from "../components/LeaveReportsSkeleton";
 import { useAllLeaves } from "../hooks/useLeaves";
 import { useUsers } from "../hooks/useUsers";
 import { useState, useMemo, useEffect } from "react";
@@ -82,6 +83,10 @@ export default function LeaveReports() {
     <DashboardLayout>
       <div className="p-10 max-w-350 mx-auto space-y-8 bg-slate-50/30 min-h-screen">
 
+        {isLoading ? (
+            <LeaveReportsSkeleton />
+          ) : (
+            <>
         {/* HEADER */}
         <header className="flex items-end justify-between border-b border-slate-200 pb-6">
           <div>
@@ -262,6 +267,7 @@ export default function LeaveReports() {
             </div>
           )}
         </div>
+        </>)}
 
         {/* DETAILS MODAL */}
         <LeaveDetailsModal
