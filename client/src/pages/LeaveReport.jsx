@@ -21,6 +21,8 @@ export default function LeaveReports() {
   const { data: leaves = [], isLoading } = useAllLeaves();
   const { data: users = [] } = useUsers();
 
+  const filteredUsers = users?.filter((u) => u.role == "employee");
+
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [month, setMonth] = useState("all");
@@ -156,7 +158,7 @@ export default function LeaveReports() {
                 className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm appearance-none bg-white cursor-pointer focus:border-indigo-500 outline-none"
               >
                 <option value="all">All Employees</option>
-                {users.map((u) => (
+                {filteredUsers.map((u) => (
                   <option key={u._id} value={u._id}>{u.name}</option>
                 ))}
               </select>

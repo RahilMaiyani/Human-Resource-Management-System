@@ -10,8 +10,11 @@ import AdminDocumentsSkeleton from "../components/AdminDocumentsSkeleton.jsx";
 import { Search } from "lucide-react";
 import DocumentPreviewModal from "../components/DocumentPreviewModal.jsx";
 import DeleteModal from "../components/DeleteModal.jsx";
+import { RotateCcw } from "lucide-react";
+import { useTitle } from "../hooks/useTitle.js";
 
 const AdminDocuments = () => {
+  useTitle("Documents")
   const { user } = useAuth();
   
   const { data: users = [], isLoading: isLoadingUsers } = useUsers();
@@ -21,6 +24,13 @@ const AdminDocuments = () => {
   const [searchText, setSearchText] = useState("");
   const [previewDoc, setPreviewDoc] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null); 
+
+  const resetSearch = () => {
+    setSearchText("");
+    setSelectedUserId("");
+    setDeleteTarget(null);
+    setPreviewDoc(null);
+  }
 
   const employees = useMemo(() => 
     (users || []).filter((u) => u.role === 'employee'), 
@@ -61,13 +71,12 @@ const AdminDocuments = () => {
   return (
     <DashboardLayout>
       <div className="p-6 space-y-6">
-        {/* 5. Use isLoadingUsers for the skeleton */}
         {isLoadingUsers ? (
           <AdminDocumentsSkeleton />
         ) : (
           <>
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Document Management</h1>
+              <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Document Management</h1>
               <p className="text-slate-500 mt-1 font-medium text-sm">View and manage employee documents</p>
             </div>
 
@@ -77,15 +86,24 @@ const AdminDocuments = () => {
                 Search Employee
               </label>
 
-              <div className="relative mb-3">
-                <Search className="absolute left-3 top-3 w-5 h-5 text-slate-300" />
-                <input
-                  type="text"
-                  placeholder="Type name to filter..."
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-                />
+              <div className="relative mb-3 flex gap-3">
+                <>
+                  <Search className="absolute left-3 top-3 w-5 h-5 text-slate-300" />
+                  <input
+                    type="text"
+                    placeholder="Type name to filter..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                  />
+                </>
+                <button 
+                  onClick={resetSearch} 
+                  className="flex items-center justify-center gap-2 h-10 border border-rose-200 bg-rose-50 text-rose-600 text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-rose-100 transition-colors w-30"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 " />
+                  <span>Clear</span>
+                </button>
               </div>
 
               <div className="space-y-2 max-h-50 overflow-y-auto border border-slate-100 rounded-lg p-1 custom-scrollbar">
