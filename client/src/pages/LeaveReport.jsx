@@ -10,7 +10,7 @@ import {
   Filter, 
   Calendar, 
   User as UserIcon, 
-  RotateCcw, 
+  RotateCcw,  
   ChevronLeft, 
   ChevronRight,
   FileText,
@@ -38,15 +38,11 @@ export default function LeaveReports() {
       const name = leave.userId?.name?.toLowerCase() || "";
       const email = leave.userId?.email?.toLowerCase() || "";
       const type = leave.type?.toLowerCase() || "";
-      const reason = leave.reason?.toLowerCase() || "";
-      const comment = leave.adminComment?.toLowerCase() || "";
 
       const searchMatch =
         name.includes(search.toLowerCase()) ||
         email.includes(search.toLowerCase()) ||
-        type.includes(search.toLowerCase()) ||
-        reason.includes(search.toLowerCase()) ||
-        comment.includes(search.toLowerCase());
+        type.includes(search.toLowerCase())
 
       const statusMatch = status === "all" || leave.status === status;
       const employeeMatch = employee === "all" || leave.userId?._id === employee;

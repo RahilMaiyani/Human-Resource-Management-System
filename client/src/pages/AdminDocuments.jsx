@@ -70,13 +70,13 @@ const AdminDocuments = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-10 space-y-6">
         {isLoadingUsers ? (
           <AdminDocumentsSkeleton />
         ) : (
           <>
             <div>
-              <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Document Management</h1>
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Document Management</h1>
               <p className="text-slate-500 mt-1 font-medium text-sm">View and manage employee documents</p>
             </div>
 

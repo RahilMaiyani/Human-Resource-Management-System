@@ -30,7 +30,7 @@ export default function Admin() {
   const { data: users = [], isLoading } = useUsers();
   const { data: leaves = [] } = useAllLeaves();
   const { data: recentLeaves = [] } = useRecentLeaves();
-  console.log(recentLeaves)
+  // console.log(recentLeaves)
   const [attendance, setAttendance] = useState([]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -43,7 +43,6 @@ export default function Admin() {
   const fetchAttendance = async () => {
       try {
         setAttendance(allAttendance);
-        
       } catch (err) {
         console.error("Attendance fetch error:", err); 
       }

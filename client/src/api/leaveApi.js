@@ -20,7 +20,6 @@ export const getRecentLeaves = async () => {
     return res.data;
 }
 
-
 export const updateLeaveRequest = async ({ id, status, adminComment }) => {
   const response = await API.patch(`/leaves/${id}`, {
     status,
