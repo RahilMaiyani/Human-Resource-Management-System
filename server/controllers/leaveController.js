@@ -50,15 +50,23 @@ export const getMyLeaves = async (req, res) => {
 
 export const getAllLeaves = async (req, res) => {
   try {
-    const leaves = await Leave.find()
-      .populate("userId", "name email profilePic")
-      .sort({ createdAt: -1 });
+    const leaves = await Leave.find().populate("userId", "name email profilePic").sort({ createdAt: -1 });
 
     res.json(leaves);
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
 };
+
+export const getRecentLeaves = async ( req, res) => {
+  try{
+    const recentLeaves = await Leave.find().sort({createdAt : -1}).limit(process.env.RECENT_LEAVES_NO);
+    res.json(recentLeaves);
+  }
+  catch(err){
+    res.status(500).json({msg : err.message});
+  }
+}
 
 export const getActiveLeaves = async (req, res) => {
   try {

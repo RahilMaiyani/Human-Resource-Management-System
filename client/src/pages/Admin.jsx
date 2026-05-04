@@ -12,7 +12,7 @@ import AdminDashboardSkeleton from "../components/AdminDashboardSkeleton";
 import EmailModal from "../components/EmailModal";
 import HoverItem from "../components/HoverItem";
 
-import { useAllLeaves } from "../hooks/useLeaves";
+import { useAllLeaves, useRecentLeaves } from "../hooks/useLeaves";
 import { useAllAttendance } from "../hooks/useAttendance";
 
 import { 
@@ -29,6 +29,8 @@ export default function Admin() {
   const queryClient = useQueryClient();
   const { data: users = [], isLoading } = useUsers();
   const { data: leaves = [] } = useAllLeaves();
+  const { data: recentLeaves = [] } = useRecentLeaves();
+  console.log(recentLeaves)
   const [attendance, setAttendance] = useState([]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -316,7 +318,7 @@ export default function Admin() {
 
           <div className="grid grid-cols-5 gap-8">
             <div className="col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-100">
-              <LeaveStatusChart leaves={leaves} />
+              <LeaveStatusChart leaves={recentLeaves} />
             </div>
             <div className="col-span-3 bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-100">
               <LeaveTrendChart leaves={leaves} />

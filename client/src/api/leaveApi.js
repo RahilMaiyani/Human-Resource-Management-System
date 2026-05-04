@@ -15,6 +15,12 @@ export const getAllLeaves = async () => {
     return res.data;
 }
 
+export const getRecentLeaves = async () => {
+    const res = await API.get("/leaves/recent");
+    return res.data;
+}
+
+
 export const updateLeaveRequest = async ({ id, status, adminComment }) => {
   const response = await API.patch(`/leaves/${id}`, {
     status,

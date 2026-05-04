@@ -5,7 +5,8 @@ import {
   getAllLeaves,
   updateLeaveStatus,
   getPendingLeavesCount,
-  getActiveLeaves
+  getActiveLeaves,
+  getRecentLeaves
 } from "../controllers/leaveController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -21,5 +22,6 @@ router.get("/", protect, authorize('admin'), getAllLeaves);
 router.patch("/:id", protect, authorize('admin'), updateLeaveStatus);
 router.get("/pending-count", protect, authorize('admin'), getPendingLeavesCount);
 router.get("/active", protect, authorize('admin'), getActiveLeaves);
+router.get("/recent", protect, authorize('admin'), getRecentLeaves);
 
 export default router;

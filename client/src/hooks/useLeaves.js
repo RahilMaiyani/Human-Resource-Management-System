@@ -5,7 +5,8 @@ import { applyLeave,
   getAllLeaves, 
   getMyLeaves, 
   updateLeaveRequest, 
-  getPendingLeavesCount
+  getPendingLeavesCount,
+  getRecentLeaves
  } from "../api/leaveApi";
 
 export const useApplyLeave = () => {
@@ -39,6 +40,12 @@ export const useAllLeaves = () => {
   });
 };
 
+export const useRecentLeaves = () => {
+  return useQuery({
+    queryKey : ["recentLeaves"],
+    queryFn : getRecentLeaves
+  });
+};
 
 export const useUpdateLeave = () => {
   const qc = useQueryClient();
