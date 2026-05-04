@@ -11,6 +11,7 @@ const DocumentUploadModal = ({ isOpen, onClose }) => {
   });
 
   const [fileError, setFileError] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
   const { uploadDocument, isUploading } = useDocuments();
 
   const handleTitleChange = (e) => {
@@ -21,11 +22,11 @@ const DocumentUploadModal = ({ isOpen, onClose }) => {
     setFormData((prev) => ({ ...prev, category: e.target.value }));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
+  // Shared file processing logic for both click and drop
+  const processFile = (file) => {
     if (!file) return;
 
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; 
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
     if (file.size > MAX_FILE_SIZE) {
       setFileError("File size must be less than 5MB");
       return;
@@ -52,6 +53,29 @@ const DocumentUploadModal = ({ isOpen, onClose }) => {
     setFormData((prev) => ({ ...prev, file }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    processFile(file);
+  };
+
+  // Drag and Drop Handlers
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    processFile(file);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -70,16 +94,13 @@ const DocumentUploadModal = ({ isOpen, onClose }) => {
       return;
     }
 
-    // Create FormData for multipart upload
     const data = new FormData();
     data.append("title", formData.title);
     data.append("category", formData.category);
     data.append("file", formData.file);
 
-    // Upload the document
     uploadDocument(data, {
       onSuccess: () => {
-        // Reset form and close modal
         setFormData({ title: "", category: "Other", file: null });
         setFileError("");
         onClose();
@@ -116,7 +137,7 @@ const DocumentUploadModal = ({ isOpen, onClose }) => {
           {/* Title Input */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Document Title *
+              Document Title
             </label>
             <input
               type="text"
@@ -131,7 +152,7 @@ const DocumentUploadModal = ({ isOpen, onClose }) => {
           {/* Category Select */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Category *
+              Category
             </label>
             <select
               value={formData.category}
@@ -140,16 +161,17 @@ const DocumentUploadModal = ({ isOpen, onClose }) => {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-colors disabled:bg-gray-50"
             >
               <option value="Contract">Contract</option>
+              <option value="Report">Report</option>
               <option value="ID Proof">ID Proof</option>
               <option value="Certification">Certification</option>
               <option value="Other">Other</option>
             </select>
           </div>
 
-          {/* File Input */}
+          {/* File Input with Drag and Drop */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select File (Max 5MB) *
+              Select or Drop File (Max 5MB)
             </label>
             <div className="relative">
               <input
@@ -162,13 +184,22 @@ const DocumentUploadModal = ({ isOpen, onClose }) => {
               />
               <label
                 htmlFor="file-input"
-                className="flex items-center justify-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-indigo-500 transition-colors disabled:opacity-50"
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`flex items-center justify-center gap-3 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition-colors disabled:opacity-50 ${
+                  isDragging
+                    ? "border-indigo-500 bg-indigo-50"
+                    : "border-gray-300 hover:border-indigo-500"
+                }`}
               >
-                <Upload className="w-5 h-5 text-gray-400" />
+                <Upload className={`w-5 h-5 ${isDragging ? "text-indigo-500" : "text-gray-400"}`} />
                 <span className="text-sm text-gray-600">
                   {formData.file
                     ? formData.file.name
-                    : "Click to select file"}
+                    : isDragging
+                    ? "Drop file to upload"
+                    : "Click or drag to select file"}
                 </span>
               </label>
             </div>

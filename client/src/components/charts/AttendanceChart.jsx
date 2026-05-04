@@ -49,6 +49,10 @@ export default function AttendanceChart({ data }) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: "index",
+      intersect: false
+    },
     plugins: {
       legend: {
         display: false, 
