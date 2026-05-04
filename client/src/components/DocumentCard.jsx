@@ -9,6 +9,8 @@ const DocumentCard = ({ document, onDelete, isDeleting, onPreview }) => {
   const isOwner = !!user && ownerId && ownerId === user._id;
   const canDelete = user?.role === "admin" || isOwner;
   const fileType = document.fileType?.toLowerCase() || "file";
+  // console.log(document)
+  const downloadUrl = document.fileUrl?.replace('/upload/', `/upload/fl_attachment:${document?.title}/`);
 
   const formattedDate = document.createdAt
     ? new Date(document.createdAt).toLocaleDateString(undefined, {
@@ -61,10 +63,10 @@ const DocumentCard = ({ document, onDelete, isDeleting, onPreview }) => {
               Preview
             </button>
           ) : null}
-
+          
           <a
-            href={document.fileUrl}
-            target="_blank"
+            href={downloadUrl}
+            // target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition"
           >

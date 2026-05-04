@@ -2,6 +2,7 @@ import { X, Download, ExternalLink, FileWarning } from 'lucide-react';
 
 export default function DocumentPreviewModal({ previewDoc, closePreview }) {
   if (!previewDoc) return null;
+  const downloadLink = previewDoc.fileUrl?.replace('/upload/', `/upload/fl_attachment:${previewDoc?.title}/`);
 
   return (
     <div
@@ -25,11 +26,10 @@ export default function DocumentPreviewModal({ previewDoc, closePreview }) {
 
           <div className="flex items-center gap-2">
             <a
-              href={previewDoc.fileUrl}
+              href={downloadLink}
               download
               className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
               title="Download"
-              target="_blank"
             >
               <Download className="w-5 h-5" />
             </a>
