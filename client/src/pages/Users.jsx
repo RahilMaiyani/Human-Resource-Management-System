@@ -33,6 +33,7 @@ export default function Users() {
 
   const { user } = useAuth();
   const { data: users = [], isLoading } = useUsers();
+  const totalUsers = users?.length;
   const deleteMutation = useDeleteUser();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -80,7 +81,7 @@ export default function Users() {
         ) : (
         <>
 
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-slate-200 pb-8">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-3 border-b border-slate-200 pb-6">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">User Management</h1>
             <p className="text-slate-500 text-sm mt-1 font-medium">Manage employee access, roles, and departmental assignments.</p>
@@ -113,6 +114,9 @@ export default function Users() {
               </select>
             </div>
           </div>
+        </div>
+        <div className="flex justify-end text-sm text-slate-500 mb-4 mr-5">
+          <span>Total Users : {totalUsers}</span>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
