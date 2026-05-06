@@ -163,9 +163,9 @@ export default function AttendanceHistory() {
               </div>
             ))
           ) : (
-            <EmptyState 
-              iconType="attendance" 
-              message="You haven't logged any shifts for this month yet." 
+            <EmptyState
+              iconType="attendance"
+              message="You haven't logged any shifts for this month yet."
             />
           )
         )}

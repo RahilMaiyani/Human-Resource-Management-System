@@ -3,7 +3,6 @@ import { useUsers, useDeleteUser } from "../hooks/useUsers";
 import { useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import UserModal from "../components/UserModal";
-import PageLoader from "../components/PageLoader";
 import UsersTableSkeleton from "../components/UsersTableSkeleton";
 import DeleteModal from "../components/DeleteModal";
 import UserDetailsModal from "../components/UserDetailsModal";
@@ -18,7 +17,6 @@ import {
   Mail,
   Briefcase
 } from "lucide-react";
-import { deleteUser } from "../api/userApi";
 
 export default function Users() {
   useTitle("Employees")
@@ -65,8 +63,6 @@ export default function Users() {
     const start = (currentPage - 1) * USERS_PER_PAGE;
     return filteredUsers.slice(start, start + USERS_PER_PAGE);
   }, [filteredUsers, currentPage]);
-
-  // if (isLoading) return <PageLoader />;
 
   return (
     <DashboardLayout

@@ -16,10 +16,10 @@ export const useDocuments = () => {
     isLoading : isLoadingDocuments,
     error: documentsError,
     refetch :refetchDocuments,
-  } = useQuery({
-    queryKey: ["myDocuments"],
-    queryFn: getMyDocumentsApi,
-    select: (data) => data.data,
+    } = useQuery({
+      queryKey: ["myDocuments"],
+      queryFn: getMyDocumentsApi,
+      select: (data) => data.data,
   });
 
   const uploadMutation = useMutation({
@@ -94,5 +94,5 @@ export const useUserDocuments = (userId) => {
     isLoadingUserDocuments,
     userDocumentsError,
   };
-  
+
 };

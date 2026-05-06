@@ -1,7 +1,6 @@
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useUsers } from "../hooks/useUsers";
 import { useEffect, useState } from "react";
-// import PageLoader from "../components/PageLoader";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTitle } from "../hooks/useTitle";
 import AttendanceChart from "../components/charts/AttendanceChart";
@@ -62,8 +61,6 @@ export default function Admin() {
     ]);
     setTimeout(() => setIsRefreshing(false), 600);
   };
-
-  // if (isLoading) return <PageLoader />;
 
   const employees = users.filter((u) => u.role !== "admin");
   const employeeIds = new Set(employees.map((u) => u._id));
