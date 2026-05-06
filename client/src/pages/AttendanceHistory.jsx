@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
-import PageLoader from "../components/PageLoader";
 import { useTitle } from "../hooks/useTitle";
 import { 
   ChevronLeft, 
@@ -12,7 +11,7 @@ import AttendanceRowSkeleton from "../components/AttendanceRowSkeleton";
 import EmptyState from "../components/EmptyState";
 
 export default function AttendanceHistory() {
-  useTitle("Attendance")
+  useTitle("Attendance");
 
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -28,8 +27,6 @@ export default function AttendanceHistory() {
   }, [filterData]);
 
   const { data, isLoading, isFetching } = useAttendanceHistory(selectedMonth, selectedYear, page);
-
-  // if (isLoading) return <PageLoader />; 
 
   const { logs = [], pagination = {} } = data || {};
 
@@ -112,6 +109,7 @@ export default function AttendanceHistory() {
                     <span className="text-[10px] font-black text-slate-400 uppercase leading-none">
                       {new Date(log.date).toLocaleDateString('en-US', { month: 'short' })}
                     </span>
+                    
                     <span className="text-xl font-black text-slate-700 group-hover:text-indigo-600 transition-colors mt-1">
                       {new Date(log.date).getDate()}
                     </span>
@@ -197,7 +195,6 @@ export default function AttendanceHistory() {
             </div>
           </div>
         )}
-        
       </div>
     </DashboardLayout>
   );

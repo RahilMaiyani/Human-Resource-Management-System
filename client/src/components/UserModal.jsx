@@ -58,15 +58,15 @@ export default function UserModal({ isOpen, onClose, editUser }) {
       return;
     }
 
-    if (file.size > MAX_IMAGE_SIZE) {
-      setImageError("Maximum size is 2MB");
+    if(file.size > MAX_IMAGE_SIZE) {
+      setImageError("Maximum size is 2 MB");
       return;
     }
 
     setImageError("");
     const reader = new FileReader();
     reader.onloadend = () => setPreview(reader.result);
-    reader.readAsDataURL(file);
+    reader.readAsDataUrl(file);
   };
 
   const onSubmit = (data) => {

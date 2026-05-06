@@ -13,9 +13,9 @@ export const useDocuments = () => {
 
   const {
     data: documentsData,
-    isLoading: isLoadingDocuments,
+    isLoading : isLoadingDocuments,
     error: documentsError,
-    refetch: refetchDocuments,
+    refetch :refetchDocuments,
   } = useQuery({
     queryKey: ["myDocuments"],
     queryFn: getMyDocumentsApi,
@@ -87,11 +87,12 @@ export const useUserDocuments = (userId) => {
     queryFn: () => getUserDocumentsApi(userId),
     select: (data) => data.data,
     enabled: !!userId,
-  });
+});
 
   return {
     documents: documentsData?.documents || [],
     isLoadingUserDocuments,
     userDocumentsError,
   };
+  
 };
