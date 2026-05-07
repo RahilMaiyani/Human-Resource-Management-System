@@ -62,7 +62,7 @@ export const getAllTickets = async (req, res) => {
 export const addReply = async (req, res) => {
   try {
     const { message, userName } = req.body;
-    console.log(req.body);
+    // console.log(req.body);
     const ticket = await Ticket.findById(req.params.id);
 
     if (!ticket) return res.status(404).json({ msg: "Ticket not found" });
