@@ -9,7 +9,7 @@ import { useAddReply, useUpdateTicketStatus } from "../hooks/useTickets";
 const TicketDetailModal = ({ ticket, onClose }) => {
   const { user } = useAuth();
   const [replyText, setReplyText] = useState("");
-  const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false); // Custom Menu State
+  const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false);
   const messagesEndRef = useRef(null);
   const menuRef = useRef(null);
 
@@ -46,7 +46,7 @@ const TicketDetailModal = ({ ticket, onClose }) => {
   const handleSendReply = (e) => {
     e.preventDefault();
     if (!replyText.trim()) return;
-    sendReply({ id: ticket._id, message: replyText });
+    sendReply({ id: ticket._id, message: replyText, userName : user.name });
   };
 
   const handleCloseTicket = () => {
@@ -115,7 +115,7 @@ const TicketDetailModal = ({ ticket, onClose }) => {
                 </span>
               )}
             </div>
-            <h2 className="text-2xl font-black text-slate-900 leading-tight">{ticket.subject}</h2>
+            <div className="text-2xl font-bold text-slate-900 leading-tight">{ticket.subject}</div>
           </div>
           
           <button onClick={onClose} className="ml-4 text-slate-400 hover:text-slate-900 p-2.5 bg-slate-50 rounded-full transition-all shrink-0">
@@ -142,14 +142,14 @@ const TicketDetailModal = ({ ticket, onClose }) => {
           {ticket.replies?.map((reply, index) => {
             const isMe = reply.senderId === user._id;
             const isAdmin = reply.role === 'admin';
-
+            // console.log(reply)
             return (
               <div key={index} className={`flex flex-col ${isMe ? "items-end" : "items-start"} max-w-[90%] ${isMe ? "ml-auto" : "mr-auto"}`}>
                 <span className={`text-[10px] font-bold mb-2 mx-2 uppercase tracking-widest ${isAdmin && !isMe ? "text-indigo-600" : "text-slate-400"}`}>
                   {isMe ? "You" : reply.senderName} {isAdmin && !isMe && "• ADMIN"}
                 </span>
                 
-                <div className={`px-5 py-3.5 rounded-3xl text-[14px] whitespace-pre-wrap leading-relaxed shadow-sm font-medium ${
+                <div className={`px-5 py-3.5 rounded-3xl text-[14px] whitespace-pre-wrap leading-relaxed shadow-sm font-medium hover:scale-105 transition duration-75 ease-in ${
                   isMe 
                     ? "bg-indigo-600 text-white rounded-tr-none shadow-indigo-200" 
                     : "bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-slate-100"

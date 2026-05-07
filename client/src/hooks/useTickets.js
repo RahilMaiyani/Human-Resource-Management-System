@@ -13,7 +13,6 @@ export const useCreateTicket = (onSuccess, onError) => {
   return useMutation({
     mutationFn: createTicket,
     onSuccess: (data) => {
-      // V5 SYNTAX FIX: Must wrap array in { queryKey: ... }
       qc.invalidateQueries({ queryKey: ["my-tickets"] });
       onSuccess?.(data);
     },

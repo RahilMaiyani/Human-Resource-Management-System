@@ -188,12 +188,18 @@ const AdminHelpdesk = () => {
                       <td className="p-4">
                         {getStatusBadge(ticket.status)}
                       </td>
-                      <td className="p-4">
-                        <button className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors shadow-sm">
-                          <MessageSquare className="w-3.5 h-3.5" />
-                          {ticket.replies?.length > 0 ? "Reply" : "Review"}
-                        </button>
-                      </td>
+                      { ticket.status !== "Closed" ? (
+                        <td className="p-4">
+                          <button className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors shadow-sm">
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            {ticket.replies?.length > 0 ? "Reply" : "Review"}
+                          </button>
+                        </td>
+                      ) : (
+                        <td className="p-4">
+                          <span className="text-xs font-bold text-slate-400">Archived</span>
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}

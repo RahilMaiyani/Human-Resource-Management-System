@@ -61,28 +61,27 @@ export const getAllTickets = async (req, res) => {
 
 export const addReply = async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, userName } = req.body;
+    console.log(req.body);
     const ticket = await Ticket.findById(req.params.id);
 
     if (!ticket) return res.status(404).json({ msg: "Ticket not found" });
 
     const currentUserId = req.user._id || req.user.id;
     const userRole = req.user.role?.toLowerCase();
-
-    // Security Check
     if (userRole !== "admin" && ticket.userId.toString() !== currentUserId.toString()) {
       return res.status(403).json({ msg: "Not authorized to reply to this ticket" });
     }
 
     // console.log(req.user);
-    // console.log(req.user)
+    // console.log(user)
     const newReply = {
       senderId: currentUserId,
-      senderName: req.user.name || "Unknown User",
+      senderName: userName || "Unknown User",
       role: userRole,
       message
     };
-
+    // console.log(newReply)
     ticket.replies.push(newReply);
 
     // Auto-reopen ticket if employee replies to a Resolved ticket
@@ -91,6 +90,7 @@ export const addReply = async (req, res) => {
     }
 
     await ticket.save();
+    // await console.log(">>>>>>> User is here", req.user)
     res.status(200).json(ticket);
   } catch (error) {
     console.error("--> ADD REPLY FAILED:", error);

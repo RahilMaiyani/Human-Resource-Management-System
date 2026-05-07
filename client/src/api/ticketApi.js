@@ -15,8 +15,8 @@ export const getAllTickets = async () => {
   return res.data;
 };
 
-export const addReply = async ({ id, message }) => {
-  const res = await API.post(`/tickets/${id}/reply`, { message });
+export const addReply = async ({ id, message, userName }) => {
+  const res = await API.post(`/tickets/${id}/reply`, { message, userName });
   return res.data;
 };
 
