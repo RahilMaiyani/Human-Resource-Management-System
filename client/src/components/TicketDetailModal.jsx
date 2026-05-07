@@ -19,7 +19,6 @@ const TicketDetailModal = ({ ticket, onClose }) => {
 
   useEffect(() => { scrollToBottom(); }, [ticket?.replies]);
 
-  // Close status menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
