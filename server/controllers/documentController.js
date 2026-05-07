@@ -85,7 +85,6 @@ export const getDocumentById = async (req, res) => {
   }
 };
 
-
 export const deleteDocument = async (req, res) => {
   try {
     const { id } = req.params;

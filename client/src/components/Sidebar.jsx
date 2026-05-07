@@ -9,7 +9,8 @@ import {
   ShieldCheck,
   DoorOpen,
   Vault,
-  FileBox
+  FileBox,
+  LifeBuoy // NEW: Added icon for Helpdesk
 } from "lucide-react";
 
 export default function Sidebar({ user }) {
@@ -39,7 +40,7 @@ export default function Sidebar({ user }) {
       </div>
 
       {/* NAVIGATION */}
-      <nav className="flex-1 px-4 space-y-2">
+      <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
         
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 ml-4">
           Main Menu
@@ -92,6 +93,15 @@ export default function Sidebar({ user }) {
               <FileBox className="w-5 h-5" />
               Documents
             </Link>
+
+            {/* NEW: Admin Helpdesk */}
+            <Link 
+              to="/admin/helpdesk" 
+              className={`${baseClass} ${isActive("/admin/helpdesk") ? activeClass : inactiveClass}`}
+            >
+              <LifeBuoy className="w-5 h-5" />
+              Helpdesk
+            </Link>
           </>
         )}
 
@@ -128,6 +138,15 @@ export default function Sidebar({ user }) {
             >
               <Vault className="w-5 h-5" />
               Document Vault
+            </Link>
+
+            {/* NEW: Employee Helpdesk */}
+            <Link
+              to="/employee/helpdesk"
+              className={`${baseClass} ${isActive("/employee/helpdesk") ? activeClass : inactiveClass}`}
+            >
+              <LifeBuoy className="w-5 h-5" />
+              Support Helpdesk
             </Link>
           </>
         )}

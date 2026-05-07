@@ -9,7 +9,7 @@ import errorMiddleware from "./middleware/errorMiddleware.js";
 import leaveRoutes from "./routes/leaveRoutes.js";
 import emailRoutes from "./routes/emailRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
-import ticketRoutes from "./routes/ticketRoutes.js";
+import ticketRoutes from './routes/ticketRoutes.js'
 import { apiLimiter } from "./middleware/rateLimiter.js";
 
 dotenv.config();
