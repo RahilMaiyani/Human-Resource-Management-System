@@ -2,7 +2,7 @@ import { useState } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import EmptyState from "../components/EmptyState";
 import { useMyTickets } from "../hooks/useTickets";
-import { Plus, Ticket as TicketIcon, Clock, MessageSquare } from "lucide-react";
+import { Plus, Ticket as TicketIcon, Clock, MessageSquare, ArrowRight } from "lucide-react";
 import CreateTicketModal from "../components/CreateTicketModal"; 
 import TicketDetailModal from "../components/TicketDetailModal";
 
@@ -24,12 +24,12 @@ const EmployeeHelpdesk = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="p-10 max-w-7xl mx-auto space-y-6">
         
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">IT & HR Helpdesk</h1>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">IT & HR Helpdesk</h1>
             <p className="text-slate-500 mt-1 text-sm font-medium">Need assistance? Raise a ticket and we'll help you out.</p>
           </div>
           
@@ -42,11 +42,25 @@ const EmployeeHelpdesk = () => {
           </button>
         </div>
 
-        {/* Tickets Grid */}
+        {/* Tickets List */}
         {isLoading ? (
-          <div className="animate-pulse space-y-4">
+          // BEAUTIFUL SKELETON LOADER
+          <div className="space-y-4">
             {[1, 2, 3].map((n) => (
-              <div key={n} className="h-24 bg-slate-100 rounded-xl border border-slate-200 w-full"></div>
+              <div key={n} className="bg-white border border-slate-200 rounded-xl p-5 sm:p-6 animate-pulse flex flex-col sm:flex-row justify-between gap-4">
+                <div className="space-y-3 w-full">
+                  <div className="flex gap-2">
+                    <div className="h-5 w-16 bg-slate-200 rounded-full"></div>
+                    <div className="h-5 w-20 bg-slate-200 rounded-full"></div>
+                  </div>
+                  <div className="h-5 w-3/4 bg-slate-200 rounded"></div>
+                  <div className="flex gap-4">
+                    <div className="h-4 w-24 bg-slate-100 rounded"></div>
+                    <div className="h-4 w-24 bg-slate-100 rounded"></div>
+                  </div>
+                </div>
+                <div className="h-10 w-28 bg-slate-100 rounded-lg shrink-0"></div>
+              </div>
             ))}
           </div>
         ) : tickets.length === 0 ? (
@@ -56,47 +70,58 @@ const EmployeeHelpdesk = () => {
             description="You don't have any open requests. Everything must be running smoothly!" 
           />
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="space-y-4">
             {tickets.map((ticket) => (
               <div 
                 key={ticket._id}
                 onClick={() => setSelectedTicket(ticket)}
-                className="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md transition-shadow cursor-pointer group"
+                className="bg-white border border-slate-200 rounded-xl p-5 sm:p-6 hover:shadow-md hover:border-indigo-200 transition-all cursor-pointer group"
               >
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
                   
-                  {/* Left Side: Info */}
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-bold text-slate-400">{ticket.ticketId}</span>
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${getStatusColor(ticket.status)}`}>
+                  {/* Left Side: Badges & Info */}
+                  <div className="flex-1 space-y-2.5">
+                    
+                    {/* Top Row: Badges */}
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${getStatusColor(ticket.status)}`}>
                         {ticket.status}
                       </span>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
+                        ticket.priority === 'Urgent' ? 'bg-rose-50 text-rose-600 border-rose-200' : 
+                        ticket.priority === 'High' ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-slate-50 text-slate-600 border-slate-200'
+                      }`}>
+                        {ticket.priority} Priority
+                      </span>
                     </div>
-                    <h3 className="text-lg font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">
+
+                    {/* Subject Line */}
+                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight">
                       {ticket.subject}
                     </h3>
-                    <div className="flex items-center gap-4 text-xs text-slate-500 font-medium">
-                      <span className="flex items-center gap-1"><TicketIcon className="w-3.5 h-3.5" /> {ticket.category}</span>
-                      <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {new Date(ticket.createdAt).toLocaleDateString()}</span>
+
+                    {/* Bottom Row: Metadata */}
+                    <div className="flex items-center gap-5 text-xs text-slate-500 font-medium">
+                      <span className="flex items-center gap-1.5"><TicketIcon className="w-3.5 h-3.5" /> {ticket.category}</span>
+                      <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {new Date(ticket.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
 
-                  {/* Right Side: Priority & Replies */}
-                  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2">
-                    <span className={`text-xs font-bold px-2.5 py-1 rounded-md ${
-                      ticket.priority === 'Urgent' ? 'bg-rose-50 text-rose-600' : 
-                      ticket.priority === 'High' ? 'bg-orange-50 text-orange-600' : 'bg-slate-50 text-slate-600'
-                    }`}>
-                      {ticket.priority} Priority
-                    </span>
-                    
-                    {ticket.replies?.length > 0 && (
-                      <span className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        {ticket.replies.length} Replies
-                      </span>
-                    )}
+                  {/* Right Side: Action Button */}
+                  <div className="w-full sm:w-auto shrink-0 pt-2 sm:pt-0 border-t border-slate-100 sm:border-0 mt-2 sm:mt-0">
+                    <button className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm font-bold text-indigo-600 bg-indigo-50 group-hover:bg-indigo-100 px-4 py-2.5 rounded-lg transition-colors">
+                      {ticket.replies?.length > 0 ? (
+                        <>
+                          <MessageSquare className="w-4 h-4" />
+                          <span>{ticket.replies.length} Replies</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>View Ticket</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
                   </div>
 
                 </div>
@@ -106,16 +131,15 @@ const EmployeeHelpdesk = () => {
         )}
       </div>
 
-        <CreateTicketModal
-         isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
-        /> 
+      <CreateTicketModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      /> 
 
-<TicketDetailModal 
-  // Look for the fresh ticket in the React Query array. If not found, use selectedTicket as fallback.
-  ticket={tickets.find(t => t._id === selectedTicket?._id) || selectedTicket} 
-  onClose={() => setSelectedTicket(null)} 
-/>
+      <TicketDetailModal 
+        ticket={tickets.find(t => t._id === selectedTicket?._id) || selectedTicket} 
+        onClose={() => setSelectedTicket(null)} 
+      />
 
     </DashboardLayout>
   );

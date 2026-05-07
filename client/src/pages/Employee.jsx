@@ -84,7 +84,7 @@ export default function Employee() {
 
   return (
     <DashboardLayout>
-      <div className="p-10 max-w-300 mx-auto space-y-8 bg-slate-50/30 min-h-screen">
+      <div className="p-8 max-w-300 mx-auto space-y-8 bg-slate-50/30 min-h-screen">
         
         <header className="flex items-end justify-between border-b border-slate-200 pb-6">
           <div>

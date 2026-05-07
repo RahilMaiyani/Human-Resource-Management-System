@@ -10,7 +10,7 @@ const DocumentVault = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6">
+      <div className="p-10">
         <DocumentList onUploadClick={() => setIsUploadModalOpen(true)} />
         <DocumentUploadModal
           isOpen={isUploadModalOpen}

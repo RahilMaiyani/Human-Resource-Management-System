@@ -62,3 +62,29 @@ export const useUpdateTicketStatus = (onSuccess, onError) => {
     onError
   });
 };
+
+// Add/Replace at the bottom of client/src/hooks/useTickets.js
+
+export const useActiveTicketCount = (isAdmin) => {
+  // We call both hooks but only "enable" the one we need
+  const myTickets = useQuery({
+    queryKey: ["my-tickets"],
+    queryFn: getMyTickets,
+    enabled: !isAdmin,
+  });
+
+  const allTickets = useQuery({
+    queryKey: ["all-tickets"],
+    queryFn: getAllTickets,
+    enabled: isAdmin,
+  });
+
+  const targetData = isAdmin ? allTickets.data : myTickets.data;
+
+  // Calculate count: Only "Open" or "In-Progress" tickets
+  if (!targetData || !Array.isArray(targetData)) return 0;
+
+  return targetData.filter(
+    (ticket) => ticket.status === "Open" || ticket.status === "In-Progress"
+  ).length;
+};

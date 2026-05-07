@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { usePendingLeavesCount } from "../hooks/useLeaves";
+import { useActiveTicketCount } from "../hooks/useTickets"; // NEW IMPORT
 import { 
   LayoutDashboard, 
   Users, 
@@ -10,13 +11,16 @@ import {
   DoorOpen,
   Vault,
   FileBox,
-  LifeBuoy // NEW: Added icon for Helpdesk
+  LifeBuoy 
 } from "lucide-react";
 
 export default function Sidebar({ user }) {
   const location = useLocation();
   const isAdmin = user?.role === "admin";
+  
+  // Custom Hooks for Badges
   const { data: pendingCount = 0 } = usePendingLeavesCount(isAdmin);
+  const activeTicketCount = useActiveTicketCount(isAdmin);
 
   const isActive = (path) => location.pathname === path;
 
@@ -94,13 +98,18 @@ export default function Sidebar({ user }) {
               Documents
             </Link>
 
-            {/* NEW: Admin Helpdesk */}
+            {/* Admin Helpdesk with Badge */}
             <Link 
               to="/admin/helpdesk" 
               className={`${baseClass} ${isActive("/admin/helpdesk") ? activeClass : inactiveClass}`}
             >
               <LifeBuoy className="w-5 h-5" />
-              Helpdesk
+              <span className="flex-1">Helpdesk</span>
+              {activeTicketCount > 0 && (
+                <span className="flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-black bg-blue-500 text-white rounded-full ring-4 ring-slate-950 animate-in zoom-in duration-300">
+                  {activeTicketCount}
+                </span>
+              )}
             </Link>
           </>
         )}
@@ -140,13 +149,18 @@ export default function Sidebar({ user }) {
               Document Vault
             </Link>
 
-            {/* NEW: Employee Helpdesk */}
+            {/* Employee Helpdesk with Badge */}
             <Link
               to="/employee/helpdesk"
               className={`${baseClass} ${isActive("/employee/helpdesk") ? activeClass : inactiveClass}`}
             >
               <LifeBuoy className="w-5 h-5" />
-              Support Helpdesk
+              <span className="flex-1">Support Helpdesk</span>
+              {activeTicketCount > 0 && (
+                <span className="flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-black bg-blue-500 text-white rounded-full ring-4 ring-slate-950 animate-in zoom-in duration-300">
+                  {activeTicketCount}
+                </span>
+              )}
             </Link>
           </>
         )}

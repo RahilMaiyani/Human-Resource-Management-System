@@ -30,21 +30,21 @@ const AdminHelpdesk = () => {
   // Helper for status badges
   const getStatusBadge = (status) => {
     const styles = {
-      "Open": "bg-yellow-100 text-yellow-800",
-      "In-Progress": "bg-blue-100 text-blue-800",
-      "Resolved": "bg-emerald-100 text-emerald-800",
-      "Closed": "bg-slate-100 text-slate-800"
+      "Open": "bg-yellow-100 text-yellow-800 border-yellow-200",
+      "In-Progress": "bg-blue-100 text-blue-800 border-blue-200",
+      "Resolved": "bg-emerald-100 text-emerald-800 border-emerald-200",
+      "Closed": "bg-slate-100 text-slate-800 border-slate-200"
     };
-    return <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${styles[status]}`}>{status}</span>;
+    return <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${styles[status]}`}>{status}</span>;
   };
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="p-10 max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Helpdesk Command Center</h1>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Helpdesk Command Center</h1>
           <p className="text-slate-500 mt-1 text-sm font-medium">Manage and resolve employee support tickets.</p>
         </div>
 
@@ -93,7 +93,7 @@ const AdminHelpdesk = () => {
         {/* Data Table */}
         <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse whitespace-nowrap">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-bold">
                   <th className="p-4">Employee</th>
@@ -105,14 +105,36 @@ const AdminHelpdesk = () => {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {isLoading ? (
-                  <tr>
-                    <td colSpan="5" className="p-8 text-center">
-                      <div className="animate-pulse flex flex-col items-center gap-4">
+                  // BEAUTIFUL SKELETON LOADER
+                  [...Array(5)].map((_, i) => (
+                    <tr key={i} className="animate-pulse bg-white">
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-slate-200 rounded-full shrink-0"></div>
+                          <div className="space-y-2">
+                            <div className="h-4 w-28 bg-slate-200 rounded"></div>
+                            <div className="h-3 w-36 bg-slate-100 rounded"></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4 space-y-2">
                         <div className="h-4 w-48 bg-slate-200 rounded"></div>
-                        <div className="h-4 w-64 bg-slate-200 rounded"></div>
-                      </div>
-                    </td>
-                  </tr>
+                        <div className="flex gap-2">
+                          <div className="h-3 w-16 bg-slate-100 rounded"></div>
+                          <div className="h-3 w-20 bg-slate-100 rounded"></div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="h-4 w-16 bg-slate-200 rounded"></div>
+                      </td>
+                      <td className="p-4">
+                        <div className="h-6 w-20 bg-slate-200 rounded-full"></div>
+                      </td>
+                      <td className="p-4">
+                        <div className="h-8 w-20 bg-slate-200 rounded-lg"></div>
+                      </td>
+                    </tr>
+                  ))
                 ) : filteredTickets.length === 0 ? (
                   <tr>
                     <td colSpan="5" className="p-0">
@@ -132,20 +154,27 @@ const AdminHelpdesk = () => {
                     >
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
-                            {ticket.userId?.name?.charAt(0) || "U"}
-                          </div>
+                          <img
+                            src={ticket.userId?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(ticket.userId?.name || "User")}&background=f1f5f9&color=475569`}
+                            className="w-10 h-10 rounded-full object-cover border border-slate-100 shadow-sm transition-transform group-hover:scale-105 shrink-0"
+                            alt="Employee"
+                          />
                           <div>
-                            <p className="text-sm font-bold text-slate-900">{ticket.userId?.name}</p>
-                            <p className="text-xs text-slate-500">{ticket.userId?.email}</p>
+                            <p className="text-sm font-bold text-slate-900">{ticket.userId?.name || "Unknown User"}</p>
+                            <p className="text-xs text-slate-500">{ticket.userId?.email || "No email"}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="p-4">
-                        <p className="text-sm font-bold text-slate-800 group-hover:text-indigo-600 transition-colors line-clamp-1">{ticket.subject}</p>
+                      <td className="p-4 max-w-xs">
+                        <p className="text-sm font-bold text-slate-800 group-hover:text-indigo-600 transition-colors truncate">
+                          {ticket.subject}
+                        </p>
                         <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
-                          <span>{ticket.category}</span>
-                          <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(ticket.createdAt).toLocaleDateString()}</span>
+                          <span className="font-medium">{ticket.category}</span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> 
+                            {new Date(ticket.createdAt).toLocaleDateString()}
+                          </span>
                         </div>
                       </td>
                       <td className="p-4">
@@ -160,7 +189,7 @@ const AdminHelpdesk = () => {
                         {getStatusBadge(ticket.status)}
                       </td>
                       <td className="p-4">
-                        <button className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">
+                        <button className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors shadow-sm">
                           <MessageSquare className="w-3.5 h-3.5" />
                           {ticket.replies?.length > 0 ? "Reply" : "Review"}
                         </button>
@@ -174,7 +203,7 @@ const AdminHelpdesk = () => {
         </div>
       </div>
 
-      {/* Reuse the exact same modal from the Employee side! */}
+      {/* Detail Modal */}
       <TicketDetailModal 
         ticket={tickets.find(t => t._id === selectedTicket?._id) || selectedTicket} 
         onClose={() => setSelectedTicket(null)} 

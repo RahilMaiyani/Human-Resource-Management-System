@@ -2,12 +2,11 @@ import Ticket from "../models/Ticket.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import { buildEmailTemplate } from "../utils/emailTemplate.js";
 
-// @desc    Create a new ticket
 export const createTicket = async (req, res) => {
   try {
-    console.log("--> Hit createTicket API");
-    console.log("User Requesting:", req.user);
-    console.log("Body Data:", req.body);
+    // console.log("--> Hit createTicket API");
+    // console.log("User Requesting:", req.user);
+    // console.log("Body Data:", req.body);
 
     // Ensure role check is case-insensitive
     if (req.user.role?.toLowerCase() === "admin") {
@@ -16,11 +15,10 @@ export const createTicket = async (req, res) => {
 
     const { subject, description, category, priority } = req.body;
     
-    // Fallback to guarantee we get the ID correctly
     const currentUserId = req.user._id || req.user.id;
 
     if (!currentUserId) {
-      console.log("Error: No User ID found in request.");
+      // console.log("Error: No User ID found in request.");
       return res.status(400).json({ msg: "Authentication error: User ID missing" });
     }
 
@@ -32,7 +30,7 @@ export const createTicket = async (req, res) => {
       priority
     });
 
-    console.log("--> Ticket Created Successfully:", newTicket._id);
+    // console.log("--> Ticket Created Successfully:", newTicket._id);
     res.status(201).json(newTicket);
   } catch (error) {
     console.error("--> TICKET CREATION FAILED:", error);
@@ -40,7 +38,6 @@ export const createTicket = async (req, res) => {
   }
 };
 
-// @desc    Get tickets for logged-in user
 export const getMyTickets = async (req, res) => {
   try {
     const currentUserId = req.user._id || req.user.id;
@@ -52,7 +49,6 @@ export const getMyTickets = async (req, res) => {
   }
 };
 
-// @desc    Get ALL tickets
 export const getAllTickets = async (req, res) => {
   try {
     const tickets = await Ticket.find().populate("userId", "name email profilePic").sort("-createdAt");
@@ -63,7 +59,6 @@ export const getAllTickets = async (req, res) => {
   }
 };
 
-// @desc    Add a chat reply
 export const addReply = async (req, res) => {
   try {
     const { message } = req.body;
@@ -79,8 +74,8 @@ export const addReply = async (req, res) => {
       return res.status(403).json({ msg: "Not authorized to reply to this ticket" });
     }
 
-    console.log(req.user);
-    // console.log()
+    // console.log(req.user);
+    // console.log(req.user)
     const newReply = {
       senderId: currentUserId,
       senderName: req.user.name || "Unknown User",
@@ -103,7 +98,6 @@ export const addReply = async (req, res) => {
   }
 };
 
-// @desc    Update ticket status
 export const updateTicketStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -114,7 +108,6 @@ export const updateTicketStatus = async (req, res) => {
     ticket.status = status;
     await ticket.save();
 
-    // Trigger Email conditionally (wrap in try/catch so email failure doesn't break the DB update)
     if (status === "Resolved") {
       try {
         const html = buildEmailTemplate({
