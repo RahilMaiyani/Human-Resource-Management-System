@@ -142,6 +142,7 @@ export default function Admin() {
                 <Users className="w-5 h-5" />
               </div>
             </div>
+            
             <div className="mt-4 flex items-center text-[10px] font-bold text-emerald-600 bg-emerald-50 w-fit px-2 py-0.5 rounded">
               <ArrowUpRight className="w-3 h-3 mr-1" /> Active Employees
             </div>
