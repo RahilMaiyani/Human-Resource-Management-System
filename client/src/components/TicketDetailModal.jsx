@@ -148,7 +148,7 @@ const TicketDetailModal = ({ ticket, onClose }) => {
                   {isMe ? "You" : reply.senderName} {isAdmin && !isMe && "• ADMIN"}
                 </span>
                 
-                <div className={`px-5 py-3.5 rounded-3xl text-[14px] whitespace-pre-wrap leading-relaxed shadow-sm font-medium hover:scale-105 transition duration-75 ease-in ${
+                <div className={`px-5 py-3.5 rounded-3xl text-[14px] whitespace-pre-wrap leading-relaxed shadow-sm font-medium hover:scale-[102%] transition duration-75 ease-in ${
                   isMe 
                     ? "bg-indigo-600 text-white rounded-tr-none shadow-indigo-200" 
                     : "bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-slate-100"

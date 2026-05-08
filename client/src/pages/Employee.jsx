@@ -95,11 +95,9 @@ export default function Employee() {
               Internal Portal | {user?.name}
             </p>
           </div>
-          
         </header>
 
         <div className="grid grid-cols-3 gap-8">
-          
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 flex flex-col items-center text-center">
             <img
               src={user?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name)}&background=f1f5f9&color=475569`}
