@@ -31,7 +31,7 @@ export default function LeaveReports() {
   const [selectedLeave, setSelectedLeave] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const LEAVES_PER_PAGE = 10;
+  const LEAVES_PER_PAGE = 8;
 
   const filteredLeaves = useMemo(() => {
     return leaves.filter((leave) => {
@@ -69,6 +69,7 @@ export default function LeaveReports() {
     setMonth("all");
     setStatus("all");
     setEmployee("all");
+    setCurrentPage(1);
   };
 
   const getStatusStyle = (status) => {

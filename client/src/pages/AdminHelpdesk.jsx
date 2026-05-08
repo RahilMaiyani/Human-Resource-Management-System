@@ -1,18 +1,26 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import EmptyState from "../components/EmptyState";
 import TicketDetailModal from "../components/TicketDetailModal";
 import { useAllTickets } from "../hooks/useTickets";
-import { Search, Filter, MessageSquare, Clock } from "lucide-react";
+import { Search, Filter, MessageSquare, Clock, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+import { useTitle } from "../hooks/useTitle";
 
 const AdminHelpdesk = () => {
+  useTitle("Helpdesk")
   const { data: tickets = [], isLoading } = useAllTickets();
   const [selectedTicket, setSelectedTicket] = useState(null);
   
-  // Filtering State
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  const itemsPerPage = 8;
+  
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, categoryFilter]);
 
   // Derived State: Filtered Tickets
   const filteredTickets = useMemo(() => {
@@ -27,7 +35,19 @@ const AdminHelpdesk = () => {
     });
   }, [tickets, searchTerm, statusFilter, categoryFilter]);
 
-  // Helper for status badges
+  const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
+  const paginatedTickets = filteredTickets.slice(
+    (currentPage - 1) * itemsPerPage, 
+    currentPage * itemsPerPage
+  );
+
+  const handleReset = () => {
+    setSearchTerm("");
+    setStatusFilter("All");
+    setCategoryFilter("All");
+    setCurrentPage(1);
+  };
+
   const getStatusBadge = (status) => {
     const styles = {
       "Open": "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -40,7 +60,7 @@ const AdminHelpdesk = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-10 max-w-7xl mx-auto space-y-6">
+      <div className="p-6 sm:p-10 max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
         <div>
@@ -49,19 +69,20 @@ const AdminHelpdesk = () => {
         </div>
 
         {/* Filters & Search Bar */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-4 justify-between items-center">
-          <div className="relative w-full sm:w-96">
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col xl:flex-row gap-4 justify-between items-center">
+          
+          <div className="relative w-full xl:w-96 shrink-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input 
               type="text" 
               placeholder="Search by subject or employee name..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
             />
           </div>
           
-          <div className="flex w-full sm:w-auto gap-3">
+          <div className="flex flex-wrap items-center w-full xl:w-auto gap-3">
             <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
               <Filter className="w-4 h-4 text-slate-400" />
               <select 
@@ -76,6 +97,7 @@ const AdminHelpdesk = () => {
                 <option value="Closed">Closed</option>
               </select>
             </div>
+            
             <select 
               value={categoryFilter} 
               onChange={(e) => setCategoryFilter(e.target.value)}
@@ -87,20 +109,29 @@ const AdminHelpdesk = () => {
               <option value="Facilities">Facilities</option>
               <option value="Payroll">Payroll</option>
             </select>
+
+            {/* CLEAR FILTERS BUTTON - Always Visible */}
+            <button 
+              onClick={handleReset} 
+              className="flex items-center justify-center gap-2 px-4 py-2 border border-rose-200 bg-rose-50 text-rose-600 text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-rose-100 transition-colors"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Reset
+            </button>
           </div>
         </div>
 
         {/* Data Table */}
-        <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse whitespace-nowrap">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-bold">
-                  <th className="p-4">Employee</th>
-                  <th className="p-4">Ticket Info</th>
-                  <th className="p-4">Priority</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4">Action</th>
+                  <th className="px-6 py-4">Employee</th>
+                  <th className="px-6 py-4">Ticket Info</th>
+                  <th className="px-6 py-4">Priority</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -135,7 +166,7 @@ const AdminHelpdesk = () => {
                       </td>
                     </tr>
                   ))
-                ) : filteredTickets.length === 0 ? (
+                ) : paginatedTickets.length === 0 ? (
                   <tr>
                     <td colSpan="5" className="p-0">
                       <EmptyState 
@@ -146,13 +177,13 @@ const AdminHelpdesk = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredTickets.map((ticket) => (
+                  paginatedTickets.map((ticket) => (
                     <tr 
                       key={ticket._id} 
                       className="hover:bg-slate-50 transition-colors group cursor-pointer"
                       onClick={() => setSelectedTicket(ticket)}
                     >
-                      <td className="p-4">
+                      <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
                           <img
                             src={ticket.userId?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(ticket.userId?.name || "User")}&background=f1f5f9&color=475569`}
@@ -197,7 +228,7 @@ const AdminHelpdesk = () => {
                         </td>
                       ) : (
                         <td className="p-4">
-                          <span className="text-xs font-bold text-slate-400">Archived</span>
+                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">Archived</span>
                         </td>
                       )}
                     </tr>
@@ -206,6 +237,33 @@ const AdminHelpdesk = () => {
               </tbody>
             </table>
           </div>
+
+          {/* IDENTICAL PAGINATION FOOTER */}
+          {totalPages > 1 && (
+            <div className="flex justify-between items-center px-6 py-4 bg-slate-50 border-t border-slate-200">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                Page {currentPage} of {totalPages}
+              </p>
+
+              <div className="flex gap-2">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  className="p-2 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors shadow-sm"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className="p-2 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors shadow-sm"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

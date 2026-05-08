@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { usePendingLeavesCount } from "../hooks/useLeaves";
-import { useActiveTicketCount } from "../hooks/useTickets"; // NEW IMPORT
+import { useActiveTicketCount } from "../hooks/useTickets"; 
 import { 
   LayoutDashboard, 
   Users, 

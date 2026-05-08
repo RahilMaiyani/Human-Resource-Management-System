@@ -80,7 +80,6 @@ export const useActiveTicketCount = (isAdmin) => {
 
   const targetData = isAdmin ? allTickets.data : myTickets.data;
 
-  // Calculate count: Only "Open" or "In-Progress" tickets
   if (!targetData || !Array.isArray(targetData)) return 0;
 
   return targetData.filter(

@@ -5,8 +5,10 @@ import { useMyTickets } from "../hooks/useTickets";
 import { Plus, Ticket as TicketIcon, Clock, MessageSquare, ArrowRight } from "lucide-react";
 import CreateTicketModal from "../components/CreateTicketModal"; 
 import TicketDetailModal from "../components/TicketDetailModal";
+import { useTitle } from "../hooks/useTitle";
 
 const EmployeeHelpdesk = () => {
+  useTitle("Helpdesk")
   const { data: tickets = [], isLoading } = useMyTickets();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
