@@ -175,7 +175,6 @@ export default function CreateAnnouncementModal({ isOpen, onClose, initialData =
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all resize-none"
               />
             </div>
-
           </form>
         </div>
 
