@@ -27,7 +27,7 @@ export default function NotFound() {
         </div>
       </div>
 
-      <h1 className="text-7xl font-black text-slate-900 tracking-tighter mb-2">404</h1>
+      <h1 className="text-6xl font-bold text-slate-900 tracking-tighter mb-2">404</h1>
       <h2 className="text-xl font-bold text-slate-800 tracking-tight">Resource Not Found</h2>
       <p className="text-slate-500 max-w-xs mt-3 font-medium leading-relaxed">
         The page you are looking for doesn't exist or has been moved to a different directory.

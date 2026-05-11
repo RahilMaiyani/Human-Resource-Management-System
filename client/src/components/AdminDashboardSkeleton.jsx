@@ -3,14 +3,51 @@ export default function AdminDashboardSkeleton() {
     <div className="animate-pulse space-y-10">
       
       {/* HEADER */}
-      <div className="border-b border-slate-200 pb-6">
-        <div className="h-8 w-64 bg-slate-200 rounded-md mb-2"></div>
-        <div className="h-4 w-96 bg-slate-100 rounded-md"></div>
+      <div className="border-b border-slate-200 pb-6 mb-6 flex justify-between items-end">
+        <div>
+          <div className="h-8 w-64 bg-slate-200 rounded-md mb-2"></div>
+          <div className="h-4 w-96 bg-slate-100 rounded-md"></div>
+        </div>
+        {/* New Broadcast Button Placeholder */}
+        <div className="h-10 w-40 bg-slate-200 rounded-lg"></div>
       </div>
 
-      {/* TOP LEVEL STATS (3 Columns) */}
-      <div className="grid grid-cols-3 gap-8">
-        {[1, 2, 3].map((i) => (
+      {/* BROADCASTS SECTION SKELETON */}
+      <div className="space-y-4 mb-8">
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 bg-slate-200 rounded-md"></div>
+          <div className="h-6 w-48 bg-slate-200 rounded-md"></div>
+        </div>
+        <div className="grid grid-cols-1 gap-4">
+          {[1, 2].map((i) => (
+            <div key={i} className="p-5 rounded-2xl border border-slate-100 bg-white shadow-sm flex gap-4">
+              <div className="w-10 h-10 bg-slate-100 rounded-xl shrink-0"></div>
+              <div className="space-y-3 flex-1">
+                {/* Title & Badges */}
+                <div className="flex gap-2 items-center">
+                  <div className="h-5 w-1/3 bg-slate-200 rounded-md"></div>
+                  <div className="h-4 w-16 bg-slate-100 rounded-md"></div>
+                  {i === 1 && <div className="h-4 w-24 bg-slate-100 rounded-md"></div>}
+                </div>
+                {/* Message Body */}
+                <div className="space-y-2 pt-1">
+                  <div className="h-3 w-full bg-slate-100 rounded-sm"></div>
+                  <div className="h-3 w-4/5 bg-slate-100 rounded-sm"></div>
+                </div>
+                {/* Metadata Footer */}
+                <div className="flex gap-4 pt-2">
+                  <div className="h-3 w-24 bg-slate-100 rounded-sm"></div>
+                  <div className="h-3 w-32 bg-slate-100 rounded-sm"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* TOP LEVEL STATS (Updated to 4 Columns for Workforce, Presence, Helpdesk, Leaves) */}
+      <div className="grid grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
           <div key={i} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             <div className="flex justify-between items-start">
               <div className="space-y-3">

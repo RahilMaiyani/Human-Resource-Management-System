@@ -8,10 +8,9 @@ export default function CreateAnnouncementModal({ isOpen, onClose, initialData =
   
   const uniqueDepartments = useMemo(() => {
     const depts = users.map(u => u.department).filter(Boolean);
-    return Array.from(new Set(depts));
+    return Array.from(new Set(depts)).sort((a, b) => a[0].localeCompare(b[0]));
   }, [users]);
 
-  // Date Constraints Logic
   const getLocalISOString = (date) => {
     const tzOffset = date.getTimezoneOffset() * 60000;
     return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
@@ -79,7 +78,7 @@ export default function CreateAnnouncementModal({ isOpen, onClose, initialData =
             <span className="text-[10px] font-black uppercase tracking-[0.2em] px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-md">
               {initialData ? "Edit Mode" : "Broadcast"}
             </span>
-            <h2 className="text-xl font-black text-slate-900 leading-tight">
+            <h2 className="text-xl font-bold text-slate-900 leading-tight">
               {initialData ? "Edit Announcement" : "New Announcement"}
             </h2>
           </div>
