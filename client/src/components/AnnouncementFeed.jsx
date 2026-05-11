@@ -8,20 +8,17 @@ import ArchiveModal from "./ArchiveModal";
 export default function AnnouncementFeed() {
   const { data: announcements = [], isLoading } = useAnnouncements();
   
-  // Extract the mutate function and the loading state (isPending)
   const { mutate: archive, isPending: isArchiving } = useArchiveAnnouncement();
   
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
-  
-  // State to hold the announcement we want to archive
+
   const [announcementToArchive, setAnnouncementToArchive] = useState(null);
 
   if (isLoading) return null;
 
-  // STRICT FRONTEND FILTERING
   const visibleAnnouncements = announcements.filter(a => {
     if (a.status !== "Active") return false;
     if (isAdmin) return true; 
