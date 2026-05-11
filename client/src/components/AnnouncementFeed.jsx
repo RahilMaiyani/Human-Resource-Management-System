@@ -3,21 +3,28 @@ import { useAnnouncements, useArchiveAnnouncement } from "../hooks/useAnnounceme
 import { useAuth } from "../context/AuthContext";
 import { AlertTriangle, Megaphone, Calendar, Award, X, Clock, Edit2 } from "lucide-react";
 import CreateAnnouncementModal from "./CreateAnnouncementModal";
+import ArchiveModal from "./ArchiveModal";
 
 export default function AnnouncementFeed() {
   const { data: announcements = [], isLoading } = useAnnouncements();
-  const { mutate: archive } = useArchiveAnnouncement();
+  
+  // Extract the mutate function and the loading state (isPending)
+  const { mutate: archive, isPending: isArchiving } = useArchiveAnnouncement();
+  
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
+  
+  // State to hold the announcement we want to archive
+  const [announcementToArchive, setAnnouncementToArchive] = useState(null);
 
   if (isLoading) return null;
 
+  // STRICT FRONTEND FILTERING
   const visibleAnnouncements = announcements.filter(a => {
     if (a.status !== "Active") return false;
     if (isAdmin) return true; 
-    
     return a.targetDepartments.includes("All") || a.targetDepartments.includes(user?.department);
   });
 
@@ -56,9 +63,7 @@ export default function AnnouncementFeed() {
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button 
-                    onClick={() => {
-                      if(window.confirm("Archive this announcement?")) archive(announcement._id);
-                    }}
+                    onClick={() => setAnnouncementToArchive(announcement)}
                     className="p-1.5 bg-white/50 hover:bg-white rounded-full text-slate-500 hover:text-rose-600 transition-colors"
                     title="Archive Announcement"
                   >
@@ -79,7 +84,6 @@ export default function AnnouncementFeed() {
                     <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 bg-white/60 rounded-md text-slate-600">
                       {announcement.type}
                     </span>
-                    {/* Show target audience badge for admin view only */}
                     {isAdmin && !announcement.targetDepartments.includes("All") && (
                       <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-md">
                         {announcement.targetDepartments.join(", ")}
@@ -104,11 +108,23 @@ export default function AnnouncementFeed() {
         })}
       </div>
 
-      {/* Render the modal for Editing */}
+      {/* MODALS */}
       <CreateAnnouncementModal 
         isOpen={!!editingAnnouncement} 
         onClose={() => setEditingAnnouncement(null)} 
         initialData={editingAnnouncement}
+      />
+
+      <ArchiveModal
+        isOpen={!!announcementToArchive}
+        onClose={() => setAnnouncementToArchive(null)}
+        title={announcementToArchive?.title}
+        isArchiving={isArchiving}
+        onConfirm={() => {
+          archive(announcementToArchive._id, {
+            onSuccess: () => setAnnouncementToArchive(null)
+          });
+        }}
       />
     </div>
   );
