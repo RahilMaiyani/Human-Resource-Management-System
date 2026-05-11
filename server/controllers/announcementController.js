@@ -1,12 +1,10 @@
 import Announcement from "../models/Announcement.js";
 
-// @desc    Get announcements
 export const getAnnouncements = async (req, res) => {
   try {
     const isAdmin = req.user.role?.toLowerCase() === "admin";
     let query = {};
 
-    // For employees, just ensure it's Active and not expired
     if (!isAdmin) {
       query = {
         status: "Active",
@@ -15,7 +13,7 @@ export const getAnnouncements = async (req, res) => {
     }
 
     const announcements = await Announcement.find(query)
-      .populate("createdBy", "name profilePic")
+      .populate("createdBy", "name")
       .sort("-createdAt");
 
     res.status(200).json(announcements);
@@ -24,7 +22,6 @@ export const getAnnouncements = async (req, res) => {
   }
 };
 
-// @desc    Create a new announcement
 export const createAnnouncement = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(403).json({ msg: "Not authorized." });
@@ -46,15 +43,14 @@ export const createAnnouncement = async (req, res) => {
   }
 };
 
-// @desc    Update/Edit an announcement
 export const updateAnnouncement = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(403).json({ msg: "Not authorized." });
 
     const updated = await Announcement.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
+        req.params.id,
+        req.body,
+        { returnDocument: 'after' }
     );
 
     res.status(200).json(updated);
@@ -63,12 +59,16 @@ export const updateAnnouncement = async (req, res) => {
   }
 };
 
-// @desc    Archive an announcement
 export const archiveAnnouncement = async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(403).json({ msg: "Not authorized" });
     
-    const updated = await Announcement.findByIdAndUpdate(req.params.id, { status: "Archived" }, { new: true });
+    const updated = await Announcement.findByIdAndUpdate(
+        req.params.id, 
+        { status: "Archived" }, 
+        { returnDocument: 'after' }
+    );
+
     res.status(200).json(updated);
   } catch (error) {
     res.status(500).json({ msg: "Failed to archive" });
