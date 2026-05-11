@@ -44,7 +44,7 @@ export default function CreateAnnouncementModal({ isOpen, onClose, initialData =
         message: "",
         type: "General",
         targetDepartments: ["All"],
-        expiresAt: maxDateTime // Defaults to exactly 7 days from now
+        expiresAt: maxDateTime
       });
     }
   }, [initialData, isOpen]);
@@ -70,7 +70,7 @@ export default function CreateAnnouncementModal({ isOpen, onClose, initialData =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-in fade-in duration-300">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-200">
         
         {/* HEADER */}

@@ -76,7 +76,7 @@ export default function Sidebar({ user }) {
               <ClipboardList className="w-5 h-5" />
               <span className="flex-1">Management</span>
               {pendingCount > 0 && (
-                <span className="flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-black bg-rose-500 text-white rounded-full ring-4 ring-slate-950">
+                <span className={`flex items-center animate-pulse justify-center min-w-5 h-5 px-1.5 text-[10px] font-black bg-rose-500 text-white rounded-full ring-4 ring-slate-950`}>
                   {pendingCount}
                 </span>
               )}
@@ -103,10 +103,10 @@ export default function Sidebar({ user }) {
               to="/admin/helpdesk" 
               className={`${baseClass} ${isActive("/admin/helpdesk") ? activeClass : inactiveClass}`}
             >
-              <LifeBuoy className="w-5 h-5" />
+              <LifeBuoy className={`w-5 h-5 ${activeTicketCount > 0 ? 'animate-spin' : ""}`} />
               <span className="flex-1">Helpdesk</span>
               {activeTicketCount > 0 && (
-                <span className="flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-black bg-blue-500 text-white rounded-full ring-4 ring-slate-950 animate-in zoom-in duration-300">
+                <span className={`flex items-center animate-pulse justify-center min-w-5 h-5 px-1.5 text-[10px] font-black bg-blue-500 text-white rounded-full ring-4 ring-slate-950 animate-in zoom-in duration-300`}>
                   {activeTicketCount}
                 </span>
               )}

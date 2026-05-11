@@ -35,7 +35,7 @@ export default function DocumentPreviewModal({ previewDoc, closePreview }) {
             </a>
             <button
               onClick={closePreview}
-              className="p-2 hover:bg-red-50 hover:text-red-500 rounded-full text-slate-400 transition-all"
+              className="p-2 animate-spin hover:bg-red-50 hover:text-red-500 rounded-full text-slate-400 transition-all"
             >
               <X className="w-6 h-6" />
             </button>
