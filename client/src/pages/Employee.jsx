@@ -9,6 +9,7 @@ import { useMyLeaves } from "../hooks/useLeaves";
 import { useAuth } from "../context/AuthContext";
 import EmployeeProfileModal from "../components/EmployeeProfileModal";
 import ConfirmModal from "../components/ConfirmModal";
+import AnnouncementFeed from "../components/AnnouncementFeed";
 import toast from "react-hot-toast";
 import { useTitle } from "../hooks/useTitle";
 import {
@@ -96,6 +97,10 @@ export default function Employee() {
             </p>
           </div>
         </header>
+        
+        <div className="mb-8">
+          <AnnouncementFeed />
+        </div>
 
         <div className="grid grid-cols-3 gap-8">
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 flex flex-col items-center text-center">

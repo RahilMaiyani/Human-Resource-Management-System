@@ -8,6 +8,9 @@ import LeaveStatusChart from "../components/charts/LeaveStatusChart";
 import LeaveTrendChart from "../components/charts/LeaveTrendChart";
 import AdminDashboardSkeleton from "../components/AdminDashboardSkeleton";
 
+import CreateAnnouncementModal from "../components/CreateAnnouncementModal";
+import AnnouncementFeed from "../components/AnnouncementFeed";
+
 import EmailModal from "../components/EmailModal";
 import HoverItem from "../components/HoverItem";
 
@@ -20,7 +23,8 @@ import {
   CalendarCheck,
   Mail,
   ArrowUpRight,
-  RefreshCw
+  RefreshCw,
+  Megaphone
 } from "lucide-react";
 
 export default function Admin() {
@@ -29,6 +33,8 @@ export default function Admin() {
   const { data: users = [], isLoading } = useUsers();
   const { data: leaves = [] } = useAllLeaves();
   const { data: recentLeaves = [] } = useRecentLeaves();
+
+  const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
   // console.log(recentLeaves)
   const [attendance, setAttendance] = useState([]);
 
@@ -121,13 +127,25 @@ export default function Admin() {
         ) : (
           <>
         {/* HEADER */}
-        <div className="border-b border-slate-200 pb-6">
+        <div className="border-b border-slate-200 pb-6 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Administrative Overview</h1>
             <p className="text-slate-500 text-sm mt-1 font-medium">
               Real-time monitoring of workforce operations and leave metrics.
             </p>
-          </div>
+          </div>  
+          <button 
+            onClick={() => setIsAnnouncementModalOpen(true)}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg font-bold transition-all shadow-sm shadow-indigo-200 shrink-0"
+          >
+            <Megaphone className="w-4 h-4" />
+            New Broadcast
+          </button>
+        </div>
+
+        {/* BROADCAST FEED */}
+        <div className="mb-8">
+          <AnnouncementFeed />
         </div>
 
         {/* TOP LEVEL STATS */}
@@ -333,6 +351,11 @@ export default function Admin() {
           }}
           user={emailUser}
           template={emailTemplate}
+        />
+
+        <CreateAnnouncementModal 
+          isOpen={isAnnouncementModalOpen} 
+          onClose={() => setIsAnnouncementModalOpen(false)} 
         />
       
       </div>
