@@ -3,7 +3,7 @@ export default function AdminDashboardSkeleton() {
     <div className="animate-pulse space-y-10">
       
       {/* HEADER */}
-      <div className="border-b border-slate-200 pb-6 mb-6 flex justify-between items-end">
+      <div className="border-b border-slate-200 pb-6 mb-10 flex justify-between items-end">
         <div>
           <div className="h-8 w-64 bg-slate-200 rounded-md mb-2"></div>
           <div className="h-4 w-96 bg-slate-100 rounded-md"></div>

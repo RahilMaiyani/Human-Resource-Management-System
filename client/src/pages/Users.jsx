@@ -15,7 +15,8 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Mail,
-  Briefcase
+  Briefcase,
+  RotateCcw
 } from "lucide-react";
 
 export default function Users() {
@@ -109,6 +110,16 @@ export default function Users() {
                 ))}
               </select>
             </div>
+            <button 
+              onClick={() => {
+                setSearch("");
+                setDepartment("");
+              }} 
+              className="flex items-center justify-center align-middle gap-2 h-11 border border-rose-200 bg-rose-50 text-rose-600 text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-rose-100 transition-colors w-30"
+            >
+              <RotateCcw className="w-3.5 h-3.5 " />
+              <span>Clear</span>
+            </button>
           </div>
         </div>
         <div className="flex justify-end text-sm text-slate-500 mb-4 mr-5">

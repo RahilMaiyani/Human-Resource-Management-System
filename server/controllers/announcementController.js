@@ -1,4 +1,7 @@
 import Announcement from "../models/Announcement.js";
+import User from "../models/User.js"; 
+import { sendEmail } from "../utils/sendEmail.js";
+import { buildEmailTemplate } from "../utils/emailTemplate.js";
 
 export const getAnnouncements = async (req, res) => {
   try {
@@ -36,6 +39,45 @@ export const createAnnouncement = async (req, res) => {
       expiresAt,
       createdBy: req.user._id || req.user.id
     });
+
+    let userQuery = {};
+    if (!newAnnouncement.targetDepartments.includes("All")) {
+      userQuery = { department: { $in: newAnnouncement.targetDepartments } };
+    }
+    
+    const targetUsers = await User.find(userQuery).select("email name");
+    const emailList = targetUsers.map(u => u.email).filter(Boolean);
+
+    if (emailList.length > 0) {
+      let emailColor = "#4f46e5"; // Indigo
+      if (type === "Urgent") emailColor = "#e11d48"; // Rose
+      if (type === "Event") emailColor = "#059669"; // Emerald
+      if (type === "Milestone") emailColor = "#d97706"; // Amber
+
+      const html = buildEmailTemplate({
+        title: `New Broadcast: ${title}`,
+        color: emailColor,
+        message: `
+          <p style="margin-bottom:24px; font-size:16px; color:#0f172a;"><b>${type} Announcement</b></p>
+          
+          <div style="color:#475569; font-size:15px; line-height:1.7;">
+            ${message.replace(/\n/g, '<br/>')}
+          </div>
+
+          <div style="margin-top:40px; padding-top:24px; border-top:1px solid #f1f5f9; color:#94a3b8; font-size:13px;">
+            Please log in to your OfficeLink dashboard for more details.<br/><br/>
+            Best regards,<br/>
+            <b style="color:#475569;">Human Resources Team</b>
+          </div>
+        `
+      });
+
+      sendEmail({
+        to: emailList,
+        subject: `OfficeLink Notice: ${title}`,
+        html
+      }).catch(err => console.error("Broadcast email failed to send:", err));
+    }
 
     res.status(201).json(newAnnouncement);
   } catch (error) {
