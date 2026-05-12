@@ -176,3 +176,59 @@ export const getMyAttendance = async (req, res) => {
     res.status(500).json({ msg: "Server error fetching attendance" });
   }
 };
+
+export const bulkFixAttendance = async (req, res) => {
+  try {
+    const today = new Date().toISOString().split("T")[0];
+    const fixTime = process.env.DEFAULT_CHECKOUT_TIME || "18:00"; 
+
+    // 1. Find all ghost records (before today, no checkout)
+    const ghosts = await Attendance.find({ 
+      date: { $lt: today }, 
+      checkout: null 
+    });
+
+    if (ghosts.length === 0) {
+      return res.json({ msg: "No records to fix." });
+    }
+
+    // 2. Fix each one using its specific date + the env time
+    const updatePromises = ghosts.map((doc) => {
+      // Creates a valid Date object like: 2026-05-10T18:00:00
+      const autoDate = new Date(`${doc.date}T${fixTime}:00`);
+      
+      return Attendance.updateOne(
+        { _id: doc._id },
+        { $set: { checkout: autoDate } }
+      );
+    });
+
+    await Promise.all(updatePromises);
+
+    res.json({ msg: `Successfully closed ${ghosts.length} sessions at ${fixTime}.` });
+  } catch (err) {
+    console.error("Bulk Fix Error:", err);
+    res.status(500).json({ msg: "Bulk fix failed" });
+  }
+};
+
+export const fixSingleAttendance = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const fixTime = process.env.DEFAULT_CHECKOUT_TIME || "18:00"; 
+
+    const record = await Attendance.findById(id);
+    if (!record) return res.status(404).json({ msg: "Record not found" });
+
+    // Create the proper Date object for that specific day
+    const autoDate = new Date(`${record.date}T${fixTime}:00`);
+    record.checkout = autoDate;
+    
+    await record.save();
+
+    res.json({ msg: "Session fixed." });
+  } catch (err) {
+    console.error("Single Fix Error:", err);
+    res.status(500).json({ msg: "Failed to fix record" });
+  }
+};

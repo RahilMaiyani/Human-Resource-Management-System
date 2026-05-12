@@ -16,6 +16,7 @@ import HoverItem from "../components/HoverItem";
 
 import { useAllLeaves, useRecentLeaves } from "../hooks/useLeaves";
 import { useAllAttendance } from "../hooks/useAttendance";
+import API from "../api/axios";
 
 import { 
   Users,
@@ -29,30 +30,30 @@ import {
 } from "lucide-react";
 
 export default function Admin() {
-  useTitle("Admin")
+  useTitle("Admin");
   const queryClient = useQueryClient();
   const { data: users = [], isLoading } = useUsers();
   const { data: leaves = [] } = useAllLeaves();
   const { data: recentLeaves = [] } = useRecentLeaves();
 
   const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
-  // console.log(recentLeaves)
   const [attendance, setAttendance] = useState([]);
-
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [emailUser, setEmailUser] = useState(null);
   const [emailTemplate, setEmailTemplate] = useState(null);
 
-  const { data : allAttendance, isPending, isError} = useAllAttendance();
+  const [showGhostList, setShowGhostList] = useState(false); 
+
+  const { data: allAttendance, isPending, isError } = useAllAttendance();
 
   const fetchAttendance = async () => {
-      try {
-        setAttendance(allAttendance);
-      } catch (err) {
-        console.error("Attendance fetch error:", err); 
-      }
-    };
+    try {
+      setAttendance(allAttendance);
+    } catch (err) {
+      console.error("Attendance fetch error:", err); 
+    }
+  };
 
   useEffect(() => {
     fetchAttendance();
@@ -90,6 +91,11 @@ export default function Admin() {
       l.toDate.slice(0, 10) >= tomorrowISO
     )
   );
+
+  // --- DATA CLEANUP LOGIC ---
+  // Finds sessions before today that do not have a checkout value
+  const ghostSessions = (attendance || []).filter(a => a.date < todayDate && !a.checkout && !a.checkOut);
+  const defaultCheckout = import.meta.env.VITE_DEFAULT_CHECKOUT_TIME || "18:00";
 
   const formatTime = (value) => {
     if (!value) return "—";
@@ -133,7 +139,6 @@ export default function Admin() {
     (u) => !checkedInUserIds.has(u._id) && !onLeaveUserIds.has(u._id)
   );
   
-
   return (
     <DashboardLayout>
       <div className="p-10 max-w-400 mx-auto space-y-10 bg-slate-50/30 min-h-screen">
@@ -157,6 +162,91 @@ export default function Admin() {
             New Broadcast
           </button>
         </div>
+
+        {/* --- UPGRADED DATA CLEANUP BANNER --- */}
+        {ghostSessions.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl shadow-sm border-l-4 border-l-amber-500 animate-in fade-in slide-in-from-top-4 mb-8 transition-all">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="bg-amber-100 p-2.5 rounded-lg text-amber-600">
+                  <RefreshCw className="w-5 h-5 animate-spin-slow" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-amber-900 uppercase tracking-tight">Data Integrity Alert</h3>
+                  <p className="text-xs text-amber-800/80 font-medium mt-0.5">
+                    <strong>{ghostSessions.length}</strong> missing check-outs detected.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setShowGhostList(!showGhostList)}
+                  className="bg-white border border-amber-200 hover:bg-amber-100 text-amber-700 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm"
+                >
+                  {showGhostList ? "Hide Details" : "Review List"}
+                </button>
+                <button 
+                  onClick={async () => {
+                    try {
+                      await API.patch('/attendance/bulk-fix'); 
+                      await handleRefresh(); 
+                    } catch (err) {
+                      console.error("Fix failed", err);
+                    }
+                  }}
+                  className="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all active:scale-95 shadow-md shadow-amber-200"
+                >
+                  Fix All
+                </button>
+              </div>
+            </div>
+
+
+            {/* EXPANDABLE GHOST LIST */}
+            {showGhostList && (
+              <div className="mt-4 pt-4 border-t border-amber-200/50 space-y-2">
+                {ghostSessions.map((session) => {
+                  // Find the user details to show their name and picture
+                  const user = users.find((u) => u._id === session.userId) || {};
+                  
+                  return (
+                    <div key={session._id} className="flex items-center justify-between bg-white/60 p-3 rounded-lg border border-amber-100">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={user.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'Unknown')}&background=fef3c7&color=92400e`}
+                          className="w-8 h-8 rounded-full object-cover"
+                          alt={user.name}
+                        />
+                        <div>
+                          <p className="text-sm font-bold text-amber-900">{user.name || "Unknown User"}</p>
+                          <p className="text-xs text-amber-700 font-medium flex items-center gap-2">
+                            <CalendarDays className="w-3 h-3" /> 
+                            {session.date} <span className="text-amber-400">•</span> In at {formatTime(session.checkIn)}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={async () => {
+                          try {
+                            await API.patch(`/attendance/fix/${session._id}`);
+                            await handleRefresh();
+                          } catch (err) {
+                            console.error("Single fix failed", err);
+                          }
+                        }}
+                        className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-md transition-colors"
+                      >
+                        Auto-Close (18:00)
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Announcement FEED */}
         <div className="mb-8">
@@ -243,10 +333,6 @@ export default function Admin() {
 
         {/* MAIN VISUALIZATION */}
         <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
-          {/* <div className="flex items-center gap-2 mb-8"> */}
-            {/* <Clock className="w-5 h-5 text-indigo-600" /> */}
-            {/* <h2 className="text-lg font-bold text-slate-800 tracking-tight">Attendance Velocity (7 Days)</h2> */}
-          {/* </div> */}
           <div className="h-90 w-full">
             <AttendanceChart data={chartData} />
           </div>
