@@ -20,8 +20,9 @@ const app = express();
 
 const allowedOrigins = [
   'http://localhost:5173',           // Local Development
-  process.env.CLIENT_URL             // Your Production Frontend
-];
+  process.env.CLIENT_URL,           // Your Production Frontend
+  'https://officelink-q3dppywc0-xyzerg808-5448s-projects.vercel.app/',
+  'https://officelink-ui-git-main-xyzerg808-5448s-projects.vercel.app/'];
 
 app.use(cors({
   origin: function (origin, callback) {
