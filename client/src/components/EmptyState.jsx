@@ -1,6 +1,4 @@
-// components/EmptyState.jsx
-import React from 'react';
-import { FileSearch, Calendar, Clock, Inbox } from 'lucide-react';
+import { Calendar, Clock, Inbox } from 'lucide-react';
 
 export default function EmptyState({ 
   message = "No records found", 

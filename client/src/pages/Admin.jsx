@@ -143,7 +143,7 @@ export default function Admin() {
           </button>
         </div>
 
-        {/* BROADCAST FEED */}
+        {/* Annoucement FEED */}
         <div className="mb-8">
           <AnnouncementFeed />
         </div>

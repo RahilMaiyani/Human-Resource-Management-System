@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAnnouncements, useArchiveAnnouncement } from "../hooks/useAnnouncements";
 import { useAuth } from "../context/AuthContext";
-import { AlertTriangle, Megaphone, Calendar, Award, X, Clock, Edit2 } from "lucide-react";
+import { AlertTriangle, Megaphone, Calendar, Award, X, Clock, Edit2, TimerOff } from "lucide-react";
 import CreateAnnouncementModal from "./CreateAnnouncementModal";
 import ArchiveModal from "./ArchiveModal";
 
@@ -9,6 +9,9 @@ export default function AnnouncementFeed() {
   const { data: announcements = [], isLoading } = useAnnouncements();
   
   const { mutate: archive, isPending: isArchiving } = useArchiveAnnouncement();
+
+  
+  const currentDateTime = new Date();
   
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
@@ -45,7 +48,7 @@ export default function AnnouncementFeed() {
       <div className="grid grid-cols-1 gap-4">
         {visibleAnnouncements.map((announcement) => {
           const style = getIconAndColor(announcement.type);
-          
+          // console.log(announcement);
           return (
             <div key={announcement._id} className={`relative p-5 rounded-2xl border shadow-sm ${style.bg}`}>
               
@@ -86,6 +89,10 @@ export default function AnnouncementFeed() {
                         {announcement.targetDepartments.join(", ")}
                       </span>
                     )}
+                    { currentDateTime > new Date(announcement.expiresAt) ?  
+                    <div>
+                        <TimerOff className="w-4 h-4 text-red-600 animate-pulse"/>
+                    </div>   :  ""}
                   </div>
                   <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-medium mt-1">
                     {announcement.message}
