@@ -22,22 +22,28 @@ const allowedOrigins = [
   'http://localhost:5173',           // Local Development
   process.env.CLIENT_URL,           // Your Production Frontend
   'https://officelink-q3dppywc0-xyzerg808-5448s-projects.vercel.app/',
-  'https://officelink-ui-git-main-xyzerg808-5448s-projects.vercel.app/'];
+  'https://officelink-ui-git-main-xyzerg808-5448s-projects.vercel.app/',
+  'https://officelink-ui.vercel.app'
+];
 
 app.use(cors({
   origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    } else {
+      console.log("CORS Blocked Origin:", origin); // Check your Vercel logs!
+      return callback(new Error('Not allowed by CORS'), false);
     }
-    return callback(null, true);
   },
-  credentials: true, 
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
+
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
