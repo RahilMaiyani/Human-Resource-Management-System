@@ -21,7 +21,7 @@ router.get("/today", protect, todayAttendance);
 router.get("/all", protect, authorize("admin"), getAllAttendance);
 router.get("/user/:userId", protect, getUserAttendance);
 
-router.get("/filters", protect, authorize("admin"), getAttendanceFilters);
+router.get("/filters", protect, getAttendanceFilters);
 router.get("/me", protect, getMyAttendance);
 router.patch("/bulk-fix", protect, authorize("admin"), bulkFixAttendance);
 router.patch("/fix/:id", protect, authorize("admin"), fixSingleAttendance);

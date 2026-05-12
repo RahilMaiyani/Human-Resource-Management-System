@@ -44,7 +44,7 @@ export default function Admin() {
   const [emailTemplate, setEmailTemplate] = useState(null);
 
   const [showGhostList, setShowGhostList] = useState(false); 
-  // State to track custom checkout times for individual sessions
+
   const [customTimes, setCustomTimes] = useState({});
 
   const { data: allAttendance, isPending, isError } = useAllAttendance();
