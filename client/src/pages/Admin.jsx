@@ -44,6 +44,8 @@ export default function Admin() {
   const [emailTemplate, setEmailTemplate] = useState(null);
 
   const [showGhostList, setShowGhostList] = useState(false); 
+  // State to track custom checkout times for individual sessions
+  const [customTimes, setCustomTimes] = useState({});
 
   const { data: allAttendance, isPending, isError } = useAllAttendance();
 
@@ -68,6 +70,13 @@ export default function Admin() {
       fetchAttendance() 
     ]);
     setTimeout(() => setIsRefreshing(false), 600);
+  };
+
+  const handleTimeChange = (sessionId, timeValue) => {
+    setCustomTimes(prev => ({
+      ...prev,
+      [sessionId]: timeValue
+    }));
   };
 
   const employees = users.filter((u) => u.role !== "admin");
@@ -197,49 +206,61 @@ export default function Admin() {
                   }}
                   className="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all active:scale-95 shadow-md shadow-amber-200"
                 >
-                  Fix All
+                  Fix All ({defaultCheckout})
                 </button>
               </div>
             </div>
-
 
             {/* EXPANDABLE GHOST LIST */}
             {showGhostList && (
               <div className="mt-4 pt-4 border-t border-amber-200/50 space-y-2">
                 {ghostSessions.map((session) => {
-                  // Find the user details to show their name and picture
                   const user = users.find((u) => u._id === session.userId) || {};
+                  const selectedTime = customTimes[session._id] || defaultCheckout;
                   
                   return (
-                    <div key={session._id} className="flex items-center justify-between bg-white/60 p-3 rounded-lg border border-amber-100">
+                    <div key={session._id} className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200 shadow-sm hover:border-amber-300 transition-colors">
                       <div className="flex items-center gap-3">
                         <img
-                          src={user.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'Unknown')}&background=fef3c7&color=92400e`}
-                          className="w-8 h-8 rounded-full object-cover"
+                          src={user.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'Unknown')}&background=f8fafc&color=0f172a`}
+                          className="w-9 h-9 rounded-full object-cover border border-slate-100"
                           alt={user.name}
+                          draggable="false"
                         />
                         <div>
-                          <p className="text-sm font-bold text-amber-900">{user.name || "Unknown User"}</p>
-                          <p className="text-xs text-amber-700 font-medium flex items-center gap-2">
-                            <CalendarDays className="w-3 h-3" /> 
-                            {session.date} <span className="text-amber-400">•</span> In at {formatTime(session.checkIn)}
+                          <p className="text-sm font-bold text-slate-800">{user.name || "Unknown User"}</p>
+                          <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5 mt-0.5">
+                            <CalendarDays className="w-3 h-3 text-slate-400" /> 
+                            {session.date} 
+                            <span className="text-slate-300 mx-1">•</span> 
+                            <span className="text-emerald-600 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded">In: {formatTime(session.checkIn)}</span>
                           </p>
                         </div>
                       </div>
                       
-                      <button
-                        onClick={async () => {
-                          try {
-                            await API.patch(`/attendance/fix/${session._id}`);
-                            await handleRefresh();
-                          } catch (err) {
-                            console.error("Single fix failed", err);
-                          }
-                        }}
-                        className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-md transition-colors"
-                      >
-                        Auto-Close (18:00)
-                      </button>
+                      {/* Custom Time Selector & Action Button */}
+                      <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                        <input 
+                          type="time" 
+                          value={selectedTime}
+                          onChange={(e) => handleTimeChange(session._id, e.target.value)}
+                          className="text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 cursor-pointer"
+                          title="Select checkout time"
+                        />
+                        <button
+                          onClick={async () => {
+                            try {
+                              await API.patch(`/attendance/fix/${session._id}`, { customTime: selectedTime });
+                              await handleRefresh();
+                            } catch (err) {
+                              console.error("Single fix failed", err);
+                            }
+                          }}
+                          className="text-[10px] font-bold uppercase tracking-widest text-white bg-slate-800 hover:bg-slate-900 px-3 py-2 rounded-md transition-all active:scale-95"
+                        >
+                          Close Session
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
