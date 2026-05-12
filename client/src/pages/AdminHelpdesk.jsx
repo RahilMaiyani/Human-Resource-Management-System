@@ -189,6 +189,7 @@ const AdminHelpdesk = () => {
                             src={ticket.userId?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(ticket.userId?.name || "User")}&background=f1f5f9&color=475569`}
                             className="w-10 h-10 rounded-full object-cover border border-slate-100 shadow-sm transition-transform group-hover:scale-105 shrink-0"
                             alt="Employee"
+                            draggable="false"
                           />
                           <div>
                             <p className="text-sm font-bold text-slate-900">{ticket.userId?.name || "Unknown User"}</p>

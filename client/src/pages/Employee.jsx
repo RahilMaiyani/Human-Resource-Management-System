@@ -108,6 +108,7 @@ export default function Employee() {
               src={user?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name)}&background=f1f5f9&color=475569`}
               className="w-28 h-28 rounded-full object-cover border-4 border-slate-50 shadow-sm"
               alt="Profile"
+              draggable="false"
             />
             <h2 className="mt-5 text-xl font-bold text-slate-800">{user?.name}</h2>
             

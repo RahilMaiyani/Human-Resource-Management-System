@@ -137,6 +137,7 @@ const AdminDocuments = () => {
                   src={selectedEmployee?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedEmployee?.name)}&background=f1f5f9&color=475569`}
                   className="w-9 h-9 rounded-full object-cover border border-slate-100 shadow-sm transition-transform group-hover:scale-105"
                   alt={selectedEmployee?.name}
+                  draggable="false"
                 />
                 <p className="text-indigo-900 text-sm">
                   <span className="font-bold">Active Selection:</span> {selectedEmployee.name} 

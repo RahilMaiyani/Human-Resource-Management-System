@@ -68,6 +68,7 @@ export default function LeaveDetailsModal({ leave, onClose }) {
               }
               className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
               alt="Applicant"
+              draggable="false"
             />
             <div>
               <p className="text-sm font-bold text-slate-800">

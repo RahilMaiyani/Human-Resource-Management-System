@@ -64,6 +64,7 @@ export default function DocumentPreviewModal({ previewDoc, closePreview }) {
                 src={previewDoc.fileUrl}
                 alt={previewDoc.title}
                 className="max-w-full max-h-[70vh] rounded-lg shadow-lg object-contain bg-white"
+                draggable="false"
               />  
             </div>
           ) : (

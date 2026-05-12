@@ -173,6 +173,7 @@ export default function Sidebar({ user }) {
             src={user?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name)}&background=f1f5f9&color=475569`}
             className="w-9 h-9 rounded-full object-cover border border-slate-100 shadow-sm transition-transform group-hover:scale-105"
             alt={user?.name}
+            draggable="false"
           />
           <div className="flex flex-col truncate">
             <span className="text-xs font-bold text-slate-200 truncate">{user?.name}</span>

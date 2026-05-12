@@ -157,6 +157,7 @@ export default function Users() {
                           src={u.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=f1f5f9&color=475569`}
                           className="w-11 h-11 rounded-full object-cover border border-slate-100 shadow-sm transition-transform group-hover:scale-105"
                           alt={u.name}
+                          draggable="false"
                         />
                         <div className="flex flex-col">
                           <span className="text-sm font-bold text-slate-800">{u.name}</span>

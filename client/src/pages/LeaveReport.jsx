@@ -210,6 +210,7 @@ export default function LeaveReports() {
                           src={leave.userId?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(leave.userId?.name)}&background=f1f5f9&color=475569`}
                           className="w-10 h-10 rounded-full object-cover border border-slate-100 shadow-sm transition-transform group-hover:scale-105"
                           alt="Avatar"
+                          draggable="false"
                         />
                         <div className="flex flex-col">
                           <span className="font-bold text-slate-800 tracking-tight">{leave.userId?.name}</span>

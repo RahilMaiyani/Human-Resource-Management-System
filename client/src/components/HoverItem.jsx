@@ -24,6 +24,7 @@ export default function HoverItem({ user, isCheckedout, toDate, content }) {
         }
         className="w-9 h-9 rounded-full object-cover border border-slate-200 shadow-sm"
         alt={user.name}
+        draggable="false"
       />
 
       {/* NAME */}

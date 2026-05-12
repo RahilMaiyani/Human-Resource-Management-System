@@ -24,6 +24,7 @@ export default function UserDetailsModal({ user, onClose }) {
                 src={user.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=f1f5f9&color=475569`}
                 className="w-24 h-24 rounded-full object-cover border-4 border-slate-50 shadow-sm"
                 alt={user.name}
+                draggable="false"
               />
               <div className="absolute bottom-1 right-1 w-5 h-5 bg-emerald-500 border-2 border-white rounded-full"></div>
             </div>

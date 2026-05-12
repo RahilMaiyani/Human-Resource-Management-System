@@ -24,7 +24,8 @@ import {
   Mail,
   ArrowUpRight,
   RefreshCw,
-  Megaphone
+  Megaphone,
+  CalendarDays
 } from "lucide-react";
 
 export default function Admin() {
@@ -77,6 +78,19 @@ export default function Admin() {
   const todayCheckins = validAttendance.filter((a) => a.date === todayDate).length;
   const totalRecords = validAttendance.length;
 
+  const tomorrowDate = new Date();
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowISO = tomorrowDate.toISOString().split("T")[0];
+
+  const tomorrowAwayUsers = employees.filter((u) => 
+    leaves.some((l) => 
+      l.userId?._id === u._id && 
+      l.status === "approved" &&
+      l.fromDate.slice(0, 10) <= tomorrowISO && 
+      l.toDate.slice(0, 10) >= tomorrowISO
+    )
+  );
+
   const formatTime = (value) => {
     if (!value) return "—";
     return new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -118,6 +132,7 @@ export default function Admin() {
   const absentUsers = employees.filter(
     (u) => !checkedInUserIds.has(u._id) && !onLeaveUserIds.has(u._id)
   );
+  
 
   return (
     <DashboardLayout>
@@ -143,7 +158,7 @@ export default function Admin() {
           </button>
         </div>
 
-        {/* Annoucement FEED */}
+        {/* Announcement FEED */}
         <div className="mb-8">
           <AnnouncementFeed />
         </div>
@@ -192,6 +207,39 @@ export default function Admin() {
             <p className="mt-4 text-xs text-slate-500 font-medium">Aggregated attendance entries</p>
           </div>
         </div>
+
+        {tomorrowAwayUsers.length > 0 && (
+          <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="bg-white p-2.5 rounded-lg shadow-sm border border-indigo-50">
+                <CalendarDays className="w-5 h-5 text-indigo-600" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-indigo-900 tracking-tight">Tomorrow's Outlook</h3>
+                <p className="text-xs text-indigo-700/80 font-medium mt-0.5">
+                  Expect <strong>{tomorrowAwayUsers.length}</strong> planned absence(s) for tomorrow ({tomorrowISO}).
+                </p>
+              </div>
+            </div>
+            <div className="flex -space-x-2.5 overflow-hidden p-1">
+              {tomorrowAwayUsers.slice(0, 5).map((u) => (
+                <img
+                  key={u._id}
+                  title={`${u.name} (On Leave)`}
+                  className="inline-block h-9 w-9 rounded-full ring-2 ring-indigo-50 object-cover shadow-sm transition-transform hover:-translate-y-1 hover:z-10 relative cursor-pointer"
+                  src={u.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=e0e7ff&color=3730a3`}
+                  alt={u.name}
+                  draggable="false"
+                />
+              ))}
+              {tomorrowAwayUsers.length > 5 && (
+                <div className="flex items-center justify-center h-9 w-9 rounded-full bg-indigo-200 text-[10px] font-black text-indigo-800 ring-2 ring-indigo-50 shadow-sm z-0">
+                  +{tomorrowAwayUsers.length - 5}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* MAIN VISUALIZATION */}
         <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
@@ -300,6 +348,7 @@ export default function Admin() {
                           src={u.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=f1f5f9&color=475569`}
                           className="w-9 h-9 rounded-full object-cover grayscale"
                           alt={u.name}
+                          draggable="false"
                         />
                         <p className="text-sm font-bold text-slate-700">{u.name}</p>
                       </div>
