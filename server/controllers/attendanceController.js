@@ -5,15 +5,12 @@ export const checkIn = async (req, res) => {
   try {
     const userId = req.user.id;
     
-    // Create Date boundaries for "Today" (Midnight to Midnight)
     const now = new Date();
     const todayStart = new Date(now.setHours(0, 0, 0, 0));
     const todayEnd = new Date(now.setHours(23, 59, 59, 999));
     
-    // Keeping your original date string format for the Attendance record
     const todayString = new Date().toISOString().split("T")[0];
 
-    // --- GATEKEEPER: Check if user is on approved leave today ---
     const activeLeave = await Leave.findOne({
       userId: userId,
       status: "approved",
@@ -27,7 +24,7 @@ export const checkIn = async (req, res) => {
       });
     }
 
-    // --- EXISTING LOGIC: Check if already checked in ---
+    
     const exists = await Attendance.findOne({
       userId: userId,
       date: todayString
@@ -37,7 +34,6 @@ export const checkIn = async (req, res) => {
       return res.status(400).json({ msg: "Already checked in" });
     }
 
-    // --- Process Check-In ---
     const record = await Attendance.create({
       userId: userId,
       date: todayString,
