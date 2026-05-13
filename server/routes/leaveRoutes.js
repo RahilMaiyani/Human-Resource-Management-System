@@ -17,11 +17,10 @@ const router = express.Router();
 router.post("/", protect, applyLeave);
 router.get("/me", protect, getMyLeaves);
 
-
-router.get("/", protect, authorize('admin'), getAllLeaves);
-router.patch("/:id", protect, authorize('admin'), updateLeaveStatus);
-router.get("/pending-count", protect, authorize('admin'), getPendingLeavesCount);
-router.get("/active", protect, authorize('admin'), getActiveLeaves);
-router.get("/recent", protect, authorize('admin'), getRecentLeaves);
+router.get("/", protect, authorize("admin"), getAllLeaves);
+router.patch("/:id", protect, authorize("admin"), updateLeaveStatus);
+router.get("/pending-count", protect, authorize("admin"), getPendingLeavesCount);
+router.get("/active", protect, authorize("admin"), getActiveLeaves);
+router.get("/recent", protect, authorize("admin"), getRecentLeaves);
 
 export default router;

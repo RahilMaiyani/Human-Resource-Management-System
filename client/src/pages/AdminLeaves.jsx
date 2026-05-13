@@ -13,7 +13,7 @@ import {
   CheckCircle2, 
   XCircle,
   CalendarDays,
-  User
+  Wallet
 } from "lucide-react";
 
 export default function AdminLeaves() {
@@ -74,7 +74,7 @@ export default function AdminLeaves() {
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Employee</th>
-                <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Type</th>
+                <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Type & Balance</th>
                 <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Duration</th>
                 <th className="px-6 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
                 <th className="px-6 py-4 text-right text-[11px] font-bold text-slate-400 uppercase tracking-widest">Review</th>
@@ -99,7 +99,10 @@ export default function AdminLeaves() {
                   </td>
                 </tr>
               ) : (
-                paginatedLeaves.map((leave) => (
+                paginatedLeaves.map((leave) => {
+                  const balance = leave.userId?.leaveBalance?.[leave.type];
+                  
+                  return (
                   <tr
                     key={leave._id}
                     onClick={() => setSelectedLeave(leave)}
@@ -121,10 +124,18 @@ export default function AdminLeaves() {
                     </td>
 
                     <td className="px-6 py-5">
-                      <span className="font-semibold text-slate-700 capitalize flex items-center gap-2">
-                        <CalendarDays className="w-3.5 h-3.5 text-slate-400" />
-                        {leave.type}
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span className="font-semibold text-slate-700 capitalize flex items-center gap-2">
+                          <CalendarDays className="w-3.5 h-3.5 text-slate-400" />
+                          {leave.type}
+                        </span>
+                        {leave.type !== "unpaid" && balance !== undefined && (
+                          <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-wider">
+                            <Wallet className="w-3 h-3 text-emerald-500" />
+                            Bal: {balance} Days
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     <td className="px-6 py-5 text-slate-600 font-medium tabular-nums">
@@ -166,7 +177,7 @@ export default function AdminLeaves() {
                       )}
                     </td>
                   </tr>
-                ))
+                )})
               )}
             </tbody>
           </table>

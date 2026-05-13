@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useMyLeaves } from "../hooks/useLeaves";
+import { useAuth } from "../context/AuthContext";
 import LeaveModal from "../components/LeaveModal";
 import LeaveDetailsModal from "../components/LeaveDetailsModal";
-// import PageLoader from "../components/PageLoader";
 import { useTitle } from "../hooks/useTitle";
 import EmptyState from "../components/EmptyState";
 import LeaveTableSkeleton from "../components/LeaveTableSkeleton";
@@ -13,12 +13,17 @@ import {
   ChevronRight,
   MessageSquare, 
   FileText,
-  Clock
+  Clock,
+  BriefcaseMedical,
+  Coffee,
+  Award,
+  Scale
 } from "lucide-react";
 
 export default function MyLeaves() {
+  const { user } = useAuth();
   const { data = [], isLoading } = useMyLeaves();
-  useTitle("My Leaves")
+  useTitle("My Leaves");
 
   const [open, setOpen] = useState(false);
   const [selectedLeave, setSelectedLeave] = useState(null);
@@ -38,7 +43,7 @@ export default function MyLeaves() {
     return data.slice(start, start + LEAVES_PER_PAGE);
   }, [data, currentPage]);
 
-  // if (isLoading) return <PageLoader />;
+  const balances = user?.leaveBalance || { sick: 0, casual: 0, earned: 0, unpaid: 0 };
 
   return (
     <DashboardLayout>
@@ -65,11 +70,54 @@ export default function MyLeaves() {
           </button>
         </div>
 
+        {/* CLEAN UNIFIED LEAVE WALLET (No Rainbow) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between group hover:border-slate-300 transition-colors">
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sick Leave</p>
+              <p className="text-2xl font-black text-slate-800 mt-0.5">{balances.sick}</p>
+            </div>
+            <div className="p-2.5 bg-slate-50 border border-slate-100 rounded-lg text-slate-400 group-hover:text-slate-600 transition-colors">
+              <BriefcaseMedical className="w-5 h-5" />
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between group hover:border-slate-300 transition-colors">
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Casual Leave</p>
+              <p className="text-2xl font-black text-slate-800 mt-0.5">{balances.casual}</p>
+            </div>
+            <div className="p-2.5 bg-slate-50 border border-slate-100 rounded-lg text-slate-400 group-hover:text-slate-600 transition-colors">
+              <Coffee className="w-5 h-5" />
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between group hover:border-slate-300 transition-colors">
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Earned</p>
+              <p className="text-2xl font-black text-slate-800 mt-0.5">{balances.earned}</p>
+            </div>
+            <div className="p-2.5 bg-slate-50 border border-slate-100 rounded-lg text-slate-400 group-hover:text-slate-600 transition-colors">
+              <Award className="w-5 h-5" />
+            </div>
+          </div>
+
+          <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between opacity-80">
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Unpaid</p>
+              <p className="text-2xl font-black text-slate-600 mt-0.5">{balances.unpaid}</p>
+            </div>
+            <div className="p-2.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-400">
+              <Scale className="w-5 h-5" />
+            </div>
+          </div>
+        </div>
+
         {/* APPLY MODAL */}
-        <LeaveModal isOpen={open} onClose={() => setOpen(false)} />
+        <LeaveModal isOpen={open} onClose={() => setOpen(false)} user={user} />
 
         {/* TABLE CONTAINER */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mt-4">
           <table className="w-full border-collapse">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
@@ -186,10 +234,11 @@ export default function MyLeaves() {
         </div>
       </>
       )}
-        {/* DETAILS MODAL */}
+        {/* DETAILS MODAL - Now explicitly hides balances for the employee view */}
         <LeaveDetailsModal
           leave={selectedLeave}
           onClose={() => setSelectedLeave(null)}
+          hideBalances={true} 
         />
       </div>
     </DashboardLayout>

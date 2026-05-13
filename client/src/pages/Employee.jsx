@@ -19,13 +19,17 @@ import {
   LogIn,
   Briefcase,
   Mail,
-  AlertCircle
+  AlertCircle,
+  BriefcaseMedical,
+  Coffee,
+  Award,
+  Scale
 } from "lucide-react";
 
 export default function Employee() {
   const { user } = useAuth();
   
-  if(user){ useTitle(user?.name)}
+  if(user){ useTitle(user?.name) }
   
   const { data: leaves = [] } = useMyLeaves();
   const { data: todayAttendance, isLoading } = useTodayAttendance();
@@ -82,6 +86,8 @@ export default function Employee() {
 
   const approvedLeaves = leaves.filter((l) => l.status === "approved").length;
   const pendingLeaves = leaves.filter((l) => l.status === "pending").length;
+
+  const balance = user?.leaveBalance || { sick: 0, casual: 0, earned: 0, unpaid: 0 };
 
   return (
     <DashboardLayout>
@@ -206,7 +212,69 @@ export default function Employee() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        {/* --- LEAVE WALLET SECTION --- */}
+        <div className="mt-8 space-y-4">
+          <div className="flex items-center gap-2 px-1">
+            <h2 className="text-lg font-bold text-slate-800 tracking-tight">My Leave Wallet</h2>
+          </div>
+
+          <div className="grid grid-cols-4 gap-6">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden transition-all hover:border-slate-300">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sick Leave</p>
+                  <h2 className="text-2xl font-bold mt-1 text-slate-800">{balance.sick}</h2>
+                </div>
+                <div className="p-2 bg-rose-50 rounded-lg text-rose-600">
+                  <BriefcaseMedical className="w-4 h-4" />
+                </div>
+              </div>
+              <p className="mt-4 text-[10px] text-slate-500 font-medium">Days remaining</p>
+            </div>
+
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden transition-all hover:border-slate-300">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Casual Leave</p>
+                  <h2 className="text-2xl font-bold mt-1 text-slate-800">{balance.casual}</h2>
+                </div>
+                <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+                  <Coffee className="w-4 h-4" />
+                </div>
+              </div>
+              <p className="mt-4 text-[10px] text-slate-500 font-medium">Days remaining</p>
+            </div>
+
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden transition-all hover:border-slate-300">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Earned</p>
+                  <h2 className="text-2xl font-bold mt-1 text-slate-800">{balance.earned}</h2>
+                </div>
+                <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                  <Award className="w-4 h-4" />
+                </div>
+              </div>
+              <p className="mt-4 text-[10px] text-slate-500 font-medium">Days available</p>
+            </div>
+
+            <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden opacity-80">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Unpaid</p>
+                  <h2 className="text-2xl font-bold mt-1 text-slate-600">{balance.unpaid}</h2>
+                </div>
+                <div className="p-2 bg-slate-200 rounded-lg text-slate-600">
+                  <Scale className="w-4 h-4" />
+                </div>
+              </div>
+              <p className="mt-4 text-[10px] text-slate-500 font-medium">Days taken (Deducted)</p>
+            </div>
+          </div>
+        </div>
+
+        {/* --- LEAVE REQUEST STATS --- */}
+        <div className="grid grid-cols-3 gap-6 pt-2">
           <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Approved Leaves</p>
             <p className="text-2xl font-bold text-slate-800">{approvedLeaves}</p>

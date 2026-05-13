@@ -11,8 +11,14 @@ const userSchema = new mongoose.Schema({
     },
     profilePic : String,
     department : String,
-    },
-    { timestamps : true}
+    leaveBalance: {
+      sick: { type: Number, default: 12 },    
+      casual: { type: Number, default: 12 },  
+      earned: { type: Number, default: 0 },
+      unpaid: { type: Number, default: 0 }     
+    }
+  },
+  { timestamps : true}
 );
 
 export default mongoose.model("User", userSchema);

@@ -41,7 +41,7 @@ export const applyLeave = async (req, res) => {
 
 export const getMyLeaves = async (req, res) => {
   try {
-    const leaves = await Leave.find({ userId: req.user.id }).populate("userId", "name email profilePic").sort({ createdAt: -1 });
+    const leaves = await Leave.find({ userId: req.user.id }).populate("userId", "name email profilePic leaveBalance").sort({ createdAt: -1 });
     res.json(leaves);
   } catch (err) {
     res.status(500).json({ msg: err.message });
@@ -50,23 +50,21 @@ export const getMyLeaves = async (req, res) => {
 
 export const getAllLeaves = async (req, res) => {
   try {
-    const leaves = await Leave.find().populate("userId", "name email profilePic").sort({ createdAt: -1 });
-
+    const leaves = await Leave.find().populate("userId", "name email profilePic leaveBalance").sort({ createdAt: -1 });
     res.json(leaves);
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
 };
 
-export const getRecentLeaves = async ( req, res) => {
-  try{
-    const recentLeaves = await Leave.find().sort({createdAt : -1}).limit(process.env.RECENT_LEAVES_NO);
+export const getRecentLeaves = async (req, res) => {
+  try {
+    const recentLeaves = await Leave.find().sort({ createdAt: -1 }).limit(Number(process.env.RECENT_LEAVES_NO) || 5);
     res.json(recentLeaves);
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
   }
-  catch(err){
-    res.status(500).json({msg : err.message});
-  }
-}
+};
 
 export const getActiveLeaves = async (req, res) => {
   try {
@@ -79,7 +77,7 @@ export const getActiveLeaves = async (req, res) => {
         { toDate: { $gte: today } }
       ]
     })
-      .populate("userId", "name email profilePic")
+      .populate("userId", "name email profilePic leaveBalance")
       .sort({ createdAt: -1 });
 
     res.json(leaves);
@@ -103,23 +101,53 @@ export const updateLeaveStatus = async (req, res) => {
     const { status, adminComment } = req.body;
 
     const leave = await Leave.findById(id);
+    if (!leave) return res.status(404).json({ msg: "Leave not found" });
 
-    if (!leave) {
-      return res.status(404).json({ msg: "Leave not found" });
+    const user = await User.findById(leave.userId);
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    // Ensure backwards compatibility for users created before the balance update
+    if (!user.leaveBalance) {
+      user.leaveBalance = { sick: 12, casual: 12, earned: 0, unpaid: 0 };
+    }
+
+    const start = new Date(leave.fromDate);
+    const end = new Date(leave.toDate);
+    const diffDays = Math.round(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+    const type = leave.type;
+
+    // Approving the leave: Check balance and deduct
+    if (status === "approved" && leave.status !== "approved") {
+      if (type !== "unpaid" && user.leaveBalance[type] < diffDays) {
+        return res.status(400).json({ 
+          msg: `Insufficient balance. Employee has ${user.leaveBalance[type]} ${type} days left, but requested ${diffDays} days.` 
+        });
+      }
+
+      if (type === "unpaid") {
+        user.leaveBalance.unpaid += diffDays;
+      } else {
+        user.leaveBalance[type] -= diffDays;
+      }
+      await user.save();
+    }
+
+    // Refunding the balance: If admin changes an approved leave to rejected
+    if (leave.status === "approved" && status !== "approved") {
+      if (type === "unpaid") {
+        user.leaveBalance.unpaid -= diffDays;
+      } else {
+        user.leaveBalance[type] += diffDays;
+      }
+      await user.save();
     }
 
     leave.status = status;
-
-    if (adminComment) {
-      leave.adminComment = adminComment;
-    }
-
+    if (adminComment) leave.adminComment = adminComment;
+    
     await leave.save();
 
-    const user = await User.findById(leave.userId);
-
     if (user) {
-      
       const statusColor = 
         status === "approved" ? "#10b981" : 
         status === "rejected" ? "#f43f5e" : "#f59e0b";

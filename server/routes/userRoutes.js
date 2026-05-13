@@ -3,7 +3,8 @@ import {
   createUser,
   getUsers,
   updateUser,
-  deleteUser
+  deleteUser,
+  migrateUserBalances
 } from "../controllers/userController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -15,5 +16,6 @@ router.post("/", protect, authorize("admin"), createUser);
 router.get("/", protect, authorize("admin"), getUsers);
 router.delete("/:id", protect, authorize("admin"), deleteUser);
 router.put("/:id", protect, updateUser);
+router.patch("/migrate-balances", protect, authorize('admin'), migrateUserBalances);
 
 export default router;

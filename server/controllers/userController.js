@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import Leave from "../models/Leave.js";
-import Attendance from "../models/Attendance.js"; // make sure this exists
+import Attendance from "../models/Attendance.js"; 
 import bcrypt from "bcryptjs";
 
 import { sendEmail } from "../utils/sendEmail.js";
@@ -60,8 +60,6 @@ export const createUser = async (req, res) => {
         html: welcomeHtml
       });
     } catch (mailErr) {
-      // We log the error but don't stop the request 
-      // so the user creation isn't rolled back just because of an email glitch
       console.error("Welcome email failed to send:", mailErr.message);
     }
 
@@ -148,5 +146,30 @@ export const deleteUser = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: "Error deleting user" });
+  }
+};
+
+// ==========================================
+// DATA MIGRATION SCRIPT
+// ==========================================
+export const migrateUserBalances = async (req, res) => {
+  try {
+    // Finds all users who DO NOT have a leaveBalance object yet
+    const result = await User.updateMany(
+      { leaveBalance: { $exists: false } },
+      { 
+        $set: { 
+          leaveBalance: { sick: 12, casual: 12, earned: 0, unpaid: 0 } 
+        } 
+      }
+    );
+
+    res.json({ 
+      msg: "Migration complete!", 
+      updatedUsersCount: result.modifiedCount 
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error migrating users" });
   }
 };

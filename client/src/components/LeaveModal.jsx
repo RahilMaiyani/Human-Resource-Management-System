@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Modal from "./ui/Modal";
 import { useApplyLeave } from "../hooks/useLeaves";
 import { Calendar, AlertCircle } from "lucide-react";
@@ -28,7 +28,8 @@ function rangeHasWeekend(fromDate, toDate) {
   return false;
 }
 
-export default function LeaveModal({ isOpen, onClose }) {
+// Passed 'user' as a prop to access the leaveBalance object
+export default function LeaveModal({ isOpen, onClose, user }) {
   const {
     register,
     handleSubmit,
@@ -49,6 +50,7 @@ export default function LeaveModal({ isOpen, onClose }) {
   const [apiError, setApiError] = useState("");
   const mutation = useApplyLeave();
 
+  const type = watch("type");
   const fromDate = watch("fromDate");
   const toDate = watch("toDate");
 
@@ -58,6 +60,18 @@ export default function LeaveModal({ isOpen, onClose }) {
   const max = new Date();
   max.setDate(today.getDate() + 14);
   const maxDate = max.toISOString().split("T")[0];
+
+  // --- BALANCE CALCULATIONS ---
+  const requestedDays = useMemo(() => {
+    if (!fromDate || !toDate || fromDate > toDate || rangeHasWeekend(fromDate, toDate)) return 0;
+    const start = parseDate(fromDate);
+    const end = parseDate(toDate);
+    return Math.round(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+  }, [fromDate, toDate]);
+
+  // Fallback to 0 if the user data hasn't loaded or doesn't have the balance object
+  const availableBalance = user?.leaveBalance?.[type] || 0;
+  const isOutOfBalance = type !== "unpaid" && requestedDays > availableBalance;
 
   const validateDate = (value, fieldName) => {
     if (!value) return `${fieldName} is required`;
@@ -84,6 +98,12 @@ export default function LeaveModal({ isOpen, onClose }) {
         type: "manual",
         message: "Range includes weekend days"
       });
+      return;
+    }
+
+    // Failsafe check
+    if (type !== "unpaid" && requestedDays > availableBalance) {
+      setApiError(`Insufficient ${type} balance.`);
       return;
     }
 
@@ -130,6 +150,7 @@ export default function LeaveModal({ isOpen, onClose }) {
             <option value="sick">Sick Leave</option>
             <option value="casual">Casual Leave</option>
             <option value="earned">Earned Leave</option>
+            <option value="unpaid">Unpaid Leave</option>
           </select>
         </div>
 
@@ -195,9 +216,23 @@ export default function LeaveModal({ isOpen, onClose }) {
           )}
         </div>
 
-        {apiError && (
+        {/* --- LIVE BALANCE TRACKER --- */}
+        {fromDate && toDate && requestedDays > 0 && (
+          <div className={`p-3 rounded-xl border flex items-center justify-between transition-colors ${isOutOfBalance ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-slate-50 border-slate-200 text-slate-700'}`}>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-60">Requested</p>
+              <p className="text-sm font-black">{requestedDays} Day{requestedDays > 1 ? 's' : ''}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-60">Available</p>
+              <p className="text-sm font-black">{type === "unpaid" ? "Unlimited" : availableBalance}</p>
+            </div>
+          </div>
+        )}
+
+        {(apiError || isOutOfBalance) && (
           <div className="p-3 bg-rose-50 border border-rose-100 rounded-lg text-rose-600 text-[11px] font-bold text-center">
-            {apiError}
+            {isOutOfBalance ? "Insufficient balance for this request." : apiError}
           </div>
         )}
 
@@ -211,8 +246,8 @@ export default function LeaveModal({ isOpen, onClose }) {
           </button>
           <button 
             type="submit"
-            disabled={mutation.isPending}
-            className="flex-1 h-11 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 disabled:opacity-50"
+            disabled={mutation.isPending || isOutOfBalance || requestedDays === 0}
+            className="flex-1 h-11 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {mutation.isPending ? "Processing..." : "Submit Request"}
           </button>
