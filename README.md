@@ -1,6 +1,6 @@
 # OfficeLink — HR Management System
 
-A full-stack Human Resource Management System built with **MERN stack**, designed to handle real-world organizational workflows. OfficeLink provides a complete solution for HR operations including employee management, attendance tracking, leave management, document storage, and internal support ticketing.
+A full-stack Human Resource Management System built with the **MERN stack**, designed to handle real-world organizational workflows. OfficeLink provides a complete solution for HR operations including employee management, attendance tracking, leave management with balance tracking, document storage, internal support ticketing, and company-wide announcements.
 
 ---
 
@@ -20,13 +20,16 @@ A full-stack Human Resource Management System built with **MERN stack**, designe
 
 ## Overview
 
-OfficeLink goes beyond basic CRUD operations. It's built with role-based access control, workflow-driven features, comprehensive business logic validation, cloud-based file storage, and production-level UX patterns. The system simulates a real internal company tool with features like leave approval workflows, document management, and internal support ticketing.
+OfficeLink goes beyond basic CRUD operations. It's built with role-based access control, workflow-driven features, comprehensive business logic validation, cloud-based file storage, and production-level UX patterns. The system simulates a real internal company tool with leave balance tracking, approval workflows, ghost-session resolution, department-targeted announcements, document management, and internal support ticketing.
 
 **Key Highlights:**
 - Role-based access (Admin & Employee)
+- Leave balance system with automatic deduction on approval
 - Cloudinary integration for scalable file storage
+- Company-wide announcement broadcasting with email delivery
 - Thread-based support ticket system
-- Advanced leave validation logic
+- Ghost attendance session detection and bulk-fix tools
+- Advanced leave validation logic including an `Unpaid` leave type
 - Professional skeleton loaders for better UX
 - Email notifications for workflow events
 - Real-time badge notifications
@@ -35,83 +38,105 @@ OfficeLink goes beyond basic CRUD operations. It's built with role-based access 
 
 ## Features
 
-### 🔐 Authentication & Authorization
+### Authentication & Authorization
 - JWT-based secure login system
 - Role-based routing on both frontend and backend
 - Protected routes with automatic permission validation
 - Two roles: **Admin** (full system access) and **Employee** (personal operations)
+- Dynamic page titles via `useTitle` hook
 
-### 👥 User Management
+### User Management
 - Create, update, and delete employee profiles (Admin only)
 - Assign roles and departments
 - Cloudinary-hosted profile pictures with automatic optimization
-- View detailed employee profiles and edit information
-- Track user metadata (last login, creation date)
+- View detailed employee profiles via `UserDetailsModal`
+- Employees can view and edit their own profile via `EmployeeProfileModal`
+- `leaveBalance` field embedded on the User model — tracks Sick, Casual, Earned, and Unpaid days
 
-### ⏱️ Attendance System
-- Employees can check-in/check-out with automatic timestamp logging
+### Attendance System
+- Employees can check-in and check-out with automatic timestamp logging
 - Daily attendance tracking with status indicators
 - Admin dashboard showing today's attendance activity
-- Employee personal attendance history view
+- Employee personal attendance history (`/me` endpoint)
 - Attendance trends visualization (last 7 days)
-- Real-time check-in/check-out status
+- Filter attendance records by date range or employee (`/filters` endpoint)
+- **Ghost Session Detection:** Admin dashboard surfaces past sessions where check-out is missing
+- **Bulk Fix:** Admin can resolve ghost sessions in bulk or individually (`/bulk-fix`, `/fix/:id`)
+- **Tomorrow's Away List:** Admin dashboard previews employees on approved leave the next day
 
-### 📝 Leave Management System
-- Employees apply for **Sick**, **Casual**, or **Earned** leave
+### Leave Management System
+- Employees apply for **Sick**, **Casual**, **Earned**, or **Unpaid** leave
+- Leave balance cards displayed on the employee dashboard with per-type icons
 - Advanced validation rules:
   - Prevent applications for past dates
   - Exclude weekends (Saturday/Sunday) from leave duration
   - Maximum 2-week range per request
   - Prevent overlapping leave requests
+  - Enforce balance check on approval — rejects if insufficient days remain
+- Leave balance automatically deducted when Admin approves; restored if rejected or reversed
 - Admin approval workflow with optional comments
-- Leave history with status tracking (pending, approved, rejected)
+- Leave history with status tracking (Pending, Approved, Rejected)
+- Leave details modal for employees to view admin feedback
+- Paginated leave table (8 records per page)
 - Leave analytics dashboard with trend charts
-- Pending leave count badge in sidebar
+- Pending leave count badge in sidebar (polled every 10 seconds for Admins)
 
-### 📄 Document Management System
+### Announcement System *(New)*
+- Admins publish company-wide or department-targeted announcements
+- Four announcement types: **General**, **Urgent**, **Event**, **Milestone** — each with a distinct email accent color
+- Set an expiry date; expired announcements are automatically hidden from employees
+- Announcements can be **Archived** by Admin at any time
+- On creation, emails are automatically broadcast to all targeted employees (or all staff if no department filter is set)
+- Employees see an **Announcement Feed** on their dashboard showing only active, non-expired announcements
+- Admins see the full announcement list including archived entries
+
+### Document Management System
 - Employees upload and manage important documents
 - File types supported: PDF, PNG, JPG, JPEG, GIF, DOC, DOCX, TXT
 - Document categories: Contract, ID Proof, Certification, Other
 - Cloudinary-powered storage with secure URLs
-- Automatic file deletion when document is removed
+- Automatic file deletion on Cloudinary when a document record is removed
 - File metadata tracking: size, type, upload date
-- Admin can view and manage all employee documents
-- Document preview modal with file type detection
+- Admin can view and manage all employee documents via `AdminDocumentViewer`
+- Document preview modal with file-type detection
+- Card and list view modes for the Document Vault
 
-### 🎟️ Support Ticket System
+### Support Ticket System
 - Employees create support tickets for any issue
-- **5 Categories:** IT Support, HR Inquiry, Payroll, Facilities, General
-- **4 Priority Levels:** Low, Medium, High, Urgent
-- **4 Status States:** Open, In-Progress, Resolved, Closed
-- Thread-based reply system (like internal messaging)
-- Both admin and employees can add replies to tickets
+- 5 Categories: IT Support, HR Inquiry, Payroll, Facilities, General
+- 4 Priority Levels: Low, Medium, High, Urgent
+- 4 Status States: Open, In-Progress, Resolved, Closed
+- Thread-based reply system (like internal messaging) — both Admin and Employee can reply
 - Admin can update ticket status as work progresses
+- Employees can close their own resolved tickets via `CloseTicketModal`
 - Active ticket count badge in sidebar
-- Real-time conversation tracking
+- `ConfirmModal` used to guard destructive or irreversible actions
 
-### 📊 Data Visualization
-- Attendance trends chart (last 7 days)
+### Data Visualization
+- Attendance trends chart (last 7 days) — `AttendanceChart`
 - Leave analytics dashboard:
-  - Status distribution (approved vs rejected vs pending)
-  - Leave trends over time by type
-- Built with Chart.js for smooth, responsive charts
-- Interactive legend and data point selection
+  - Status distribution (Approved vs Rejected vs Pending) — `LeaveStatusChart`
+  - Leave trends over time by type — `LeaveTrendChart`
+- Built with Chart.js via `react-chartjs-2` for smooth, responsive charts
 
-### 📧 Email Notifications
-- Automatic emails on leave approval
-- Automatic emails on leave rejection with admin comment
-- Styled HTML email templates
+### Email Notifications
+- Automatic emails on leave approval and rejection (with admin comment)
+- Announcement broadcast emails sent to targeted employees on creation
+- Styled HTML email templates built with `buildEmailTemplate`
 - Powered by Nodemailer with Gmail SMTP
-- Manual email trigger option available
+- Manual email trigger available via `EmailModal` on the Admin dashboard
 
-### 🎨 User Experience Enhancements
-- Offline detection banner (real-time network status)
-- Toast notifications for all actions (success, error, info)
-- Professional skeleton loaders for all data tables
-- Empty state components for tables with no data
+### User Experience
+- Offline detection banner with animated indicator (real-time network status)
+- Toast notifications for all actions (success, error, info) via `react-hot-toast`
+- Professional skeleton loaders for all data tables and dashboards
+- `EmptyState` component for tables with no data
+- `DecisionModal` and `ConfirmModal` for safe approval and destructive actions
 - Global page loader with Suspense boundary
-- 404 Not Found error page
-- API rate limiting for security
+- 404 Not Found page (`NotFound.jsx`)
+- `HoverItem` tooltip component for contextual hints
+- API rate limiting (200 req/15 min general; 15 req/30 min for auth routes)
+- `DashboardLayout` wrapper shared across all authenticated pages
 
 ---
 
@@ -125,7 +150,7 @@ OfficeLink goes beyond basic CRUD operations. It's built with role-based access 
 | Vite | ^8.0.9 | Build tool & dev server |
 | Tailwind CSS | ^4.2.4 | Utility-first styling |
 | React Router DOM | ^7.14.2 | Client-side routing |
-| TanStack Query | ^5.99.2 | Server state management |
+| TanStack Query | ^5.99.2 | Server state management & caching |
 | React Hook Form | ^7.73.1 | Form handling |
 | Chart.js | ^4.5.1 | Data visualization |
 | react-chartjs-2 | ^5.3.1 | React wrapper for Chart.js |
@@ -138,14 +163,15 @@ OfficeLink goes beyond basic CRUD operations. It's built with role-based access 
 | Package | Version | Purpose |
 |---|---|---|
 | Express | ^5.2.1 | Web framework |
-| MongoDB/Mongoose | ^9.5.0 | Database & ODM |
+| Mongoose | ^9.5.0 | MongoDB ODM |
 | bcryptjs | ^3.0.3 | Password hashing |
 | jsonwebtoken | ^9.0.3 | JWT authentication |
 | Cloudinary | ^1.41.3 | Cloud storage for files |
 | Multer | ^2.1.1 | File upload middleware |
-| Multer Storage Cloudinary | ^4.0.0 | Cloudinary integration for Multer |
+| multer-storage-cloudinary | ^4.0.0 | Cloudinary integration for Multer |
 | Nodemailer | ^8.0.5 | Email sending |
 | express-rate-limit | ^8.4.1 | Rate limiting |
+| dotenv | ^17.4.2 | Environment variable management |
 | CORS | ^2.8.6 | Cross-origin support |
 
 ---
@@ -160,13 +186,14 @@ HR-Management-System/
 │   │   └── favicon.svg
 │   └── src/
 │       ├── api/
-│       │   ├── axios.js                    # Axios instance config
+│       │   ├── axios.js                      # Axios instance config
 │       │   ├── authApi.js
 │       │   ├── userApi.js
 │       │   ├── attendanceApi.js
 │       │   ├── leaveApi.js
 │       │   ├── documentApi.js
-│       │   ├── ticketApi.js                
+│       │   ├── ticketApi.js
+│       │   ├── announcementApi.js            # NEW
 │       │   └── emailApi.js
 │       │
 │       ├── components/
@@ -176,17 +203,33 @@ HR-Management-System/
 │       │   │   └── LeaveTrendChart.jsx
 │       │   ├── ui/
 │       │   │   ├── Button.jsx
-│       │   │   ├── Modal.jsx
-│       │   │   └── Skeleton.jsx
+│       │   │   └── Modal.jsx
 │       │   ├── Header.jsx
 │       │   ├── Sidebar.jsx
+│       │   ├── HoverItem.jsx
+│       │   ├── AnnouncementFeed.jsx          # NEW
+│       │   ├── CreateAnnouncementModal.jsx   # NEW
+│       │   ├── ArchiveModal.jsx              # NEW
 │       │   ├── UserModal.jsx
+│       │   ├── UserDetailsModal.jsx
+│       │   ├── EmployeeProfileModal.jsx
 │       │   ├── LeaveModal.jsx
+│       │   ├── LeaveDetailsModal.jsx
+│       │   ├── DecisionModal.jsx
+│       │   ├── ConfirmModal.jsx
+│       │   ├── DeleteModal.jsx
+│       │   ├── DocumentCard.jsx
+│       │   ├── DocumentList.jsx
 │       │   ├── DocumentUploadModal.jsx
 │       │   ├── DocumentPreviewModal.jsx
-│       │   ├── CreateTicketModal.jsx        
-│       │   ├── TicketDetailModal.jsx        
+│       │   ├── AdminDocumentViewer.jsx
+│       │   ├── CreateTicketModal.jsx
+│       │   ├── TicketDetailModal.jsx
+│       │   ├── CloseTicketModal.jsx          # NEW
+│       │   ├── EmailModal.jsx
 │       │   ├── EmptyState.jsx
+│       │   ├── PageLoader.jsx
+│       │   ├── Skeleton.jsx
 │       │   └── [Skeleton loaders for all tables]
 │       │
 │       ├── hooks/
@@ -195,8 +238,13 @@ HR-Management-System/
 │       │   ├── useAttendance.js
 │       │   ├── useLeaves.js
 │       │   ├── useDocuments.js
-│       │   ├── useTickets.js                
-│       │   └── useEmail.js
+│       │   ├── useTickets.js
+│       │   ├── useAnnouncements.js           # NEW
+│       │   ├── useEmail.js
+│       │   └── useTitle.js                   # NEW
+│       │
+│       ├── layouts/
+│       │   └── DashboardLayout.jsx           # NEW
 │       │
 │       ├── pages/
 │       │   ├── Login.jsx
@@ -208,14 +256,15 @@ HR-Management-System/
 │       │   ├── LeaveReport.jsx
 │       │   ├── AdminDocuments.jsx
 │       │   ├── DocumentVault.jsx
-│       │   ├── AdminHelpdesk.jsx            
-│       │   ├── EmployeeHelpdesk.jsx         
+│       │   ├── AdminHelpdesk.jsx
+│       │   ├── EmployeeHelpdesk.jsx
 │       │   └── AttendanceHistory.jsx
 │       │
 │       ├── context/
 │       │   └── AuthContext.jsx
 │       ├── routes/
 │       │   └── ProtectedRoute.jsx
+│       ├── NotFound.jsx
 │       ├── App.jsx
 │       └── main.jsx
 │
@@ -229,23 +278,26 @@ HR-Management-System/
 │   │   ├── attendanceController.js
 │   │   ├── leaveController.js
 │   │   ├── documentController.js
-│   │   ├── ticketController.js             
+│   │   ├── ticketController.js
+│   │   ├── announcementController.js         # NEW
 │   │   └── emailController.js
 │   │
 │   ├── models/
-│   │   ├── User.js
+│   │   ├── User.js                           # Updated — leaveBalance embedded
 │   │   ├── Attendance.js
-│   │   ├── Leave.js
+│   │   ├── Leave.js                          # Updated — unpaid type added
 │   │   ├── Document.js
-│   │   └── Ticket.js                       
+│   │   ├── Ticket.js
+│   │   └── Announcement.js                   # NEW
 │   │
 │   ├── routes/
 │   │   ├── authRoutes.js
 │   │   ├── userRoutes.js
-│   │   ├── attendanceRoutes.js
-│   │   ├── leaveRoutes.js
+│   │   ├── attendanceRoutes.js               # Updated — bulk-fix, filters
+│   │   ├── leaveRoutes.js                    # Updated — recent, pending-count
 │   │   ├── documentRoutes.js
-│   │   ├── ticketRoutes.js                
+│   │   ├── ticketRoutes.js
+│   │   ├── announcementRoutes.js             # NEW
 │   │   └── emailRoutes.js
 │   │
 │   ├── middleware/
@@ -274,9 +326,9 @@ HR-Management-System/
 - Gmail account with [App Password](https://support.google.com/accounts/answer/185833) enabled
 - Cloudinary account (free tier available at [cloudinary.com](https://cloudinary.com))
 
-### Installation Steps
+### Installation
 
-#### 1. Clone Repository
+#### 1. Clone the Repository
 ```bash
 git clone https://github.com/your-username/hr-management-system.git
 cd hr-management-system
@@ -298,12 +350,10 @@ npm install
 
 ## Configuration
 
-### Environment Variables
-
 Create a `.env` file in the `/server` directory:
 
 ```env
-# Server Configuration
+# Server
 PORT=5000
 
 # Database
@@ -312,92 +362,114 @@ MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/hrms
 # Authentication
 JWT_SECRET=your_super_secret_jwt_key_min_32_characters
 
-# Email Configuration (Gmail)
+# Email (Gmail)
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your_gmail_app_password
 
-# Cloudinary Configuration
+# Cloudinary
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 ```
 
+Create a `.env` file in the `/client` directory:
+
+```env
+# Default check-out time used when resolving ghost attendance sessions
+VITE_DEFAULT_CHECKOUT_TIME=18:00
+```
+
 ### Running the Application
 
-**Backend (from `/server` directory):**
+**Backend** (from `/server`):
 ```bash
 npm run dev      # Development with nodemon
-npm start        # Production mode
+npm start        # Production
 ```
-Server runs on `http://localhost:5000`
+Runs on `http://localhost:5000`
 
-**Frontend (from `/client` directory):**
+**Frontend** (from `/client`):
 ```bash
 npm run dev      # Development server
 npm run build    # Production build
 npm run preview  # Preview production build
 ```
-Client runs on `http://localhost:5173`
+Runs on `http://localhost:5173`
 
 ---
 
 ## API Reference
 
-All endpoints are prefixed with `/api` and include rate limiting (200 req/15min). Auth routes use stricter limits (15 req/30min).
+All endpoints are prefixed with `/api`. General rate limit: 200 req/15 min. Auth routes: 15 req/30 min.
 
 ### Authentication
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/auth/login` | User login, returns JWT token |
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/api/auth/login` | Public | Login, returns JWT token |
 
-### User Management (Admin Only)
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/users` | Get all employees |
-| POST | `/api/users` | Create new employee |
-| PUT | `/api/users/:id` | Update employee details |
-| DELETE | `/api/users/:id` | Delete employee |
+### User Management
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| GET | `/api/users` | Admin | Get all employees |
+| POST | `/api/users` | Admin | Create new employee |
+| PUT | `/api/users/:id` | Admin | Update employee details |
+| DELETE | `/api/users/:id` | Admin | Delete employee |
 
 ### Attendance
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/attendance/check-in` | Employee check-in |
-| POST | `/api/attendance/check-out` | Employee check-out |
-| GET | `/api/attendance/all` | Get all attendance (Admin) |
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/api/attendance/check-in` | Employee | Check in |
+| POST | `/api/attendance/check-out` | Employee | Check out |
+| GET | `/api/attendance/today` | Employee | Today's own attendance |
+| GET | `/api/attendance/me` | Employee | Personal attendance history |
+| GET | `/api/attendance/all` | Admin | All attendance records |
+| GET | `/api/attendance/user/:userId` | Admin | Attendance for a specific user |
+| GET | `/api/attendance/filters` | Both | Filtered attendance records |
+| PATCH | `/api/attendance/bulk-fix` | Admin | Bulk-resolve ghost sessions |
+| PATCH | `/api/attendance/fix/:id` | Admin | Fix a single ghost session |
 
 ### Leave Management
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/leaves` | Apply for leave |
-| GET | `/api/leaves/my` | Get personal leave history |
-| GET | `/api/leaves/all` | Get all leaves (Admin) |
-| GET | `/api/leaves/active` | Get current + pending leaves |
-| GET | `/api/leaves/pending/count` | Get pending count |
-| PUT | `/api/leaves/:id` | Approve/reject leave (Admin) |
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/api/leaves` | Employee | Apply for leave |
+| GET | `/api/leaves/me` | Employee | Personal leave history |
+| GET | `/api/leaves` | Admin | All leave requests |
+| GET | `/api/leaves/active` | Admin | Current & pending leaves |
+| GET | `/api/leaves/recent` | Admin | Recently updated leaves |
+| GET | `/api/leaves/pending-count` | Admin | Pending leave count (sidebar badge) |
+| PATCH | `/api/leaves/:id` | Admin | Approve or reject leave |
+
+### Announcements
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| GET | `/api/announcements` | Both | Get announcements (filtered by role) |
+| POST | `/api/announcements` | Admin | Create announcement + broadcast email |
+| PUT | `/api/announcements/:id` | Admin | Edit announcement |
+| PUT | `/api/announcements/:id/archive` | Admin | Archive announcement |
 
 ### Document Management
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/documents/upload` | Upload document (multipart) |
-| GET | `/api/documents/my-documents` | Get personal documents |
-| GET | `/api/documents/:id` | Get document details |
-| PUT | `/api/documents/:id` | Update metadata |
-| DELETE | `/api/documents/:id` | Delete document |
-| GET | `/api/documents/user/:userId` | Get user's documents (Admin) |
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/api/documents/upload` | Employee | Upload document (multipart) |
+| GET | `/api/documents/my-documents` | Employee | Personal documents |
+| GET | `/api/documents/:id` | Both | Document details |
+| PUT | `/api/documents/:id` | Employee | Update metadata |
+| DELETE | `/api/documents/:id` | Employee | Delete document |
+| GET | `/api/documents/user/:userId` | Admin | All documents for a user |
 
 ### Support Tickets
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/tickets` | Create ticket |
-| GET | `/api/tickets/my` | Get personal tickets |
-| GET | `/api/tickets/all` | Get all tickets (Admin) |
-| POST | `/api/tickets/:id/reply` | Add reply to ticket |
-| PATCH | `/api/tickets/:id/status` | Update ticket status |
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/api/tickets` | Employee | Create ticket |
+| GET | `/api/tickets/my` | Employee | Personal tickets |
+| GET | `/api/tickets/all` | Admin | All tickets |
+| POST | `/api/tickets/:id/reply` | Both | Add reply to thread |
+| PATCH | `/api/tickets/:id/status` | Admin | Update ticket status |
 
 ### Email
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/email/send` | Send email notification |
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | `/api/email/send` | Admin | Send manual email notification |
 
 ---
 
@@ -406,31 +478,36 @@ All endpoints are prefixed with `/api` and include rate limiting (200 req/15min)
 ### User
 ```javascript
 {
-  name:       String           // Employee full name
-  email:      String           // Unique email address
-  password:   String           // Bcrypt hashed
-  role:       String           // "admin" or "employee"
-  profilePic: String           // Cloudinary URL
-  department: String           // Department name
-  lastLogin:  Date            // Last login timestamp
-  createdAt:  Date            // Auto-generated
-  updatedAt:  Date            // Auto-generated
+  name:         String,          // Full name
+  email:        String,          // Unique
+  password:     String,          // bcrypt hashed
+  role:         String,          // "admin" | "employee"
+  profilePic:   String,          // Cloudinary URL
+  department:   String,
+  leaveBalance: {
+    sick:       Number,          // Default: 12
+    casual:     Number,          // Default: 12
+    earned:     Number,          // Default: 0
+    unpaid:     Number           // Tracks days taken (default: 0)
+  },
+  createdAt:    Date,
+  updatedAt:    Date
 }
 ```
 
 ### Leave
 ```javascript
 {
-  userId:       ObjectId       // Reference to User
-  type:         String         // "sick", "casual", "earned"
-  fromDate:     Date
-  toDate:       Date
-  reason:       String         // Leave reason
-  status:       String         // "pending", "approved", "rejected"
-  reviewedBy:   ObjectId       // Admin who reviewed
-  adminComment: String         // Feedback from admin
-  reviewedAt:   Date
-  createdAt:    Date
+  userId:       ObjectId,        // Ref: User
+  type:         String,          // "sick" | "casual" | "earned" | "unpaid"
+  fromDate:     Date,
+  toDate:       Date,
+  reason:       String,
+  status:       String,          // "pending" | "approved" | "rejected"
+  reviewedBy:   ObjectId,        // Ref: User (Admin)
+  adminComment: String,
+  reviewedAt:   Date,
+  createdAt:    Date,
   updatedAt:    Date
 }
 ```
@@ -438,26 +515,41 @@ All endpoints are prefixed with `/api` and include rate limiting (200 req/15min)
 ### Attendance
 ```javascript
 {
-  userId:       ObjectId
-  checkIn:      Date           // Check-in timestamp
-  checkOut:     Date           // Check-out timestamp
-  date:         Date           // Attendance date
-  createdAt:    Date
+  userId:       ObjectId,        // Ref: User
+  checkIn:      Date,
+  checkOut:     Date,
+  date:         String,          // YYYY-MM-DD
+  createdAt:    Date,
   updatedAt:    Date
+}
+```
+
+### Announcement
+```javascript
+{
+  title:              String,
+  message:            String,
+  type:               String,    // "General" | "Urgent" | "Event" | "Milestone"
+  targetDepartments:  [String],  // ["All"] or specific department names
+  status:             String,    // "Active" | "Archived"
+  expiresAt:          Date,
+  createdBy:          ObjectId,  // Ref: User (Admin)
+  createdAt:          Date,
+  updatedAt:          Date
 }
 ```
 
 ### Document
 ```javascript
 {
-  userId:       ObjectId       // Document owner
-  title:        String
-  fileUrl:      String         // Cloudinary URL
-  publicId:     String         // Cloudinary public ID (for deletion)
-  fileType:     String         // "pdf", "png", "jpg", "doc", "docx", "txt"
-  category:     String         // "Contract", "ID Proof", "Certification", "Other"
-  fileSize:     Number         // In bytes
-  createdAt:    Date
+  userId:       ObjectId,        // Ref: User
+  title:        String,
+  fileUrl:      String,          // Cloudinary URL
+  publicId:     String,          // Cloudinary ID (used for deletion)
+  fileType:     String,          // "pdf" | "png" | "jpg" | "doc" | "docx" | "txt"
+  category:     String,          // "Contract" | "ID Proof" | "Certification" | "Other"
+  fileSize:     Number,          // In bytes
+  createdAt:    Date,
   updatedAt:    Date
 }
 ```
@@ -465,22 +557,20 @@ All endpoints are prefixed with `/api` and include rate limiting (200 req/15min)
 ### Ticket
 ```javascript
 {
-  userId:       ObjectId       // Ticket creator
-  subject:      String
-  description:  String
-  category:     String         // "IT Support", "HR Inquiry", "Payroll", "Facilities", "General"
-  priority:     String         // "Low", "Medium", "High", "Urgent"
-  status:       String         // "Open", "In-Progress", "Resolved", "Closed"
-  replies: [                   // Thread-based conversation
-    {
-      senderId:   ObjectId
-      senderName: String
-      role:       String       // "admin" or "employee"
-      message:    String
-      createdAt:  Date
-    }
-  ],
-  createdAt:    Date
+  userId:       ObjectId,        // Ref: User
+  subject:      String,
+  description:  String,
+  category:     String,          // "IT Support" | "HR Inquiry" | "Payroll" | "Facilities" | "General"
+  priority:     String,          // "Low" | "Medium" | "High" | "Urgent"
+  status:       String,          // "Open" | "In-Progress" | "Resolved" | "Closed"
+  replies: [{
+    senderId:   ObjectId,
+    senderName: String,
+    role:       String,          // "admin" | "employee"
+    message:    String,
+    createdAt:  Date
+  }],
+  createdAt:    Date,
   updatedAt:    Date
 }
 ```
@@ -491,51 +581,56 @@ All endpoints are prefixed with `/api` and include rate limiting (200 req/15min)
 
 | Path | Role | Component | Purpose |
 |---|---|---|---|
-| `/` | Public | Login | User authentication |
-| `/admin` | Admin | Dashboard | Overview & statistics |
+| `/` | Public | Login | Authentication |
+| `/admin` | Admin | Admin | Overview, stats, announcements |
 | `/users` | Admin | Users | Employee management |
 | `/admin/leaves` | Admin | AdminLeaves | Leave approval |
 | `/admin/reports` | Admin | LeaveReport | Analytics & charts |
-| `/admin/documents` | Admin | AdminDocuments | Manage documents |
-| `/admin/helpdesk` | Admin | AdminHelpdesk | Manage tickets |
-| `/employee` | Employee | Dashboard | Personal dashboard |
-| `/employee/leaves` | Employee | MyLeaves | Leave management |
+| `/admin/documents` | Admin | AdminDocuments | Manage all documents |
+| `/admin/helpdesk` | Admin | AdminHelpdesk | Manage support tickets |
+| `/employee` | Employee | Employee | Personal dashboard & announcements |
+| `/employee/leaves` | Employee | MyLeaves | Leave history & apply |
 | `/employee/attendance` | Employee | AttendanceHistory | Check-in/out history |
-| `/employee/vault` | Employee | DocumentVault | Document storage |
+| `/employee/vault` | Employee | DocumentVault | Personal document storage |
 | `/employee/helpdesk` | Employee | EmployeeHelpdesk | Create & track tickets |
+| `*` | Any | NotFound | 404 page |
 
 ---
 
 ## Key Features in Detail
 
+### Leave Balance System
+Each employee has a `leaveBalance` object embedded on their User document. When an Admin **approves** a leave request, the system checks whether the employee has sufficient days remaining for the requested leave type. If the balance is insufficient, the approval is blocked with an informative error message. On approval, the balance is deducted; on rejection or reversal, it is restored. Unpaid leave is tracked separately and accumulates rather than depletes.
+
+Default annual allocations:
+- Sick: 12 days
+- Casual: 12 days
+- Earned: 0 days (accrual-based)
+- Unpaid: tracked (no cap)
+
+### Announcement Broadcasting
+When an Admin creates an announcement, the system immediately sends a broadcast email to all employees in the targeted department(s). If `targetDepartments` is set to `["All"]`, every employee receives the email. Each announcement type maps to a distinct email accent color (Indigo for General, Rose for Urgent, Emerald for Event, Amber for Milestone) to aid at-a-glance recognition in inboxes.
+
+### Ghost Session Resolution
+A ghost session is an attendance record from a past date where the employee checked in but never checked out. The Admin dashboard surfaces these sessions with a dedicated panel. Admins can apply a default check-out time (configured via `VITE_DEFAULT_CHECKOUT_TIME`) to all ghost sessions at once (`bulk-fix`) or resolve them individually (`fix/:id`).
+
 ### Leave Validation Rules
-- **Past dates**: Prevented — can only apply for future dates
-- **Weekends**: Automatically excluded from leave duration calculation
-- **Duration limit**: Maximum 14 days (2 weeks) per request
-- **Overlaps**: System prevents overlapping leave applications for same employee
+- **Past dates** — prevented; only future dates allowed
+- **Weekends** — Saturday and Sunday are automatically excluded from the leave duration count
+- **Duration limit** — maximum 14 calendar days per request
+- **Overlaps** — system rejects new requests that overlap with existing ones for the same employee
+- **Balance check** — enforced at approval time; insufficient balance blocks the action
 
 ### Ticket Workflow
 1. Employee creates ticket → Status: **Open**
 2. Admin reviews → Updates to **In-Progress**
-3. Both can reply with comments
-4. Once resolved → Status: **Resolved**
-5. Final confirmation → Status: **Closed**
-
-### Document Management
-- Files stored on Cloudinary (not in database)
-- Automatic cleanup when document is deleted
-- File size and type validation at upload
-- Metadata stored in MongoDB for quick queries
+3. Both Admin and Employee can add replies to the thread
+4. Admin marks as **Resolved** when the issue is addressed
+5. Employee confirms and closes → Status: **Closed**
 
 ### Authentication Flow
-1. User logs in with email/password
-2. Server validates and returns JWT token
-3. Frontend stores token in localStorage
-4. All subsequent requests include token in header
-5. Protected routes validate token and role
-
----
-
-## Purpose
-
-OfficeLink demonstrates production-level full-stack development with real business logic. The focus is on workflow automation, role-based access control, data validation, file management, professional UX patterns, and scalable architecture — beyond basic CRUD operations.
+1. User submits email and password via the Login page
+2. Server validates credentials and returns a signed JWT
+3. Frontend stores the token in `localStorage` via `AuthContext`
+4. All subsequent API requests include the token in the `Authorization` header
+5. Protected routes on both frontend and backend validate the token and check the user's role before granting access

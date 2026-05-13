@@ -20,6 +20,7 @@ const app = express();
 
 const allowedOrigins = [
   'http://localhost:5173',           // Local Development
+  'http://localhost:4173',
   process.env.CLIENT_URL,           // Your Production Frontend
   'https://officelink-q3dppywc0-xyzerg808-5448s-projects.vercel.app/',
   'https://officelink-ui-git-main-xyzerg808-5448s-projects.vercel.app/',

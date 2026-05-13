@@ -163,7 +163,7 @@ export const migrateUserBalances = async (req, res) => {
 
     res.json({ 
       msg: "Migration complete!", 
-      updatedUsersCount: result.modifiedCount 
+      updatedUsersCount: result.modifiedCount,
     });
   } catch (err) {
     console.error(err);
