@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 
 import { sendEmail } from "../utils/sendEmail.js";
 import { buildEmailTemplate } from "../utils/emailTemplate.js";
+import { createAuditLog } from "../utils/auditLogger.js"; // Imported the audit logger
 
 export const createUser = async (req, res) => {
   try {
@@ -27,6 +28,18 @@ export const createUser = async (req, res) => {
       department,
       profilePic
     });
+
+    // --- AUDIT LOG: USER CREATION ---
+    // Fallback to user._id if this is the very first system registration without a token
+    const performerId = req.user ? req.user.id : user._id; 
+    await createAuditLog(
+      performerId,
+      "USER_CREATED",
+      user._id,
+      "User",
+      null,
+      { name: user.name, email: user.email, role: user.role, department: user.department }
+    );
 
     try {
       const welcomeHtml = buildEmailTemplate({
@@ -106,6 +119,14 @@ export const updateUser = async (req, res) => {
       return res.status(404).json({ msg: "User not found" });
     }
 
+    // --- PRE-CHANGE SNAPSHOT FOR AUDIT ---
+    const oldSnapshot = {
+      name: currentUser.name,
+      email: currentUser.email,
+      role: currentUser.role,
+      department: currentUser.department
+    };
+
     const updates = req.body;
 
     if (updates.password) {
@@ -115,6 +136,21 @@ export const updateUser = async (req, res) => {
     const user = await User.findByIdAndUpdate(id, updates, {
       returnDocument: "after"
     }).select("-password");
+
+    // --- AUDIT LOG: USER UPDATE ---
+    await createAuditLog(
+      req.user.id, // The person making the change (could be Admin or self)
+      "USER_UPDATED",
+      user._id,
+      "User",
+      oldSnapshot,
+      {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        department: user.department
+      }
+    );
 
     res.json(user);
   } catch (err) {
@@ -136,10 +172,28 @@ export const deleteUser = async (req, res) => {
       return res.status(400).json({ msg: "Cannot delete admin" });
     }
     
+    // --- PRE-CHANGE SNAPSHOT FOR AUDIT ---
+    const oldSnapshot = {
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      department: user.department
+    };
+
     await Leave.deleteMany({ userId: id });
     await Attendance.deleteMany({ userId: id });
     
     await User.findByIdAndDelete(id);
+
+    // --- AUDIT LOG: USER DELETED ---
+    await createAuditLog(
+      req.user.id, // The Admin performing the deletion
+      "USER_DELETED",
+      id,
+      "User",
+      oldSnapshot,
+      null // No new data since it's deleted
+    );
 
     res.json({ msg: "User and related data deleted" });
     
@@ -148,7 +202,6 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ msg: "Error deleting user" });
   }
 };
-
 
 export const migrateUserBalances = async (req, res) => {
   try {
@@ -159,6 +212,16 @@ export const migrateUserBalances = async (req, res) => {
           leaveBalance: { sick: 12, casual: 12, earned: 0, unpaid: 0 } 
         } 
       }
+    );
+
+    // --- AUDIT LOG: BULK SYSTEM ACTION ---
+    await createAuditLog(
+      req.user.id,
+      "SYSTEM_LEAVE_MIGRATION",
+      req.user.id, // Target is the admin who triggered it
+      "User",
+      null,
+      { updatedUsersCount: result.modifiedCount }
     );
 
     res.json({ 
