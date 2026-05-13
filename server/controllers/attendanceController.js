@@ -1,5 +1,6 @@
 import Attendance from "../models/Attendance.js";
-import Leave from "../models/Leave.js"; // Ensure Leave model is imported
+import Leave from "../models/Leave.js"; 
+import mongoose from "mongoose";
 
 export const checkIn = async (req, res) => {
   try {
