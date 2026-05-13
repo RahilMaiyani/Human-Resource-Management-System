@@ -23,7 +23,8 @@ import {
   BriefcaseMedical,
   Coffee,
   Award,
-  Scale
+  Scale,
+  Loader2 // Added Loader icon
 } from "lucide-react";
 
 export default function Employee() {
@@ -31,8 +32,12 @@ export default function Employee() {
   
   if(user){ useTitle(user?.name) }
   
-  const { data: leaves = [] } = useMyLeaves();
-  const { data: todayAttendance, isLoading } = useTodayAttendance();
+  // 1. FRONTEND FIX: Extract isLoading from BOTH hooks
+  const { data: leaves = [], isLoading: loadingLeaves } = useMyLeaves();
+  const { data: todayAttendance, isLoading: loadingAttendance } = useTodayAttendance();
+
+  // 2. COMBINED BARRIER: True if either API is still fetching
+  const isStatusChecking = loadingAttendance || loadingLeaves;
 
   const [openProfile, setOpenProfile] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -145,7 +150,7 @@ export default function Employee() {
               </div>
 
               <div>
-                {isOnLeaveToday ? (
+                {isStatusChecking ? null : isOnLeaveToday ? (
                   <span className="text-[10px] font-black uppercase tracking-widest text-amber-700 bg-amber-50 px-3 py-1 rounded border border-amber-200">
                     On Leave
                   </span>
@@ -157,8 +162,12 @@ export default function Employee() {
               </div>
             </div>
 
-            {isLoading ? (
-              <div className="h-40 flex items-center justify-center text-slate-400 text-sm">Loading attendance data...</div>
+            {/* 3. IMPLEMENT COMBINED CHECK: Only render buttons if completely finished loading */}
+            {isStatusChecking ? (
+              <div className="h-40 flex flex-col items-center justify-center gap-3 text-slate-400 text-sm">
+                <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                <p className="font-medium">Verifying daily status...</p>
+              </div>
             ) : (
               <>
                 <div className="grid grid-cols-2 gap-6 mb-8">
@@ -175,8 +184,10 @@ export default function Employee() {
                 <div className="flex items-center">
                   {isOnLeaveToday && (
                     <div className="w-full flex items-center gap-4 p-4 bg-amber-50 border border-amber-100 rounded-lg">
-                      <AlertCircle className="w-5 h-5 text-amber-600" />
-                      <span className="text-sm font-medium text-amber-800">Currently on approved leave until {leaveEndDate}.</span>
+                      <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+                      <span className="text-sm font-medium text-amber-800">
+                        Currently on approved leave until <strong>{leaveEndDate}</strong>. Check-in is disabled.
+                      </span>
                     </div>
                   )}
 
@@ -184,9 +195,10 @@ export default function Employee() {
                     <button
                       onClick={() => checkInMutation.mutate()}
                       disabled={checkInMutation.isPending}
-                      className="px-8 h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-3"
+                      className="px-8 h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-3 w-full sm:w-auto justify-center"
                     >
-                      <LogIn className="w-4 h-4" /> {checkInMutation.isPending ? "Recording..." : "Check In"}
+                      {checkInMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />} 
+                      {checkInMutation.isPending ? "Recording..." : "Check In"}
                     </button>
                   )}
 
@@ -194,9 +206,10 @@ export default function Employee() {
                     <button
                       onClick={handleCheckOut}
                       disabled={checkOutMutation.isPending}
-                      className="px-8 h-12 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-3"
+                      className="px-8 h-12 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-3 w-full sm:w-auto justify-center"
                     >
-                      <LogOut className="w-4 h-4" /> {checkOutMutation.isPending ? "Recording..." : "Check Out"}
+                      {checkOutMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />} 
+                      {checkOutMutation.isPending ? "Recording..." : "Check Out"}
                     </button>
                   )}
 

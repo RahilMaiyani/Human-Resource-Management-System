@@ -1,22 +1,46 @@
 import Attendance from "../models/Attendance.js";
-import mongoose from "mongoose";
+import Leave from "../models/Leave.js"; // Ensure Leave model is imported
 
 export const checkIn = async (req, res) => {
   try {
-    const today = new Date().toISOString().split("T")[0];
+    const userId = req.user.id;
+    
+    // Create Date boundaries for "Today" (Midnight to Midnight)
+    const now = new Date();
+    const todayStart = new Date(now.setHours(0, 0, 0, 0));
+    const todayEnd = new Date(now.setHours(23, 59, 59, 999));
+    
+    // Keeping your original date string format for the Attendance record
+    const todayString = new Date().toISOString().split("T")[0];
 
+    // --- GATEKEEPER: Check if user is on approved leave today ---
+    const activeLeave = await Leave.findOne({
+      userId: userId,
+      status: "approved",
+      fromDate: { $lte: todayEnd }, 
+      toDate: { $gte: todayStart }  
+    });
+
+    if (activeLeave) {
+      return res.status(403).json({ 
+        msg: "Check-in blocked. You are on approved leave today." 
+      });
+    }
+
+    // --- EXISTING LOGIC: Check if already checked in ---
     const exists = await Attendance.findOne({
-      userId: req.user.id,
-      date: today
+      userId: userId,
+      date: todayString
     });
 
     if (exists) {
       return res.status(400).json({ msg: "Already checked in" });
     }
 
+    // --- Process Check-In ---
     const record = await Attendance.create({
-      userId: req.user.id,
-      date: today,
+      userId: userId,
+      date: todayString,
       checkIn: new Date()
     });
 
