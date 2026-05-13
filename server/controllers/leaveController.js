@@ -106,7 +106,6 @@ export const updateLeaveStatus = async (req, res) => {
     const user = await User.findById(leave.userId);
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    // Ensure backwards compatibility for users created before the balance update
     if (!user.leaveBalance) {
       user.leaveBalance = { sick: 12, casual: 12, earned: 0, unpaid: 0 };
     }
@@ -132,7 +131,6 @@ export const updateLeaveStatus = async (req, res) => {
       await user.save();
     }
 
-    // Refunding the balance: If admin changes an approved leave to rejected
     if (leave.status === "approved" && status !== "approved") {
       if (type === "unpaid") {
         user.leaveBalance.unpaid -= diffDays;

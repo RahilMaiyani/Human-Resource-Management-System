@@ -101,8 +101,6 @@ export default function Admin() {
     )
   );
 
-  // --- DATA CLEANUP LOGIC ---
-  // Finds sessions before today that do not have a checkout value
   const ghostSessions = (attendance || []).filter(a => a.date < todayDate && !a.checkout && !a.checkOut);
   const defaultCheckout = import.meta.env.VITE_DEFAULT_CHECKOUT_TIME || "18:00";
 

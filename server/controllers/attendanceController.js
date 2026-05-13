@@ -216,16 +216,14 @@ export const bulkFixAttendance = async (req, res) => {
 export const fixSingleAttendance = async (req, res) => {
   try {
     const { id } = req.params;
-    const { customTime } = req.body; // Read custom time from frontend
+    const { customTime } = req.body;
 
-    // Fallback to Env variable or 18:00 if no custom time is provided
     const defaultTime = process.env.DEFAULT_CHECKOUT_TIME || "18:00"; 
     const fixTime = customTime || defaultTime;
 
     const record = await Attendance.findById(id);
     if (!record) return res.status(404).json({ msg: "Record not found" });
 
-    // Apply the chosen time to the original date
     const autoDate = new Date(`${record.date}T${fixTime}:00`);
     record.checkout = autoDate;
     

@@ -89,7 +89,7 @@ export const getUsers = async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    res.status(500).json({ msg: "Error fetching users" });
+    res.status(500).json({ msg: "Error fetching users" }); 
   }
 };
 
@@ -149,12 +149,9 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-// ==========================================
-// DATA MIGRATION SCRIPT
-// ==========================================
+
 export const migrateUserBalances = async (req, res) => {
   try {
-    // Finds all users who DO NOT have a leaveBalance object yet
     const result = await User.updateMany(
       { leaveBalance: { $exists: false } },
       { 
