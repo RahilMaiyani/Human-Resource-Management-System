@@ -12,7 +12,7 @@ import documentRoutes from "./routes/documentRoutes.js";
 import ticketRoutes from './routes/ticketRoutes.js';
 import announcementRoutes from "./routes/announcementRoutes.js";
 import { apiLimiter } from "./middleware/rateLimiter.js";
-
+import logRoutes from "./routes/logRouter.js";
 dotenv.config();
 connectDB();
 
@@ -57,6 +57,8 @@ app.use("/api/email", emailRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/announcements", announcementRoutes);
+
+app.use("/api/logs", logRoutes);
 
 app.get("/", (req, res) => {
     res.send("OfficeLink API Running");

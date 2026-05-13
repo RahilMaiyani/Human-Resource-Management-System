@@ -1,7 +1,8 @@
 import Leave from "../models/Leave.js";
+import User from "../models/User.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import { buildEmailTemplate } from "../utils/emailTemplate.js";
-import User from "../models/User.js";
+import { createAuditLog } from "../utils/auditLogger.js";
 
 export const applyLeave = async (req, res) => {
   try {
@@ -32,6 +33,16 @@ export const applyLeave = async (req, res) => {
       toDate,
       reason
     });
+
+    // --- AUDIT LOG: LEAVE APPLICATION ---
+    await createAuditLog(
+      req.user.id,
+      "LEAVE_APPLIED",
+      leave._id,
+      "Leave",
+      null, 
+      { type, fromDate, toDate, reason }
+    );
 
     res.status(201).json(leave);
   } catch (err) {
@@ -95,6 +106,9 @@ export const getPendingLeavesCount = async (req, res) => {
   }
 };
 
+
+// ... getMyLeaves, getAllLeaves, getRecentLeaves, getActiveLeaves, getPendingLeavesCount ...
+
 export const updateLeaveStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -106,16 +120,24 @@ export const updateLeaveStatus = async (req, res) => {
     const user = await User.findById(leave.userId);
     if (!user) return res.status(404).json({ msg: "User not found" });
 
+    // Initialize balance if it doesn't exist
     if (!user.leaveBalance) {
       user.leaveBalance = { sick: 12, casual: 12, earned: 0, unpaid: 0 };
     }
+
+    // --- PRE-CHANGE SNAPSHOT FOR AUDIT ---
+    const oldSnapshot = {
+      status: leave.status,
+      balance: { ...user.leaveBalance },
+      adminComment: leave.adminComment
+    };
 
     const start = new Date(leave.fromDate);
     const end = new Date(leave.toDate);
     const diffDays = Math.round(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
     const type = leave.type;
 
-    // Approving the leave: Check balance and deduct
+    // Logic: Deduct balance if approving for the first time
     if (status === "approved" && leave.status !== "approved") {
       if (type !== "unpaid" && user.leaveBalance[type] < diffDays) {
         return res.status(400).json({ 
@@ -131,6 +153,7 @@ export const updateLeaveStatus = async (req, res) => {
       await user.save();
     }
 
+    // Logic: Revert balance if an approved leave is changed to rejected/pending
     if (leave.status === "approved" && status !== "approved") {
       if (type === "unpaid") {
         user.leaveBalance.unpaid -= diffDays;
@@ -145,61 +168,74 @@ export const updateLeaveStatus = async (req, res) => {
     
     await leave.save();
 
-    if (user) {
-      const statusColor = 
-        status === "approved" ? "#10b981" : 
-        status === "rejected" ? "#f43f5e" : "#f59e0b";
+    // --- AUDIT LOG: STATUS UPDATE ---
+    await createAuditLog(
+      req.user.id, 
+      "LEAVE_STATUS_UPDATE",
+      leave._id,
+      "Leave",
+      oldSnapshot,
+      { 
+        status: leave.status, 
+        balance: user.leaveBalance, 
+        adminComment: leave.adminComment 
+      }
+    );
 
-      const html = buildEmailTemplate({
-        title: "Leave Application Update",
-        color: statusColor,
-        message: `
-          <p style="margin-bottom:24px;">Hello <b>${user.name}</b>,</p>
-          
-          <p style="margin-bottom:32px;">Your leave request status has been updated to:</p>
-          
-          <div style="text-align:center; margin-bottom:32px;">
-            <span style="background-color:${statusColor}; color:#ffffff; padding:10px 24px; border-radius:50px; font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:0.05em;">
-              ${status}
-            </span>
+    // --- FULL EMAIL NOTIFICATION ENGINE ---
+    const statusColor = 
+      status === "approved" ? "#10b981" : 
+      status === "rejected" ? "#f43f5e" : "#f59e0b";
+
+    const html = buildEmailTemplate({
+      title: "Leave Application Update",
+      color: statusColor,
+      message: `
+        <p style="margin-bottom:24px;">Hello <b>${user.name}</b>,</p>
+        
+        <p style="margin-bottom:32px;">Your leave request status has been updated to:</p>
+        
+        <div style="text-align:center; margin-bottom:32px;">
+          <span style="background-color:${statusColor}; color:#ffffff; padding:10px 24px; border-radius:50px; font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:0.05em;">
+            ${status}
+          </span>
+        </div>
+
+        <div style="background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:24px; margin-bottom:24px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="padding-bottom:12px; font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase;">Leave Type</td>
+              <td style="padding-bottom:12px; font-size:14px; color:#1e293b; font-weight:600; text-align:right;">${leave.type}</td>
+            </tr>
+            <tr>
+              <td style="padding-bottom:12px; font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase;">From Date</td>
+              <td style="padding-bottom:12px; font-size:14px; color:#1e293b; font-weight:600; text-align:right;">${leave.fromDate.toISOString().slice(0, 10)}</td>
+            </tr>
+            <tr>
+              <td style="font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase;">To Date</td>
+              <td style="font-size:14px; color:#1e293b; font-weight:600; text-align:right;">${leave.toDate.toISOString().slice(0, 10)}</td>
+            </tr>
+          </table>
+        </div>
+
+        ${adminComment ? `
+          <div style="border-left:4px solid #e2e8f0; padding-left:20px; margin:24px 0;">
+            <p style="margin:0 0 4px 0; font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase;">Administrator Comment</p>
+            <p style="margin:0; font-style:italic; color:#475569;">"${adminComment}"</p>
           </div>
+        ` : ""}
 
-          <div style="background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:24px; margin-bottom:24px;">
-            <table width="100%" cellpadding="0" cellspacing="0">
-              <tr>
-                <td style="padding-bottom:12px; font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase;">Leave Type</td>
-                <td style="padding-bottom:12px; font-size:14px; color:#1e293b; font-weight:600; text-align:right;">${leave.type}</td>
-              </tr>
-              <tr>
-                <td style="padding-bottom:12px; font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase;">From Date</td>
-                <td style="padding-bottom:12px; font-size:14px; color:#1e293b; font-weight:600; text-align:right;">${leave.fromDate.toISOString().slice(0, 10)}</td>
-              </tr>
-              <tr>
-                <td style="font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase;">To Date</td>
-                <td style="font-size:14px; color:#1e293b; font-weight:600; text-align:right;">${leave.toDate.toISOString().slice(0, 10)}</td>
-              </tr>
-            </table>
-          </div>
+        <p style="font-size:13px; color:#94a3b8; margin-top:32px; text-align:center;">
+          Please login to the dashboard for more details.
+        </p>
+      `
+    });
 
-          ${adminComment ? `
-            <div style="border-left:4px solid #e2e8f0; padding-left:20px; margin:24px 0;">
-              <p style="margin:0 0 4px 0; font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase;">Administrator Comment</p>
-              <p style="margin:0; font-style:italic; color:#475569;">"${adminComment}"</p>
-            </div>
-          ` : ""}
-
-          <p style="font-size:13px; color:#94a3b8; margin-top:32px; text-align:center;">
-            Please login to the OfficeLink dashboard for more details.
-          </p>
-        `
-      });
-
-      await sendEmail({
-        to: user.email,
-        subject: "Leave Request Update",
-        html
-      });
-    }
+    await sendEmail({
+      to: user.email,
+      subject: "Leave Request Update",
+      html
+    });
 
     res.json(leave);
   } catch (err) {
