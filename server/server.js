@@ -58,12 +58,16 @@ app.use("/api/documents", documentRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/announcements", announcementRoutes);
 
-app.get("/", (req, res) => {
-    res.send("OfficeLink API Running");
-});
 
 app.use(errorMiddleware);
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "active",
+    message: "OfficeLink API is running smoothly",
+    timestamp: new Date()
+  });
+});
 
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 5000;
