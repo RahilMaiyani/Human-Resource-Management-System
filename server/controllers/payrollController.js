@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import Payslip from "../models/Payslip.js";
+import Leave from "../models/Leave.js";
 import { encryptData, decryptData } from "../utils/crypto.js"; 
 import { sendEmail } from "../utils/sendEmail.js";
 import { buildEmailTemplate } from "../utils/emailTemplate.js";
@@ -156,13 +157,15 @@ export const getMyPayslips = async (req, res) => {
   }
 };
 
-
 export const generateMonthlyPayroll = async (req, res) => {
   try {
     const today = new Date();
     const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const targetMonth = lastMonth.toLocaleString('default', { month: 'long' });
     const targetYear = lastMonth.getFullYear();
+
+    const targetMonthStart = new Date(targetYear, lastMonth.getMonth(), 1);
+    const targetMonthEnd = new Date(targetYear, lastMonth.getMonth() + 1, 0, 23, 59, 59);
 
     const alreadyRun = await Payslip.findOne({ month: targetMonth, year: targetYear });
     if (alreadyRun) {
@@ -180,9 +183,33 @@ export const generateMonthlyPayroll = async (req, res) => {
       const special = emp.salaryDetails.specialAllowance;
       const totalGross = basic + special;
 
-      const dailyRate = totalGross / 30;
-      const unpaidDays = emp.leaveBalance?.unpaid || 0; 
-      const lopDeduction = Math.round(unpaidDays * dailyRate);
+      const totalDays = new Date(targetYear, lastMonth.getMonth() + 1, 0).getDate();
+      const dailyRate = totalGross / parseInt(totalDays);
+      
+      // Fetch Approved Unpaid Leaves overlapping with this specific month
+      const unpaidLeaves = await Leave.find({
+        userId: emp._id, 
+        status: "approved",
+        type: "unpaid", 
+        fromDate: { $lte: targetMonthEnd },
+        toDate: { $gte: targetMonthStart }
+      });
+    //   console.log(`Employee: ${emp.name} | Unpaid Leaves This Month: ${unpaidLeaves.length}, ${unpaidLeaves}`);
+
+      let unpaidDaysThisMonth = 0;
+
+      // Calculate the exact number of unpaid days falling WITHIN the target month
+      unpaidLeaves.forEach(leave => {
+        const start = leave.fromDate < targetMonthStart ? targetMonthStart : leave.fromDate;
+        const end = leave.toDate > targetMonthEnd ? targetMonthEnd : leave.toDate;
+        
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; 
+        
+        unpaidDaysThisMonth += diffDays;
+      });
+
+      const lopDeduction = Math.round(unpaidDaysThisMonth * dailyRate);
       
       const pTax = 200;
       const netPay = totalGross - lopDeduction - pTax;
@@ -261,6 +288,7 @@ export const generateMonthlyPayroll = async (req, res) => {
 
     // 4. Admin Summary Dispatch
     const adminEmail = req.user?.email || process.env.EMAIL_USER;
+    // console.log(req.user?.email);
     
     if (adminEmail) {
       const summaryHtml = buildEmailTemplate({
@@ -314,7 +342,7 @@ export const generateMonthlyPayroll = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("\n🔴 CRITICAL PAYROLL GENERATION ERROR:");
+    console.error("\n CRITICAL PAYROLL GENERATION ERROR:");
     console.error(error);
     res.status(500).json({ msg: "Critical error during payroll generation" });
   }
