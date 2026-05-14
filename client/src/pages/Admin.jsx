@@ -7,7 +7,7 @@ import AttendanceChart from "../components/charts/AttendanceChart";
 import LeaveStatusChart from "../components/charts/LeaveStatusChart";
 import LeaveTrendChart from "../components/charts/LeaveTrendChart";
 import AdminDashboardSkeleton from "../components/AdminDashboardSkeleton";
-
+import SmartTriggerBanner from "../components/SmartTriggerBanner";
 import CreateAnnouncementModal from "../components/CreateAnnouncementModal";
 import AnnouncementFeed from "../components/AnnouncementFeed";
 
@@ -169,6 +169,9 @@ export default function Admin() {
             New Broadcast
           </button>
         </div>
+
+        {/* --- PAYROLL SMART TRIGGER BANNER --- */}
+        <SmartTriggerBanner />
 
         {/* --- UPGRADED DATA CLEANUP BANNER --- */}
         {ghostSessions.length > 0 && (

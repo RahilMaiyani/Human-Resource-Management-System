@@ -6,7 +6,8 @@ import {
   setupEmployeePayroll, 
   getMyPayslips, 
   generateMonthlyPayroll,
-  seedMissingPayrollData
+  downloadPayslipPDF
+//   seedMissingPayrollData
 } from "../controllers/payrollController.js";
 
 const router = express.Router();
@@ -21,5 +22,6 @@ router.post("/generate", protect, authorize("admin"), generateMonthlyPayroll);
 
 // Employee Routes
 router.get("/my-payslips", protect, getMyPayslips);
+router.get("/download/:id", protect, downloadPayslipPDF);
 
 export default router;

@@ -5,7 +5,7 @@ dotenv.config();
 // We use AES-256-CBC. It requires a 32-byte key and a 16-byte IV.
 const algorithm = "aes-256-cbc";
 const secretKey = crypto.createHash("sha256").update(process.env.JWT_SECRET).digest();
-
+// console.log(secretKey)
 export const encryptData = (text) => {
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv(algorithm, secretKey, iv);

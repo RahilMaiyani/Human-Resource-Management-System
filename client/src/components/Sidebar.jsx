@@ -11,7 +11,8 @@ import {
   DoorOpen,
   Vault,
   FileBox,
-  LifeBuoy 
+  LifeBuoy,
+  IndianRupee,
 } from "lucide-react";
 
 export default function Sidebar({ user }) {
@@ -161,6 +162,14 @@ export default function Sidebar({ user }) {
                   {activeTicketCount}
                 </span>
               )}
+            </Link>
+
+            <Link
+              to="/employee/financials"
+              className={`${baseClass} ${isActive("/employee/financials") ? activeClass : inactiveClass}`}
+            >
+              <IndianRupee className="w-5 h-5" />
+              My Payslips
             </Link>
           </>
         )}

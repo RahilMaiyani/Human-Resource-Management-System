@@ -6,7 +6,6 @@ import { sendEmail } from "../utils/sendEmail.js";
 import { buildEmailTemplate } from "../utils/emailTemplate.js";
 import PDFDocument from "pdfkit";
 
-// Helper: Generates the Encrypted PDF Buffer in memory
 const generatePDFBuffer = (user, payslip, rawAccount) => {
   return new Promise((resolve) => {
     // PASSWORD LOGIC: Strip spaces, lowercase, pad short names with 'x'
@@ -27,7 +26,6 @@ const generatePDFBuffer = (user, payslip, rawAccount) => {
     doc.on('data', buffers.push.bind(buffers));
     doc.on('end', () => resolve(Buffer.concat(buffers)));
 
-    // --- CORPORATE PDF DESIGN ---
     
     // 1. Top Header Bar
     doc.rect(0, 0, 600, 100).fill('#f8fafc');
@@ -169,7 +167,7 @@ export const generateMonthlyPayroll = async (req, res) => {
 
     const alreadyRun = await Payslip.findOne({ month: targetMonth, year: targetYear });
     if (alreadyRun) {
-      return res.status(400).json({ msg: "Payroll already generated for this month" });
+      return res.status(400).json({ msg: "Payroll already generated for this month", month: targetMonth, year: targetYear });
     }
 
     const employees = await User.find({ "salaryDetails.basicPay": { $gt: 0 } }).select('+bankDetails.accountNumber');
@@ -285,7 +283,6 @@ export const generateMonthlyPayroll = async (req, res) => {
         }
       }
     }
-
     // 4. Admin Summary Dispatch
     const adminEmail = req.user?.email || process.env.EMAIL_USER;
     // console.log(req.user?.email);
@@ -347,6 +344,41 @@ export const generateMonthlyPayroll = async (req, res) => {
     res.status(500).json({ msg: "Critical error during payroll generation" });
   }
 };
+
+// GET /api/payroll/download/:id
+export const downloadPayslipPDF = async (req, res) => {
+  try {
+    const payslip = await Payslip.findById(req.params.id);
+    if (!payslip) return res.status(404).json({ msg: "Payslip not found" });
+
+    // Security check: Only the owner or an admin can download it
+    if (payslip.userId.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ msg: "Not authorized to download this document" });
+    }
+
+    const emp = await User.findById(payslip.userId).select('+bankDetails.accountNumber');
+    if (!emp || !emp.bankDetails?.accountNumber) {
+       return res.status(400).json({ msg: "Incomplete bank details. Cannot generate secure PDF." });
+    }
+
+    // Generate PDF in memory
+    const rawAccount = decryptData(emp.bankDetails.accountNumber);
+    const pdfBuffer = await generatePDFBuffer(emp, payslip, rawAccount);
+
+    // Tell the browser this is a downloadable PDF file
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="Payslip_${payslip.month}_${payslip.year}.pdf"`,
+      'Content-Length': pdfBuffer.length
+    });
+
+    res.end(pdfBuffer);
+  } catch (error) {
+    console.error("PDF Download Error:", error);
+    res.status(500).json({ msg: "Critical error during PDF generation" });
+  }
+};
+
 
 // ==========================================
 // TEMPORARY MIGRATION SCRIPT

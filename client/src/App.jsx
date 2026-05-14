@@ -12,7 +12,9 @@ import AdminLeaves from "./pages/AdminLeaves";
 import LeaveReports from "./pages/LeaveReport";
 import AttendanceHistory from "./pages/AttendanceHistory";
 import DocumentVault from "./pages/DocumentVault";
-import AdminDocuments from "./pages/AdminDocuments";import EmployeeHelpdesk from "./pages/EmployeeHelpdesk";
+import AdminDocuments from "./pages/AdminDocuments";
+import EmployeeHelpdesk from "./pages/EmployeeHelpdesk";
+import EmployeeFinancials from "./pages/MyPayslips";
 import AdminHelpdesk from "./pages/AdminHelpdesk";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -102,6 +104,7 @@ export default function App() {
             <Route path="/employee/attendance" element={<ProtectedRoute role="employee"><AttendanceHistory /></ProtectedRoute>} />
             <Route path="/employee/vault" element={<ProtectedRoute role="employee"><DocumentVault /></ProtectedRoute>} />
             <Route path="/employee/helpdesk" element={<ProtectedRoute role="employee"><EmployeeHelpdesk /></ProtectedRoute>} />
+            <Route path="/employee/financials" element={<ProtectedRoute role="employee"><EmployeeFinancials /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

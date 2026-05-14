@@ -7,6 +7,8 @@ import UsersTableSkeleton from "../components/UsersTableSkeleton";
 import DeleteModal from "../components/DeleteModal";
 import UserDetailsModal from "../components/UserDetailsModal";
 import { useTitle } from "../hooks/useTitle";
+import PayrollSetupModal from "../components/PayrollSetupModal"; // Added Import
+
 import { 
   Search, 
   Filter, 
@@ -16,7 +18,8 @@ import {
   ChevronRight, 
   Mail,
   Briefcase,
-  RotateCcw
+  RotateCcw,
+  IndianRupee // Added Icon
 } from "lucide-react";
 
 export default function Users() {
@@ -26,6 +29,9 @@ export default function Users() {
   const [deleteUserId, setDeleteUserId] = useState(null);
   const [deleteUserName, setDeleteUserName] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+  
+  // NEW STATE: Holds the user being configured for payroll
+  const [payrollUser, setPayrollUser] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const USERS_PER_PAGE = 10;
@@ -39,7 +45,7 @@ export default function Users() {
   const [editUser, setEditUser] = useState(null);
 
   const employees = users.filter((u) => u.role != 'admin');
-  // console.log(employees)
+  
   const departments = useMemo(() => {
     const deps = employees.map((u) => u.department).filter(Boolean);
     return ["", ...new Set(deps)];
@@ -185,7 +191,8 @@ export default function Users() {
                     </td>
 
                     <td className="px-6 py-5">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -196,6 +203,17 @@ export default function Users() {
                           title="Edit User"
                         >
                           <Edit3 className="w-4 h-4" />
+                        </button>
+                        
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation(); 
+                            setPayrollUser(u);
+                          }}
+                          className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                          title="Configure Payroll"
+                        >
+                          <IndianRupee className="w-4 h-4" />
                         </button>
 
                         <button
@@ -268,6 +286,13 @@ export default function Users() {
           onClose={() => setIsModalOpen(false)}
           editUser={editUser}
         />
+
+        <PayrollSetupModal
+          isOpen={!!payrollUser}
+          onClose={() => setPayrollUser(null)}
+          user={payrollUser}
+        />
+
       </div>
     </DashboardLayout>
   );
