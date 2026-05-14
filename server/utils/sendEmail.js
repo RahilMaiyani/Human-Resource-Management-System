@@ -39,6 +39,5 @@ export const sendEmail = async ({ to, subject, html, attachments }) => {
     
   } catch (err) {
     console.log(`\n  \x1b[41m\x1b[37m ERROR \x1b[0m \x1b[31mMail dispatch failed to ${to}:\x1b[0m ${err.message}`);
-    // We do NOT throw the error here anymore. We just log it so the loop can continue.
   }
-};
+};  
