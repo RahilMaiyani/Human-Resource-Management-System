@@ -11,28 +11,34 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// --- TRANSPORTER VERIFICATION LOG ---
 transporter.verify((error) => {
   if (error) {
     console.log(`\n  \x1b[41m\x1b[37m ERROR \x1b[0m \x1b[31mMail engine failure:\x1b[0m ${error.message}`);
   } else {
-    // Matches the "Ember" dashboard style
     console.log(`  \x1b[38;5;208m➜\x1b[0m  \x1b[1mMail Engine:\x1b[0m \x1b[32mReady\x1b[0m \x1b[90m(gmail_verified)\x1b[0m`);
   }
 });
 
-export const sendEmail = async ({ to, subject, html }) => {
+export const sendEmail = async ({ to, subject, html, attachments }) => {
+  // 1. THE SHIELD: Prevent "No recipients defined" crash
+  if (!to || to.trim() === "") {
+    console.log(`  \x1b[33m⚠\x1b[0m  \x1b[1mMail System:\x1b[0m \x1b[33mSkipped\x1b[0m \x1b[90m(No email address provided for: ${subject})\x1b[0m`);
+    return; 
+  }
+
   try {
     await transporter.sendMail({
       from: `"OfficeLink" <${process.env.EMAIL_USER}>`,
       to,
       subject,
-      html
+      html,
+      attachments
     });
+
     console.log(`  \x1b[38;5;208m➜\x1b[0m  \x1b[1mMail System:\x1b[0m \x1b[36mDispatched\x1b[0m \x1b[90mto ${to}\x1b[0m`);
     
   } catch (err) {
-    console.log(`\n  \x1b[41m\x1b[37m ERROR \x1b[0m \x1b[31mMail dispatch failed:\x1b[0m ${err.message}`);
-    throw err; 
+    console.log(`\n  \x1b[41m\x1b[37m ERROR \x1b[0m \x1b[31mMail dispatch failed to ${to}:\x1b[0m ${err.message}`);
+    // We do NOT throw the error here anymore. We just log it so the loop can continue.
   }
 };

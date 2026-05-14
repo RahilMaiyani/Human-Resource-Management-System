@@ -11,6 +11,7 @@ import emailRoutes from "./routes/emailRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
 import ticketRoutes from './routes/ticketRoutes.js';
 import announcementRoutes from "./routes/announcementRoutes.js";
+import payrollRoutes from "./routes/payrollRoutes.js";
 import { apiLimiter } from "./middleware/rateLimiter.js";
 
 dotenv.config();
@@ -57,7 +58,7 @@ app.use("/api/email", emailRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/announcements", announcementRoutes);
-
+app.use("/api/payroll", payrollRoutes);
 
 app.use(errorMiddleware);
 
